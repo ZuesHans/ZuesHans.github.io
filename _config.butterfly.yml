@@ -1,0 +1,26 @@
+# ---------------------------------
+# 1. 头像 (Avatar)
+# ---------------------------------
+# 记得把 avatar.png 放到 /source/img/ 文件夹下
+avatar:
+  img: /img/头像im.jpg
+  effect: false
+
+# ---------------------------------
+# 2. 头图 (Banner)
+# ---------------------------------
+# 记得把 banner.jpg 放到 /source/img/ 文件夹下
+# 首页头图
+index_img: /img/夏至.png
+# 其他页面的默认头图
+default_top_img: /img/杜预.png
+
+# ---------------------------------
+# 3. 菜单 (Menu)
+# ---------------------------------
+# 增加了 "友链" 菜单
+menu:
+  主页: / || fas fa-home
+  归档: /archives/ || fas fa-archive
+  标签: /tags/ || fas fa-tags
+  CF: /link/ || fas fa-link

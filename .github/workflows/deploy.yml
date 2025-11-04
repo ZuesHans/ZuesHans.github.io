@@ -1,0 +1,45 @@
+name: Deploy Hexo Blog
+
+# 触发器：当推送到 source 分支时运行
+on:
+  push:
+    branches:
+      - source
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # 运行环境
+    steps:
+      # 步骤1：拉取你的 source 分支的代码
+      - name: Checkout Source
+        uses: actions/checkout@v3
+        with:
+          ref: source
+
+      # 步骤2：设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # 推荐使用 LTS 版本
+          cache: 'npm'
+
+      # 步骤3：安装 Hexo 依赖
+      - name: Install Dependencies
+        run: npm install
+
+      # 步骤4：生成静态文件 (hexo g)
+      - name: Build Site
+        run: hexo generate
+
+      # 步骤5：部署到 main 分支
+      - name: Deploy to main branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # 这个 GITHUB_TOKEN 是 GitHub 自动提供的，你不需要设置
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+          # 目标分支：你希望把 HTML 部署到哪里
+          publish_branch: main
+
+          # 部署的文件夹：Hexo 生成的文件夹（默认是 public）
+          publish_dir: ./public

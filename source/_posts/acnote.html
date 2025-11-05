@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>acnote.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<p>[TOC]</p>
+<h2 id="%E4%BA%A4%E4%BA%92%E6%A8%A1%E6%9D%BF%E9%A2%98">交互模板题</h2>
+<ul>
+<li><strong>C++ 代码</strong>:</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;cstdio&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> l = <span class="hljs-number">1</span>, r = <span class="hljs-number">1000000000</span>, mid = (l + r) &gt;&gt; <span class="hljs-number">1</span>, res; l &lt;= r; mid = (l + r) &gt;&gt; <span class="hljs-number">1</span>) {
+    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; mid &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cin</span> &gt;&gt; res;
+    <span class="hljs-keyword">if</span> (res == <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (res == <span class="hljs-number">-1</span>) {
+      l = mid + <span class="hljs-number">1</span>;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (res == <span class="hljs-number">1</span>) {
+      r = mid - <span class="hljs-number">1</span>;
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-built_in">puts</span>(<span class="hljs-string">"OvO, I AK IOI"</span>); <span class="hljs-comment">// this statement will never be executed.</span>
+    }
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+</div></code></pre>
+<ul>
+<li>
+<p><strong>交互特点</strong>:</p>
+<ul>
+<li>mid = (l + r) &gt;&gt; 1 意味着mid是右移，相当于除以2</li>
+<li>res在这里是存储交互机答案</li>
+<li>std::cout &lt;&lt; mid &lt;&lt; std::endl; 记得用endl来清除缓存</li>
+<li>或者std::cout &lt;&lt; std::flush</li>
+<li>std::cin &gt;&gt; res;读取输入流数据</li>
+<li>一般来说输出和读取都在循环里面进行若干次</li>
+<li>输出答案之后剩下的都差不多</li>
+</ul>
+</li>
+<li>
+<p><strong>改进思路</strong>:</p>
+<ul>
+<li>一般交互题考虑二分或顺序输出</li>
+</ul>
+</li>
+<li>
+<h2 id="%E7%9C%8B%E9%A2%98%E8%A7%A3%E7%9C%8B%E5%88%B0%E7%9A%84%E7%A5%9E%E4%BA%BA%E6%9D%BF%E5%AD%90%E8%B6%85%E7%BA%A7%E5%BF%AB%E8%AF%BB">看题解看到的神人板子：超级快读</h2>
+</li>
+</ul>
+<pre class="hljs"><code><div>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> rep(i,m,n) for(int i=m;i&lt;=n;++i)</span>
+
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-keyword">int</span> <span class="hljs-title">read</span><span class="hljs-params">()</span></span>{
+    <span class="hljs-keyword">int</span> s = <span class="hljs-number">0</span>, w = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">char</span> ch = getchar();
+    <span class="hljs-keyword">while</span>(ch &lt; <span class="hljs-string">'0'</span> || ch &gt; <span class="hljs-string">'9'</span>){<span class="hljs-keyword">if</span>(ch == <span class="hljs-string">'-'</span>)w = <span class="hljs-number">-1</span>;ch = getchar();}
+    <span class="hljs-keyword">while</span>(ch &gt;= <span class="hljs-string">'0'</span> &amp;&amp; ch &lt;= <span class="hljs-string">'9'</span>) s = s * <span class="hljs-number">10</span> + ch - <span class="hljs-string">'0'</span>,ch = getchar();
+    <span class="hljs-keyword">return</span> s * w;
+}
+<span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> MAXN = <span class="hljs-number">20010</span>;
+<span class="hljs-keyword">int</span> n;
+<span class="hljs-keyword">int</span> l[MAXN], r[MAXN], f[MAXN][<span class="hljs-number">2</span>];
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+    n = read();
+    rep(i, <span class="hljs-number">1</span>, n) l[i] = read(), r[i] = read();
+   
+}
+
+</div></code></pre>
+<h2 id="%E8%B6%85%E7%BA%A7%E5%BF%AB%E5%86%99">超级快写</h2>
+<pre class="hljs"><code><div>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">write</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{
+    <span class="hljs-keyword">if</span> (x &lt; <span class="hljs-number">0</span>) <span class="hljs-built_in">putchar</span>(<span class="hljs-string">'-'</span>), x = -x;
+    <span class="hljs-keyword">if</span> (x &gt; <span class="hljs-number">9</span>) write(x / <span class="hljs-number">10</span>);
+    <span class="hljs-built_in">putchar</span>(x % <span class="hljs-number">10</span> + <span class="hljs-string">'0'</span>);
+}
+</div></code></pre>
+<h2 id="%E5%BF%AB%E9%80%9F%E4%B9%98">快速乘</h2>
+<pre class="hljs"><code><div><span class="hljs-function">i64 <span class="hljs-title">qmul</span><span class="hljs-params">(i64 x, i64 y, i64 m)</span> </span>{<span class="hljs-comment">// 快速模乘：计算 (x * y) % m，避免大数乘法溢出</span>
+    i64 z = (f80) x / m * y + <span class="hljs-number">0.5L</span>;<span class="hljs-comment">// 将 x / m * y 转为浮点数运算，估算商 z，z ≈ (x * y) / m</span>
+    u64 c = (u64) x * y - (u64) z * m;<span class="hljs-comment">// 计算 c = (x * y) - z * m，得到模 m 后的结果</span>
+    <span class="hljs-keyword">return</span> c &lt; m ? (i64) c : (i64) (c + m);<span class="hljs-comment">// 如果 c &lt; m，直接返回 c；否则返回 c + m，保证结果在 [0, m) 范围内</span>
+}
+
+</div></code></pre>
+<h2 id="%E5%BF%AB%E9%80%9F%E5%B9%82">快速幂</h2>
+<pre class="hljs"><code><div><span class="hljs-comment">// 快速幂：计算 (a^n) % m，高效处理大指数</span>
+<span class="hljs-function">i64 <span class="hljs-title">qpow</span><span class="hljs-params">(i64 a, i64 n, i64 m)</span> </span>{
+    i64 res = <span class="hljs-number">1</span>;  <span class="hljs-comment">// 初始化结果为 1</span>
+    <span class="hljs-keyword">while</span> (n) {   <span class="hljs-comment">// 当 n &gt; 0 时循环</span>
+        <span class="hljs-keyword">if</span> (n &amp; <span class="hljs-number">1</span>) res = qmul(res, a, m);  <span class="hljs-comment">// 如果 n 的最低位为 1，res = res * a % m</span>
+        a = qmul(a, a, m);                 <span class="hljs-comment">// a = a * a % m</span>
+        n &gt;&gt;= <span class="hljs-number">1</span>;                           <span class="hljs-comment">// n 右移一位</span>
+    }
+    <span class="hljs-keyword">return</span> res;  <span class="hljs-comment">// 返回 (a^n) % m</span>
+}
+</div></code></pre>
+<p>-记住用法：</p>
+<pre><code>- 题目要求 (a^n) % m，直接调用 qpow(a, n, m)。
+-题目要求大数乘法 (x * y) % m，用 qmul(x, y, m)。
+</code></pre>
+<h1 id="%E6%AF%94%E8%B5%9B%E6%A0%87%E5%87%86%E6%A8%A1%E6%9D%BF%E5%BA%93%E5%B8%B8%E7%94%A8%E5%BA%93%E5%87%BD%E6%95%B0">比赛标准模板库：常用库函数</h1>
+<h2 id="builtin-%E4%BD%8D%E8%BF%90%E7%AE%97">__builtin 位运算</h2>
+<p>高效位运算，<code>bit</code> 库的替代品。</p>
+<p><strong>注意</strong>：在给 64 位整数使用时须在函数名末尾添加 <code>ll</code>。</p>
+<ul>
+<li><code>__builtin_ctz(x)</code>：返回括号内数的二进制表示<strong>末尾 0 的个数</strong>。</li>
+<li><code>__builtin_clz(x)</code>：返回括号内数的二进制表示<strong>前导 0 的个数</strong>。</li>
+<li><code>__builtin_popcount(x)</code>：返回括号内数的二进制表示<strong>1 的个数</strong>。</li>
+<li><code>__builtin_parity(x)</code>：判断括号中数的二进制表示<strong>1 的个数的奇偶性</strong>（偶数返回 <code>0</code>，奇数返回 <code>1</code>）。</li>
+</ul>
+<h2 id="algorithm-%E5%BA%93">algorithm 库</h2>
+<p><code>algorithm</code> 库提供通用算法函数（如 <code>sort</code>、<code>find</code>、<code>reverse</code>、<code>max</code>），用于排序、搜索、遍历及容器操作，支持迭代器模式，适用于数据批量处理和竞赛编程优化。</p>
+<p><strong>注意</strong>：</p>
+<ul>
+<li>库中函数基本都有 <code>ranges</code> 版本</li>
+<li>基于比较的函数可传入 <code>cmp</code> 以指定比较函数。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>find(v.begin(), v.end(), val)</code></td>
+<td>顺序查找，其中 <code>val</code> 为需要查找的值。</td>
+</tr>
+<tr>
+<td><code>reverse(v.begin(), v.end())</code></td>
+<td>翻转序列，如数组、字符串。</td>
+</tr>
+<tr>
+<td><code>sort(v.begin(), v.end(), cmp)</code></td>
+<td>内省排序，不保持相对顺序，其中 <code>cmp</code> 为自定义的比较函数。</td>
+</tr>
+<tr>
+<td><code>stable_sort(v.begin(), v.end(), cmp)</code></td>
+<td>归并排序，<strong>保持相对顺序</strong>，用法同 <code>sort</code>。</td>
+</tr>
+<tr>
+<td><code>unique(v.begin(), v.end())</code></td>
+<td>将序列<strong>相邻的重复元素</strong>移动到序列末尾，返回指向去重后序列结尾的迭代器，<strong>原容器大小不变</strong>。与 <code>sort</code> 结合使用可以实现序列去重。</td>
+</tr>
+<tr>
+<td><code>shuffle(v.begin(), v.end(), rng)</code></td>
+<td>随机地打乱序列（需 <code>&lt;random&gt;</code> 和随机引擎 <code>rng</code>）。</td>
+</tr>
+<tr>
+<td><code>nth_element(v.begin(), v.begin() + n, v.end(), cmp)</code></td>
+<td>按指定范围进行分类，即找出序列中<strong>第 <code>n</code> 大的元素</strong>，使其左边均为小于它的数，右边均为大于它的数。</td>
+</tr>
+<tr>
+<td><code>binary_search(v.begin(), v.end(), val)</code></td>
+<td>二分查找。其中 <code>val</code> 为需要查找的值。</td>
+</tr>
+<tr>
+<td><code>merge(v1.begin(), v1.end(), v2.begin(), v2.end(), v3.begin())</code></td>
+<td>将<strong>有序序列</strong> <code>v1</code> 和 <code>v2</code> 合并到序列 <code>v3</code>。</td>
+</tr>
+<tr>
+<td><code>inplace_merge(v.begin() + l, v.begin() + m, v.begin() + r)</code></td>
+<td>将两个（<strong>已按小于运算符排序</strong>的）<code>[l, m)</code>、<code>[m, r)</code> 范围<strong>原地合并</strong>为一个有序序列。</td>
+</tr>
+<tr>
+<td><code>lower_bound(v.begin(), v.end(), val)</code></td>
+<td>在<strong>有序序列</strong> <code>v</code> 中进行二分查找，返回指向<strong>第一个大于等于 <code>val</code> 的元素</strong>的迭代器。如果不存在，则返回尾迭代器。</td>
+</tr>
+<tr>
+<td><code>upper_bound(v.begin(), v.end(), val)</code></td>
+<td>在<strong>有序序列</strong> <code>v</code> 中进行二分查找，返回指向<strong>第一个大于 <code>val</code> 的元素</strong>的迭代器。如果不存在，则返回尾迭代器。</td>
+</tr>
+<tr>
+<td><code>is_permutation(v1.begin(), v1.end(), v2.begin())</code></td>
+<td>判断序列 <code>v1</code> 是否为 <code>v2.begin()</code> 指向的序列的<strong>排列</strong>，即排序后集合元素两两相同。</td>
+</tr>
+<tr>
+<td><code>next_permutation(v.begin(), v.end())</code></td>
+<td>将当前排列更改为<strong>全排列中的下一个排列</strong>。如果当前已经是最后一个（<strong>从大到小</strong>），返回 <code>false</code> 并改为第一个（<strong>从小到大</strong>）；否则返回 <code>true</code>。</td>
+</tr>
+<tr>
+<td><code>prev_permutation(v.begin(), v.end())</code></td>
+<td>将当前排列更改为<strong>全排列中的上一个排列</strong>，用法同 <code>next_permutation</code>。</td>
+</tr>
+<tr>
+<td><code>includes(v1.begin(), v1.end(), v2.begin(), v2.end())</code></td>
+<td>判断序列 <code>v1</code> 是否<strong>包含</strong>序列 <code>v2</code>（不必连续）。</td>
+</tr>
+<tr>
+<td><code>max(a, b)</code> 或 <code>max({a, b, ...})</code></td>
+<td>返回两个数或初始化列表中元素的最大值。</td>
+</tr>
+<tr>
+<td><code>min(a, b)</code> 或 <code>min({a, b, ...})</code></td>
+<td>返回两个数或初始化列表中元素的最小值。</td>
+</tr>
+<tr>
+<td><code>max_element(v.begin(), v.end())</code></td>
+<td>返回序列中<strong>最大元素</strong>的迭代器。</td>
+</tr>
+<tr>
+<td><code>min_element(v.begin(), v.end())</code></td>
+<td>返回序列中<strong>最小元素</strong>的迭代器。</td>
+</tr>
+<tr>
+<td><code>clamp(v, l, r)</code></td>
+<td>如果 <code>v</code> 属于 <code>[l, r]</code>，则返回 <code>v</code>，否则返回<strong>最临近的边界</strong>。</td>
+</tr>
+<tr>
+<td><code>is_partitioned(v.begin(), v.end(), pred)</code></td>
+<td>判断范围是否已按给定的<strong>谓词 <code>pred</code></strong> 划分，即所有满足 <code>pred</code> 的元素会在所有不满足的元素之前。</td>
+</tr>
+<tr>
+<td><code>partition(v.begin(), v.end(), pred)</code></td>
+<td>划分序列，使得 <code>pred</code> 返回 <code>true</code> 的元素位于 <code>false</code> 的元素之前。<strong>不保持相对顺序</strong>。</td>
+</tr>
+<tr>
+<td><code>stable_partition(v.begin(), v.end(), pred)</code></td>
+<td><strong>稳定划分</strong>，用法同 <code>partition</code>。</td>
+</tr>
+<tr>
+<td><code>partition_point(v.begin(), v.end(), pred)</code></td>
+<td>检查序列分区范围，并找到<strong>第一个不满足 <code>p</code> 的元素</strong>，如果所有满足则返回尾迭代器。</td>
+</tr>
+<tr>
+<td><code>transform(v.begin(), v.end(), dest, op)</code></td>
+<td>应用函数 <code>op</code> 到输入范围，并将结果存储到 <code>dest</code> 指向的序列。</td>
+</tr>
+<tr>
+<td><code>replace(v.begin(), v.end(), old_value, new_value)</code></td>
+<td>以 <code>new_value</code> <strong>替换</strong>序列中所有值为 <code>old_value</code> 的元素。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="string-%E5%BA%93">string 库</h2>
+<p><code>string</code> 库提供字符串处理功能（如 <code>find</code>、<code>substr</code>、<code>stoi</code>），用于文本操作、转换及解析，支持动态内存管理和高效字符串算法，适用于输入处理、数据格式化及竞赛编程中的文本需求。</p>
+<ul>
+<li><code>to_string(value)</code>：将值 <code>value</code> 转化为字符串。</li>
+<li><code>stoi(str)</code>：将字符串 <code>str</code> 转化为<strong>有符号整数</strong>。</li>
+<li><code>stof(str)</code>：将字符串 <code>str</code> 转化为<strong>浮点数</strong>。</li>
+</ul>
+<h2 id="cctype-%E5%BA%93">cctype 库</h2>
+<p><code>cctype</code> 库提供字符处理函数（如 <code>isdigit</code>、<code>isalpha</code>、<code>toupper</code>），用于字符分类、转换及验证，支持基于 ASCII 的高效文本操作，适用于输入解析或格式化处理。</p>
+<ul>
+<li><code>isalnum(ch)</code>：检查字符 <code>ch</code> 是否为<strong>字母或数字</strong>。</li>
+<li><code>isalpha(ch)</code>：检查字符 <code>ch</code> 是否为<strong>字母</strong>。</li>
+<li><code>islower(ch)</code>：检查字符 <code>ch</code> 是否为<strong>小写字符</strong>。</li>
+<li><code>isupper(ch)</code>：检查字符 <code>ch</code> 是否为<strong>大写字符</strong>。</li>
+<li><code>isdigit(ch)</code>：检查字符 <code>ch</code> 是否为<strong>数字</strong>。</li>
+<li><code>ispunct(ch)</code>：检查字符是否为<strong>标点符</strong>（默认：<code>!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_</code>{|}~`）。</li>
+</ul>
+<h2 id="numeric-%E5%BA%93">numeric 库</h2>
+<p><code>numeric</code> 库提供数值计算函数（如 <code>accumulate</code>、<code>inner_product</code>、<code>partial_sum</code> 和 <code>adjacent_difference</code>），用于累加、内积、前缀和及差分等算法操作。</p>
+<ul>
+<li><code>gcd(m, n)</code>：计算整数 <code>m</code> 和 <code>n</code> 的<strong>最大公约数</strong>。</li>
+<li><code>lcm(m, n)</code>：计算整数 <code>m</code> 和 <code>n</code> 的<strong>最小公倍数</strong>。</li>
+<li><code>midpoint(a, b)</code>：计算整数、浮点或指针 <code>a</code> 和 <code>b</code> 的<strong>中点</strong>。</li>
+<li><code>lerp(a, b, t)</code>：如果 <code>t</code> 在 <code>[0, 1]</code> 内，则计算 <code>a</code> 和 <code>b</code> 的<strong>线性插值</strong>，否则为<strong>线性外推</strong>：<code>a + t * (b - a)</code>。</li>
+<li><code>accumulate(v.begin(), v.end(), value)</code>：计算给定值 <code>init</code> 与序列中各元素的<strong>和</strong>。</li>
+<li><code>iota(v.begin(), v.end(), value)</code>：用<strong>按顺序递增的值</strong>填充序列，从 <code>value</code> 开始（<code>++value</code>）。</li>
+<li><code>partial_sum(v.begin(), v.end(), dest)</code>：计算序列<strong>前缀和</strong>，赋值给 <code>dest</code> 指向的序列。</li>
+<li><code>adjacent_difference(v.begin(), v.end(), dest)</code>：计算序列<strong>差分</strong>，用法同前缀和。</li>
+</ul>
+<h2 id="cmath-%E5%BA%93">cmath 库</h2>
+<p><code>cmath</code> 库提供数学计算函数（如 <code>sqrt</code>、<code>pow</code>、<code>abs</code>、<code>sin</code>），涵盖数值运算、几何计算及科学问题，支持浮点和整数类型的数学操作与常用算法需求。</p>
+<p><strong>注意</strong>：</p>
+<ul>
+<li>函数一般接收<strong>浮点型输入</strong>并<strong>输出浮点型</strong>，注意精度损失。</li>
+<li>如需更高精度，可在函数名后添加 <code>l</code>（如 <code>sqrtl</code>）以指定 <code>long double</code>。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>abs(x)</code></td>
+<td><code>x</code> 的<strong>绝对值</strong>。</td>
+</tr>
+<tr>
+<td><code>exp(x)</code></td>
+<td><code>e</code> 的 <code>x</code> 次幂。</td>
+</tr>
+<tr>
+<td><code>pow(x, y)</code></td>
+<td><code>x</code> 的 <code>y</code> 次幂。</td>
+</tr>
+<tr>
+<td><code>log(x)</code></td>
+<td><strong>以 <code>e</code> 为底</strong> <code>x</code> 的对数。</td>
+</tr>
+<tr>
+<td><code>log10(x)</code></td>
+<td><strong>以 <code>10</code> 为底</strong> <code>x</code> 的对数。</td>
+</tr>
+<tr>
+<td><code>log2(x)</code></td>
+<td><strong>以 <code>2</code> 为底</strong> <code>x</code> 的对数。</td>
+</tr>
+<tr>
+<td><code>sqrt(x)</code></td>
+<td><code>x</code> 的<strong>平方根</strong>。</td>
+</tr>
+<tr>
+<td><code>cbrt(x)</code></td>
+<td><code>x</code> 的<strong>立方根</strong>。</td>
+</tr>
+<tr>
+<td><code>hypot(x, y)</code></td>
+<td>计算 <code>x</code> 和 <code>y</code> <strong>平方和的平方根</strong>。</td>
+</tr>
+<tr>
+<td><code>ceil(x)</code></td>
+<td><strong>向上取整</strong>（不小于 <code>x</code> 的整数）。</td>
+</tr>
+<tr>
+<td><code>floor(x)</code></td>
+<td><strong>向下取整</strong>（不大于 <code>x</code> 的整数）。</td>
+</tr>
+<tr>
+<td><code>round(x)</code></td>
+<td><strong>四舍五入取整</strong>（不管正负）。</td>
+</tr>
+<tr>
+<td><code>trunc(x)</code></td>
+<td><strong>向零取整</strong>（舍去小数部分）。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bit-%E5%BA%93">bit 库</h2>
+<p><code>bit</code> 库提供底层位操作函数（如 <code>countl_zero</code>、<code>bit_ceil</code>、<code>byteswap</code>），用于位计数、掩码生成和字节序转换，支持高效位运算及数值优化。</p>
+<p><strong>注意</strong>：使用 <code>bit</code> 库需要 <strong>C++20</strong> 以上版本。以下函数中 <code>x</code> 为<strong>无符号整型</strong>。</p>
+<ul>
+<li><code>has_single_bit(x)</code>：检查 <code>x</code> 是否为<strong>二的整数次幂</strong>。</li>
+<li><code>bit_ceil(x)</code>：<strong>向上取</strong>二的整数次幂（不小于 <code>x</code> 的最小二的幂）。</li>
+<li><code>bit_floor(x)</code>：<strong>向下取</strong>二的整数次幂（不大于 <code>x</code> 的最大二的幂）。</li>
+<li><code>bit_width(x)</code>：若 <code>x</code> 非零，计算 <code>x</code> 的<strong>二进制位数</strong>；若 <code>x</code> 为零，返回零。</li>
+<li><code>rotl(x, s)</code>：计算 <code>x</code> <strong>左循环移位</strong> <code>s</code> 位的结果。</li>
+<li><code>rotr(x, s)</code>：计算 <code>x</code> <strong>右循环移位</strong> <code>s</code> 位的结果。</li>
+<li><code>countl_zero(x)</code>：从<strong>最高位</strong>起计量<strong>连续的 0 位</strong>数量。</li>
+<li><code>countl_one(x)</code>：从<strong>最高位</strong>起计量<strong>连续的 1 位</strong>数量。</li>
+<li><code>countr_zero(x)</code>：从<strong>最低位</strong>起计量<strong>连续的 0 位</strong>数量。</li>
+<li><code>countr_one(x)</code>：从<strong>最低位</strong>起计量<strong>连续的 1 位</strong>数量。</li>
+<li><code>pop_count(x)</code>：返回 <code>x</code> 中<strong>1 的个数</strong>。</li>
+</ul>
+<h2 id="c-%E7%89%88%E6%9C%AC%E7%89%B9%E6%80%A7">C++ 版本特性</h2>
+<h3 id="c98">C++98</h3>
+<p>第一个官方标准，<strong>啥都没有</strong>。</p>
+<h3 id="c11">C++11</h3>
+<ul>
+<li><strong>自动类型推导</strong>：<code>auto</code> 关键字根据初始化表达式推导类型。<pre class="hljs"><code><div><span class="hljs-keyword">auto</span> x = <span class="hljs-number">5</span>;          <span class="hljs-comment">// int</span>
+<span class="hljs-keyword">auto</span> y = <span class="hljs-number">5.0</span>;        <span class="hljs-comment">// double</span>
+<span class="hljs-keyword">auto</span> z = <span class="hljs-string">"Hello"</span>;    <span class="hljs-comment">// const char*</span>
+
+<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; v = {<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>};
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> it = v.begin(); it != v.end(); ++it) {
+    <span class="hljs-built_in">cout</span> &lt;&lt; *it &lt;&lt; <span class="hljs-string">" "</span>;  <span class="hljs-comment">// 使用 auto 推导迭代器类型</span>
+}
+
+# 高精度运算与素数判断代码解析
+
+</div></code></pre>
+</li>
+</ul>
+<h2 id="1-highmult-%E5%87%BD%E6%95%B0">1. highmult 函数</h2>
+<p><strong>功能</strong>：实现高精度乘法，计算两个大整数（以字符串形式输入）的乘积。</p>
+<p><strong>原理</strong>：</p>
+<ul>
+<li>将输入字符串 <code>A</code> 和 <code>B</code> 转换为数字数组，逆序存储（低位在前）。</li>
+<li>模拟手算乘法，每位相乘结果累加到结果数组 <code>c</code>。</li>
+<li>处理进位，确保每位数字小于10。</li>
+<li>去掉前导零，将结果数组转为字符串返回。</li>
+</ul>
+<p><strong>调用方法</strong>：</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">string</span> result = highmult(<span class="hljs-string">"123"</span>, <span class="hljs-string">"456"</span>); <span class="hljs-comment">// 返回 "56088"</span>
+</div></code></pre>
+<p><strong>使用场景</strong>：</p>
+<ul>
+<li>处理超过 <code>long long</code> 范围的大整数乘法。</li>
+<li>适合比赛中需要精确计算大数乘积的题目。</li>
+</ul>
+<hr>
+<h2 id="2-highplus-%E5%87%BD%E6%95%B0">2. highplus 函数</h2>
+<p><strong>功能</strong>：实现高精度加法，计算两个大整数（以字符串形式输入）的和。</p>
+<p><strong>原理</strong>：</p>
+<ul>
+<li>将输入字符串 <code>A</code> 和 <code>B</code> 转为数字数组，逆序存储。</li>
+<li>逐位相加，处理进位。</li>
+<li>去掉前导零，将结果数组转为字符串返回。</li>
+</ul>
+<p><strong>调用方法</strong>：</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">string</span> result = highplus(<span class="hljs-string">"123"</span>, <span class="hljs-string">"456"</span>); <span class="hljs-comment">// 返回 "579"</span>
+</div></code></pre>
+<p><strong>使用场景</strong>：</p>
+<ul>
+<li>处理大整数加法，适用于数据范围超大的题目。</li>
+</ul>
+<hr>
+<h2 id="3-jd-%E5%87%BD%E6%95%B0">3. jd 函数</h2>
+<p><strong>功能</strong>：判断一个整数 <code>n</code> 是否为素数。</p>
+<p><strong>原理</strong>：</p>
+<ul>
+<li>小于2的数不是素数。</li>
+<li>2和3是素数。</li>
+<li>排除2和3的倍数。</li>
+<li>检查从5开始的数（步长6，检查 <code>i</code> 和 <code>i+2</code>），若 <code>n</code> 能被这些数整除，则非素数。</li>
+</ul>
+<p><strong>调用方法</strong>：</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">bool</span> isPrime = jd(<span class="hljs-number">17</span>); <span class="hljs-comment">// 返回 true</span>
+</div></code></pre>
+<p><strong>使用场景</strong>：</p>
+<ul>
+<li>快速判断一个数是否为素数，适用于数论相关题目。</li>
+<li>适合中小范围整数（<code>n</code> 不太大时效率较高）。</li>
+</ul>
+<hr>
+<p><strong>注意事项</strong>：</p>
+<ul>
+<li>高精度函数输入为字符串，输出为字符串，需确保输入合法（纯数字）。</li>
+<li><code>jd</code> 函数适合中小规模素数判断，大数需优化或使用高精度算法。</li>
+</ul>
+
+</body>
+</html>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: {inlineMath: [['$', '$']]}, messageStyle: "none" });
+</script>

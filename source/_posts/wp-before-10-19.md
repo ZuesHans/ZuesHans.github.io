@@ -6,7 +6,7 @@ tags:
   - C++
   - Problems
 cover:
-    /images/covers/江东的铁壁.png
+    /images/cover/江东的铁壁.png
 ---
 [TOC]
 

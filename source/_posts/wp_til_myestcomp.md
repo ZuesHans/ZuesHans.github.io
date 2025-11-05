@@ -6,7 +6,7 @@ tags:
   - C++
   - Problems
 cover:
-    /images/covers/白衣渡江.png
+    /images/cover/白衣渡江.png
 ---
 
 # Wpnote

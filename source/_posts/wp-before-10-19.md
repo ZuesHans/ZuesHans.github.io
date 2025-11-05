@@ -8,7 +8,7 @@ tags:
 cover:
     /img/cover/江东的铁壁.png
 ---
-[TOC]
+
 
 ## 交互模板题
 

@@ -1,59 +1,72 @@
-# ---------------------------------
+# -----------------
 # 1. 头像 (Avatar)
-# ---------------------------------
-# 记得把 avatar.png 放到 /source/img/ 文件夹下
+
+favicon: /img/头像im.jpg
+# -----------------
 avatar:
   img: /img/头像im.jpg
-  effect: false
+  effect: false 
 
-# ---------------------------------
+# -----------------
 # 2. 头图 (Banner)
-# ---------------------------------
-# 记得把 banner.jpg 放到 /source/img/ 文件夹下
+# -----------------
 # 首页头图
 index_img: /img/夏至.png
 # 其他页面的默认头图
 default_top_img: /img/杜预.png
-# ---------------------------------
-# 主页副标题 (显示在头图上的打字机效果)
-# ---------------------------------
+
+# -----------------
+# 主页副标题 (打字机)
+# -----------------
 subtitle:
   enable: true
-  # 开启打字机效果
   effect: true
-  # 循环播放打字效果
   loop: true
-  # 【重要】在这里写下你的签名，可以写多行
-  # 格式是：- '你想说的话'
   sub:
-    - 'a coding cat_with love in its heart' 
+    - 'a coding cat_with love in its heart'
     - 'Hamilton musical|Mazda RX7|CSisfate'
     - 'Welcome to my little bag.'
-# ---------------------------------
+
+# -----------------
 # 社交图标 (Social Icons)
-# 会显示在侧边栏头像和副标题下面
-# ---------------------------------
+# -----------------
 social:
   fas fa-envelope: mailto:kai779@qq.com || 最正经的联系我的方式
   fab fa-github: https://github.com/ZuesHans || GitHub
   fas fa-rss: /atom.xml || RSS
-  fas fa-code: https://codeforces.com/profile/keronshans || 不要时间我啊555 
-  # fab fa-weibo: https://weibo.com/your-id || 微博
+  fas fa-code: https://codeforces.com/profile/keronshans || 不要时间我啊555
 
-# ---------------------------------
+# -----------------
 # 3. 菜单 (Menu)
-# ---------------------------------
-# 增加了 "友链" 菜单
+# -----------------
 menu:
   主页: / || fas fa-home
   归档: /archives/ || fas fa-archive
   标签: /tags/ || fas fa-tags
-  CF: /link/ || fas fa-link
+  links: /link/ || fas fa-link
 
+# -----------------
+# 侧边栏 (Aside)
+# -----------------
 aside:
-  # ... 其他侧边栏设置 ...
-
   # 公告
   card_announcement:
     enable: true
     content: '这里是一只会打字的小猫<br>欢迎来找我玩！<br>小猫永远喜欢unk大人/小声'
+
+# -----------------
+# 首页文章封面 (!! 新增以满足你的需求)
+# -----------------
+# 确保你文章的 Front-matter (开头信息) 中设置了 'cover' 字段
+index_post_cover:
+  enable: true
+  position: top # 封面图显示在卡片顶部
+
+  # -----------------
+# 数学公式 (Math)
+# -----------------
+# 详情: https://butterfly.js.org/posts/ceeb7cbf/
+math:
+  enable: true
+  engine: 'mathjax' 
+  per_page: false

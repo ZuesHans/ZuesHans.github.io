@@ -7,7 +7,7 @@ tags:
     - 图论
     - 最短路
 cover:
-    /img/cover/日记头图.png
+    img\cover\白露.png
 ---
 #### P4779 【模板】单源最短路径（标准版）
 

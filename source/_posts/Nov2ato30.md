@@ -615,6 +615,115 @@ void solve()
 }
 ```
 
+### 广州大学2024新生赛VP
+
+#### 在ACM里面打ACM（map的使用：模拟：数据处理）
+
+-**AC代码**
+
+```cpp
+struct hsh
+{
+    bool accepted = false;
+    int wrangans = 0;
+    int time = 0;
+};
+void solve()
+{
+    int n;
+    cin >> n;
+    map<string, map<char, hsh>> ljl;
+    map<string, int> sumtime;
+    map<string, int> sumac;
+    string ans;
+    for (int i = 0; i < n; i++)
+    {
+        string n;
+        char th;
+        bool ac;
+        int tme;
+        cin >> n >> th >> ac >> tme;
+        ans = n;
+        if (ljl[n][th].accepted)
+            continue;
+        if (ac)
+        {
+            ljl[n][th].time += tme;
+            ljl[n][th].time += ljl[n][th].wrangans * 20;
+            ljl[n][th].accepted=true;
+            sumac[n]++;
+            sumtime[n] += ljl[n][th].time;
+        }
+        else
+        {
+            ljl[n][th].wrangans++;
+        }
+    }
+
+    for (auto it : ljl)
+    {
+        if (sumac[it.first] > sumac[ans])
+        {
+            ans = it.first;
+        }
+        if (sumac[it.first] == sumac[ans])
+        {
+            if (sumtime[it.first] < sumtime[ans])
+            {
+                ans = it.first;
+            }
+        }
+    }
+    cout<<ans<<' '<<sumac[ans]<<' '<<sumtime[ans];
+}
+
+```
+
+#### [逆=辶+屰](https://ac.nowcoder.com/acm/contest/97487/B)
+
+放在这里是为了告诉你：正确分析复杂度是多么的重要。。。以及数学好真的很重要
+以及有时候大脑真的不要把题目想的太难，可以根据过题人数考虑是否需要考虑唐氏做法
+这道题纯纯预处理一下就行了
+//可能我通宵了，大脑垃圾太多了，竟然放过了一道这么唐氏且简单还珍贵的题目
+>来自数院的小楠喜欢研究数学，他给定了一个数字 \( n \)，然后提出了 \( q \) 个问题，每个问题给出两个整数 \( k \) 和 \( r \)，现在他想知道，在他的每个问题中，他给出的数字 \( n \) 是否满足**不少于 \( k \) 个不同的正整数** \( c_1, c_2, c_3, \dots, c_k \) 能够使得：
+\[
+n \mod c_i = r, \quad i = 1, 2, 3, \dots, k.
+\]
+其中 `mod` 代表求余，例如：  
+ \( 5 \mod 2 = 1 \)  
+\( 8 \mod 2 = 0 \)
+>第一行输入两个整数 n(1≤n≤1×10^6), q(1≤q≤1×10^4)，
+分别代表小楠给出的这个数字 n 和提出的问题数量 q。
+接下来 q 行，每行输入两个整数 k(1≤k≤1×10^6), r(0≤r<n)，
+代表 n 是否满足有不少于 k 个不同的正整数 c1,c2,...,ck 使得 n mod ci = r。
+>输出共 q 行，
+如果 n 能够满足第 i 个问题，则输出 "YES"，
+否则输出 "NO"。
+（输出不含双引号，且必须严格大写）
+>
+
+```cpp
+void solve()
+{
+    int n, q;
+    cin >> n >> q;
+    vi nums(n + 1);
+    for (int i = 1; i <= n; i++)
+    {
+        nums[n % i]++;
+    }
+    for (int i = 1; i <= q; i++)
+    {
+        int k, r;
+        cin >> k >> r;
+        if (k <= nums[r])
+            cout << "YES" << '\n';
+        else
+            cout << "NO" << '\n';
+    }
+}
+```
+
 ---
 
 ## 附件

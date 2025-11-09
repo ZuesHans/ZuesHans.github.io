@@ -402,6 +402,95 @@ void solve()
 
 ### 11月2日晚牛客挑战赛
 
+#### 小红的区间构造
+
+- **算法** ：前缀和
+- **思路&错误原因**
+  - 这道题想要你构造区间，最坏情况是所有点都是一个区间。题目给出来的条件就非常前缀和，直接差分处理然后一个一个insert左右端点就完事儿了
+- **注意事项**
+  - 注意数据范围**提前退出**以免mle（致敬我调了一个晚上的点）
+  - 注意学习左右端点的处理方法：因为是差分处理所以两个数组大小一定一样
+- **AC代码**
+
+```cpp
+    void solve()
+
+{
+    int n, m;
+    cin >> n >> m;
+    vi nums(n + 2);
+    vi cf(n + 2);
+    int sum=0;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> nums[i];
+        sum += nums[i];
+        if (nums[i] > m)
+        {
+            cout << "-1" << '\n';
+            return;
+        }
+        cf[i] = nums[i] - nums[i - 1];
+    }
+    if(sum < m){cout << -1 << '\n';return;}
+    cf[n + 1] = nums[n + 1] - nums[n];
+    vi left;
+    vi right;
+    for (int i = 1; i <= n + 1; i++)
+    {
+        if (cf[i] > 0)
+            for (int j = 0; j < cf[i]; j++)
+                left.push_back(i);
+        if (cf[i] < 0)
+            for (int j = 0; j < abs(cf[i]); j++)
+                right.push_back(i - 1);
+    }
+    int k = left.size();
+    int gap = m - left.size();
+    if (left.size() > m)
+    {
+        cout << "-1" << '\n';
+        return;
+    }
+    ll cnt=0;
+    for (int j = 0; j < k; j++)
+    {
+        cnt+= right[j] - left[j] + 1;
+    }
+    if(cnt<m)
+    {
+         cout << "-1" << '\n';
+        return;
+    }
+
+    for (int j = 0; j < k; j++)
+    {
+        if(gap==0)
+        cout<<left[j]<<' '<<right[j]<<'\n';
+
+        if (right[j] - left[j] < gap&& gap!=0)
+        {    for (int i = left[j]; i <=right[j]; i++)
+            {
+                cout<<i<<' '<<i<<'\n';
+            }
+            gap-=(right[j] - left[j]);
+            continue;
+        }
+        if (right[j] - left[j]  >= gap && gap!=0)
+        {    for (int i = left[j] ; i < left[j]+gap; i++)
+            {
+                cout<<i<<' '<<i<<'\n';
+            }
+         
+            cout<<left[j]+gap<<' '<<right[j]<<'\n';
+            gap=0;
+            continue;
+        }
+
+    }
+}
+```
+
 ### 2025年11月5日晚上牛客基础组
 
 #### 子段异或和

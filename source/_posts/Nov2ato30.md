@@ -142,25 +142,22 @@ void solve()
 
 ```cpp
 
-void solve() {
+void solve()
+{
     int n;
-    cin >> n;
-    vi nums(n);
-    for (int i = 0; i < n; i++) {
-        cin >> nums[i];
-    }
+    cin>>n;
+    vi nums(n+1);
 
-    if (n == 0) {
-        cout << 0 << '\n';
-        return;
-    }
-
-    ll sum = nums[0], ans = nums[0];
-    for (int i = 1; i < n; i++) {
-        sum = max((ll)nums[i], sum + nums[i]);
-        ans = max(ans, sum);
-    }
-    cout << ans << '\n';
+    for (int i=1;i<=n;i++) cin>>nums[i];
+    vi dp(n+1);
+    int ans=-4545556565;
+        for(int j=1;j<=n;j++)
+        {
+            dp[j]=dp[j-1]+nums[j];
+            if (dp[j]<=0) dp[j]=nums[j];
+            ans=max(ans,dp[j]);
+        }
+cout<<ans<<'\n';
 }
 
 ```

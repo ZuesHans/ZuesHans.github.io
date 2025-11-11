@@ -227,12 +227,16 @@ void solve()
 }
 
 ```
+
 ### 边界处理
+
 #### P2004 领地选择
+
 - **分析**
   - 题目是非常简单而且典型的滑动窗口二维前缀和。最大的问题出在你滑动窗口的时候的推导式：详情见P2280 HNOI2003 激光炸弹
 - **出错的推导点**`int hsh = qzh[i + c-1][j + c-1] + qzh[i-1][j-1]- qzh[i + c-1][j-1] - qzh[i-1][j + c-1];`
 - 首先注意减去边界格的时候要-1往里面一格（因为要包含到ij），然后是因为是C*C的数组所以要往里面移动一格（请你以后先列式子算一下）
+
 ---
 
 ## 赛后补题
@@ -926,6 +930,87 @@ void solve()
         else
             cout << "NO" << '\n';
     }
+}
+```
+
+### div2 11_10 CF
+
+#### c
+
+- **思路**（可以一眼，但是我我不确定当时我是不是一眼出来的）
+    对于每个l，r，会有某个路线能满足题目的要求。对于R而言（这里指的是右下，左上对称同理），如果有任意R超出了我们待选区间的范围，则这个待选区间不成立。所以要维护上列前缀最大最小和下列后缀最大最小（这一步简单，好想）。
+    下一步是如何计算（确定）我们要的区间：很显然，在（转折点）处就能找到我们要的（l，r），一共有n个待选极限（l，r）（当`l<=li<ri<=r`时显然对于一个成立的l，r时成立的。所以更新方程是：`sum+=2*n+prdq.top()[0];`
+    这个时候我们要想几个细节的点：来决定我们用什么遍历方式和容器，显而易见：我们要达到O（n）或者O（nlogn）的复杂度
+    对于每一个待选的（l，r），他们的出现是有可能重复的：我们需要一个去重的容器：
+    为了保证每个区间是单一的我们会想到一个经典的处理方式：详情：[线段覆盖](https://www.luogu.com.cn/problem/P1803)
+    在位置i，对于每个不递减的l，考虑他带着的线段
+    外层循环走`for (int i = 0; i < 2 * n; ++i)`可以保证：模拟从左到右不会重复计算，可以清理过期值
+- 注意：`priority_queue<array<int, 2>> prdq;`默认按照prdq()[0]大小排序
+
+- **AC代码**(优先队列法)（我感觉我还没完全搞懂他的实现）
+
+```cpps
+void solve()
+{
+    int n;
+    cin >> n;
+    vi mpu(n);
+    vi mpd(n);
+    vi mxu(n);
+    vi mnu(n);
+    vi mxd(n);
+    vi mnd(n);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> mpu[i];
+        mpu[i]--;
+        if (!i)
+        {
+            mxu[i] = mpu[i];
+            mnu[i] = mpu[i];
+        }
+        else
+        {
+            mxu[i] = max(mxu[i - 1], mpu[i]);
+            mnu[i] = min(mnu[i - 1], mpu[i]);
+        }
+    }
+    for (int i = 0; i < n; i++)
+    {
+        cin >> mpd[i];
+        mpd[i]--;
+    }
+    for (int i = n - 1; i >= 0; i--)
+    {
+        if (i == n - 1)
+        {
+            mxd[i] = mpd[i];
+            mnd[i] = mpd[i];
+        }
+        else
+        {
+            mxd[i] = max(mxd[i + 1], mpd[i]);
+            mnd[i] = min(mnd[i + 1], mpd[i]);
+        }
+    }
+    priority_queue<array<int, 2>> prdq;
+    for (int i = 0; i < n; i++)
+    {
+        prdq.push({-max(mxd[i], mxu[i]), min(mnd[i], mnu[i])});
+    }
+    ll sum = 0;
+    for (int i = 0; i < 2 * n; ++i)
+    {
+        while (!prdq.empty() && prdq.top()[1] < i)
+        {
+            prdq.pop();
+        }
+        if (!prdq.empty())
+        {
+            sum += 2 * n + prdq.top()[0];
+        }
+    }
+    cout << sum << '\n';
 }
 ```
 

@@ -262,7 +262,7 @@ void dfs(int idx, const vector<vi> &dw, int cnt, int st, vi &mem)
 ```
 
 - **WA原因**
-  - 读错题。
+  - 读错题
 
 ### 题意理解&&容器选择
 

@@ -118,22 +118,22 @@ void solve()
 
 #### 最大子段和
 >
-># P1115 最大子段和
+> P1115 最大子段和
 >
->## 题目描述
+>题目描述
 >
 >给一个长度为 $n$ 的序列 $a$，选出其中连续且非空的一段使得这段和最大。
 >
->## 输入格式
+> 输入格式
 >
 >第一行是一个整数，表示序列的长度 $n$。
 >第二行有 $n$ 个整数，第 $i$ 个整数表示序列的第 $i$ 个数字 $a_i$。
 >
->## 输出格式
+> 输出格式
 >
 >输出一行一个整数表示答案。
 >
->#### 数据规模与约定
+> 数据规模与约定
 >
 >- 对于 $40\%$ 的数据，保证 $n \leq 2 \times 10^3$。
 >- 对于 $100\%$ 的数据，保证 $1 \leq n \leq 2 \times 10^5$，$-10^4 \leq a_i \leq 10^4$。
@@ -161,6 +161,122 @@ cout<<ans<<'\n';
 }
 
 ```
+
+### 计算几何
+
+#### 牛牛战队的秀场
+
+- **题目简述**：给定圆半径r，求里面内接正n边形边长
+- **代码块**
+
+```cpp
+#define M_PI  3.14159265358979323846
+void solve()
+{
+    int n;
+    double R;
+    cin >> n >> R;
+    double side = 2 * R * sin(M_PI / n);
+    int q,w;
+    cin>>q>>w;
+    int jl=min(abs(w-q),n-abs(w-q));
+    cout << fixed << setprecision(10) << side*jl<< '\n';
+}
+```
+
+- **公式**：`double side = 2 *R* sin(M_PI / n);`
+
+#### 牛牛战队的比赛地(三分教学)
+
+- [link](https://ac.nowcoder.com/acm/contest/120454/F)
+- **题意简述**：给出若干个点的坐标，在x轴上找到某点使得该点与给出的点距离的最大值最小，求这个最大值最小的值(数据范围:点的数量1e5，坐标范围-1e9到1e9)
+- **tag** ：计算几何，二分答案/三分
+- **思路做法**：
+  - 首先读题：`距离的最大值最小值`，再看数据范围：遍历法：1e23？？
+  - 问题转化：这里我们有两种转化思路：1.找到`最大值最小的值`，对可能的答案进行二分。求：是否有一个答案满足：对于所有点来说，必然存在一个共同的点（或者区间）在x轴上，与他距离为r ->求圆覆盖交集问题 -> cek函数：求交集
+    思路2.按照题目的顺思路：对x轴进行三分，找到符合要求的点，不需要写cek，直观简单
+    缺点：我不会三分
+- **新算法：三分**
+  - 和二分的区别：二分对象具有单调性;判断“是否可行” → 二分答案（如最小化最大值）
+                 三分直接求凸函数极值（无 check 可写）
+  - 三分用处：适合答案有**类似于凸函数的性质**
+    - 求函数最值
+    - 求唯一最小值
+    - 求最远点对，圆覆盖问题转化
+    - 概率期望优化
+  - 注意事项：
+    - 在1e9到1e12循环100次
+    - 函数需要单峰
+    - 整数域使用最好用二分
+  - 三分模板
+
+    ```cpp
+        double ternary_search(double l, double r) {
+             for (int i = 0; i < 100; i++) {
+             double m1 = l + (r - l) / 3;
+             double m2 = r - (r - l) / 3;
+            if (f(m1) < f(m2)) l = m1;
+            else r = m2;
+        }
+         return (l + r) / 2;
+    }
+    ```
+
+- **AC代码**：二分答案（适合答案有**单调性**）
+
+```cpp
+struct node
+{
+    double x, y;
+};
+bool check(double r, const vector<node> &jd)
+{
+    double le = -1e9;
+    double ri = 1e9;
+    for (node hsh : jd)
+    {
+        if (fabs(hsh.y) > r + EPS)
+            return false;//剪枝
+        double dy = hsh.y;
+        double dx = sqrt(max(0.0, r * r - dy * dy));
+        le = max(le, hsh.x - dx);
+        ri = min(ri, hsh.x + dx);
+    }
+    return le <= ri + EPS;
+}
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<node> jd(n);
+
+    rep(i, 0, n - 1)
+    {
+        double a, s;
+        cin >> a >> s;
+        jd[i].x = a;
+        jd[i].y = s;
+    }
+    double l = 0, r = 3e4;
+    for(int i=0;i<=100;i++)
+    {
+        double mid = (l + r) / 2;
+        if (check(mid,jd))
+            r = mid;
+        else
+            l = mid;
+    }
+    cout << fixed << setprecision(10) << l<< '\n';
+}
+```
+
+- **AC代码**：三分（适合答案有**类似于凸函数的性质**）
+
+```cpp
+
+```
+
+- **注意事项**：double有精度丢失：用 for(int i=0;i<=100;i++)实现各种操作
 
 ---
 
@@ -1112,3 +1228,5 @@ void solve()
 | **树直径** | 树上 **最长简单路径** 的长度。 |
 | **差分约束** | 一组形如 \(x_i - x_j \leq c_k\) 的不等式，可转化为最短路求解。 |
 | **费用流** | 每单位流量有费用，求 **最小费用** 的 **最大流**。 |
+
+2.计算几何常用

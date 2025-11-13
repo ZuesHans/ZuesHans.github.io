@@ -215,8 +215,8 @@ void solve()
              for (int i = 0; i < 100; i++) {
              double m1 = l + (r - l) / 3;
              double m2 = r - (r - l) / 3;
-            if (f(m1) < f(m2)) l = m1;
-            else r = m2;
+            if (f(m1) < f(m2)) r = m2;
+            else l = m1;
         }
          return (l + r) / 2;
     }
@@ -273,7 +273,47 @@ void solve()
 - **AC代码**：三分（适合答案有**凸函数的性质**）
 
 ```cpp
-
+struct Point
+{
+    double x, y;
+    Point(double x = 0, double y = 0) : x(x), y(y) {}
+    Point operator-(const Point &b) const { return Point(x - b.x, y - b.y); }
+    double len() const { return hypot(x, y); }
+};
+double Dist(Point a, Point b) { return (a - b).len(); } // 需要重载.len()
+double mxdist(const vector<Point> &rec, Point c)
+{
+    double s = 0;
+    for (Point hsh : rec)
+    {
+        s = max(Dist(hsh, c), s);
+    }
+    return s;
+}
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<Point> rec(n);
+    rep(i, 0, n - 1)
+    {
+        cin >> rec[i].x >> rec[i].y;
+    }
+    double l = -1e9;
+    double r = 1e9;
+    for (int i = 0; i < 100; i++)
+    {
+        double m1 = l + (r - l) / 3;
+        double m2 = l + (r - l) * 2 / 3;
+        Point c1 = {m1, 0};
+        Point c2 = {m2, 0};
+        if (mxdist(rec, c1) < mxdist(rec, c2))
+            r = m2;
+        else
+            l = m1;
+    }
+    cout << fixed << setprecision(10) << mxdist(rec, {l, 0});
+}
 ```
 
 - **注意事项**：double有精度丢失：用 for(int i=0;i<=100;i++)实现各种操作
@@ -343,7 +383,6 @@ void solve()
 }
 
 ```
-
 
 #### P4017 最大食物链计数
 

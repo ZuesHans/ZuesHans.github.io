@@ -1,69 +1,71 @@
 @echo off
 ::============================================================
-:: 一键发布 Hexo 博客（源码推到 source 分支）
-:: 由 GitHub Actions 自动构建并部署到 main 分支
-:: 任何错误立即终止，只有全部成功才显示 SUCCESS
+:: One-click publish script for Hexo blog
+:: - Source code lives in branch: source
+:: - GitHub Actions builds and pushes to: main
+:: - Any error stops immediately
+:: - SUCCESS shown only when everything finishes
 ::============================================================
 
 cd /d "%~dp0"
 
 echo.
-echo ===== 步骤 1：清理旧文件 =====
+echo ===== Step 1: Clean old files =====
 call hexo clean
 if %errorlevel% neq 0 (
     echo.
-    echo [ERROR] hexo clean 失败
+    echo [ERROR] hexo clean failed
     pause
     exit /b %errorlevel%
 )
 
 echo.
-echo ===== 步骤 2：生成静态文件（预览用）=====
+echo ===== Step 2: Generate static files (for preview) =====
 call hexo generate
 if %errorlevel% neq 0 (
     echo.
-    echo [ERROR] hexo generate 失败
+    echo [ERROR] hexo generate failed
     pause
     exit /b %errorlevel%
 )
 
 echo.
-echo ===== 步骤 3：提交源码改动 =====
+echo ===== Step 3: Stage source changes =====
 git add .
 if %errorlevel% neq 0 (
     echo.
-    echo [ERROR] git add 失败
+    echo [ERROR] git add failed
     pause
     exit /b %errorlevel%
 )
 
-:: 检查是否有改动
+:: Check if there are any changes to commit
 git diff --cached --exit-code >nul 2>&1
 if %errorlevel% equ 0 (
     echo.
-    echo [INFO] 没有检测到改动，跳过提交和推送
+    echo [INFO] No changes detected – skipping commit & push
     goto :success
 )
 
-:: 生成时间戳
+:: Generate timestamp for commit message
 for /f "tokens=2 delims==" %%a in ('"wmic OS Get localdatetime /value"') do set "dt=%%a"
 set "timestamp=%dt:~0,4%-%dt:~4,2%-%dt:~6,2% %dt:~8,2%:%dt:~10,2%"
 
 git commit -m "Site updated: %timestamp%"
 if %errorlevel% neq 0 (
     echo.
-    echo [ERROR] git commit 失败
+    echo [ERROR] git commit failed
     pause
     exit /b %errorlevel%
 )
 
 echo.
-echo ===== 步骤 4：推送源码到 origin/source =====
+echo ===== Step 4: Push source to origin/source =====
 git push origin source
 if %errorlevel% neq 0 (
     echo.
-    echo [ERROR] 推送失败！可能是网络超时或认证问题。
-    echo        请检查网络、Git 配置或 GitHub 状态。
+    echo [ERROR] Push failed! (network timeout, auth, etc.)
+    echo        Check your connection, Git config, or GitHub status.
     pause
     exit /b %errorlevel%
 )
@@ -71,10 +73,10 @@ if %errorlevel% neq 0 (
 :success
 echo.
 echo =========================================================
-echo [SUCCESS] 源码已成功推送到 source 分支！
+echo [SUCCESS] Source code pushed to branch 'source'!
 echo.
-echo GitHub Actions 正在构建中……
-echo 预计 1-2 分钟后网站更新：
+echo GitHub Actions is now building...
+echo Site will be live in ~1-2 minutes:
 echo https://ZuesHans.github.io
 echo =========================================================
 pause

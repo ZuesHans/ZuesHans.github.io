@@ -75,6 +75,136 @@ void solve()
 - **思路**:
   - 认真研读并学习114514次
 
+### 图论
+
+#### P4017 最大食物链计数（拓扑排序，挺简单的）
+
+- **题目概述** 给出一张有向无环图，求出最长路径的数量（最长路径定义：入度为0的点到初读为0的点），n是节点数量，m是路径数量
+- **数据范围**:n:2e3,m:1e5
+- **初始思路** ；记忆化加DFS
+- **正解思路**：DFS+DP
+- **AC代码**
+
+```cpp
+int mod = 80112002;
+int n, m;
+vi mem(5005, -1);
+int dfs(int u, const vector<vi> &dw,const vi&in,const vi&out)
+{
+    if (mem[u] != -1)
+    {
+        return mem[u];
+    }
+    if (in[u] == 0)
+    {
+        mem[u] = 1;
+        return 1;
+    }
+    mem[u]=0;
+    for (int v : dw[u])
+    {
+       // mem[u] = max(mem[u], dfs(v, dw,in,out) % mod + 1);
+       mem[u]=(dfs(v,dw,in,out)+mem[u])%mod;
+    }
+    return mem[u];
+}
+
+void solve()
+{
+    vector<vi> dw(5005);
+    cin >> n >> m;
+    vi out(n + 1);
+    vi in(n + 1);
+    rep(i, 0, m - 1)
+    {
+        int d, f;
+        cin >> d >> f;
+        dw[f].push_back(d);
+        out[d]++;//需要计算入度和出度是为了辨别什么时候开始什么时候结束
+        in[f]++;
+    }
+    int ans = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        if (out[i] == 0)
+            // ans=max(ans,dfs(i,dw)%mod);
+            ans = (ans + dfs(i, dw,in,out)) % mod;
+    }
+    cout << ans << '\n';
+}
+```
+
+- **AC代码**:拓扑排序
+
+```cpp
+void solve()
+{
+    vector<vi> dw(5005);
+    cin >> n >> m;
+    vi out(n + 1);
+    vi in(n + 1);
+    rep(i, 0, m - 1)
+    {
+        int d, f;
+        cin >> d >> f;
+        dw[f].push_back(d);
+        out[f]++;
+        in[d]++;
+    }
+    int ans = 0;
+    queue<int> dl;
+     vi lx(n + 1,0);
+    for (int i = 1; i <= n; i++)
+    {
+        if (in[i] == 0)
+        {
+            dl.emplace(i);
+            lx[i]=1;
+        }
+    }
+   
+    while (!dl.empty())
+    {
+        auto hsh = dl.front();
+        dl.pop();
+
+        for (auto hsh2 : dw[hsh])
+        {
+            lx[hsh2]=(lx[hsh2]+lx[hsh])%mod;
+            in[hsh2]--;
+            if(in[hsh2]==0)
+            {
+                dl.emplace(hsh2);
+            }
+        }
+    }
+    for(int i=1;i<=n;i++)
+    {
+        if(!out[i])
+        {
+            ans=(ans+lx[i])%mod;
+        }
+    }
+    cout << ans << '\n';
+}
+```
+
+- 拓扑排序的目标是将所有节点排序，使得排在前面的节点不能依赖于排在后面的节点。
+- 作用：
+  - 确定任务执行顺序
+  - DAG 上的动态规划
+  - 检测环路:如果拓扑排序无法将所有节点都加入到最终的序列中（
+  - **“顺序”、“依赖”、“先决条件”，或者需要在一个有向图中进行基于依赖的计算（如 DP）时
+
+#### 图的遍历（tarjan算法）
+
+- **题目描述**：给出一张有向图（不保证无环），节点编号1到n，求每个节点能到达的最大编号
+
+
+
+
+
+
 ### 数据结构
 
 #### Cool Partition
@@ -395,42 +525,6 @@ void solve()
 }
 
 ```
-
-#### P4017 最大食物链计数
-
-- **错点**：TLE
-- **题目概述** 给出一张有向无环图，求出最长路径的数量（最长路径定义：入度为0的点到初读为0的点），n是节点数量，m是路径数量
-- **数据范围**:n:2e3,m:1e5
-- **初始思路** ；记忆化加DFS
-- **WA代码**
-
-```cpp
-void dfs(int idx, const vector<vi> &dw, int cnt, int st, vi &mem)
-{
-    if (mem[idx]!=-1)
-    {
-        mem[st]=max((mem[idx]+cnt-1)%mod,mem[st]);
-
-        return;
-    }
-    if (dw[idx].empty())
-    {
-        mem[st]=max(cnt%mod,mem[st]);
-        mem[idx]=1;
-        return;
-    }
-    
-    for (int hsh : dw[idx])
-    {
-       // mem[hsh]=max(mem[hsh],cnt+1);
-        dfs(hsh, dw, cnt + 1, st, mem);
-    }
-    return;
-}
-```
-
-- **WA原因**
-  - 读错题
 
 ### 题意理解&&容器选择
 

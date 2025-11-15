@@ -2,8 +2,9 @@
 title: wp_11_2
 date: 2025年11月7日 02点45分
 tags:
-    - 算法
-    - C++
+  - 算法
+  - C++
+  - Problems
 cover:
     /img/cover/熏鱼我爱你.png
 ---
@@ -611,6 +612,65 @@ void solve()
   - 题目是非常简单而且典型的滑动窗口二维前缀和。最大的问题出在你滑动窗口的时候的推导式：详情见P2280 HNOI2003 激光炸弹
 - **出错的推导点**`int hsh = qzh[i + c-1][j + c-1] + qzh[i-1][j-1]- qzh[i + c-1][j-1] - qzh[i-1][j + c-1];`
 - 首先注意减去边界格的时候要-1往里面一格（因为要包含到ij），然后是因为是C*C的数组所以要往里面移动一格（请你以后先列式子算一下）
+
+#### 子段乘积（简单）
+
+- **题号**: C
+- **链接**: [题目链接](https://ac.nowcoder.com/acm/contest/120453/C)
+- **算法类型**: 滑动窗口（双指针）
+- **AC 代码**:
+
+```cpp
+void solve()
+{
+    int n, k;
+    cin >> n >> k;
+    vi nums(n + 1);
+    rep(i, 1, n)
+    {
+        cin >> nums[i];
+    }
+
+    int left = 1;
+    int right = 1;
+    int ans = 0;
+    int sz = 1;
+    int mod = 998244353;
+    while (right <= n)
+    {
+        while (right <= n && left + k > right)
+        {
+            if (nums[right] == 0)
+            {
+                left = right + 1;
+                right = left;
+                sz = 1;
+                continue;
+            }
+            sz = (sz * nums[right]) % mod;
+            right++;
+        }
+        if (right > n || left > n - k)
+            break;
+
+       // if (right - left == k)这是保险起见之举，事实上没有必要
+            ans = max(ans, sz);
+
+        sz = (sz * inverse_fermat(nums[left], mod)) % mod;
+        left++;
+    }
+    cout << ans;
+}
+
+```
+
+- **注意事项**:
+  - 1-Based存数方式lr初始在1
+  - 记得滑动窗口的while，不要惯性思维认为*答案更新*/*大小比较*都在while的末尾。while只是一个路径，前面是快指针移动，后面是慢指针移动。中间夹着你的数字更新
+  - 适用于固定区间长度的数据处理
+  - 维护r的界限和nums[r]的更新逻辑是难点
+[相似的滑动窗口](https://codeforces.com/problemset/problem/2117/C)
+
 
 ---
 

@@ -547,7 +547,59 @@ Your task is to calculate the maximum possible total array sum if you can perfor
 
 - **思路**
   - `区间总和`->前缀和优化
-  - 
+  - 对于每个数字我们是否能判断他更改的收益从而确定他要不要被更改,随后贪心解决一切？
+  - 第一条思路：让他和他自己比较的贪心：但是你会发现这只能确定一些“必须更改”的数字，不符合题目里面的边界，l和r的改变随时能够影响更改的权重。这个思路假的很明显
+  - 第二条思路：要去寻找rl的最优值肯定是n方解法，我们能不能通过假设存在lr然后推导出对于每一组lr的收益表达式来找到他贪心的点呢？
+    - 对于确定的lr，更改之后的收益是: (l+r)*(r-l+1)-(qzh[r]-qzh[l-1])
+    - 学过高中数学我们就知道l和r是可以分离开的:得到贪心最大化式子:l^2-r^2+l+r+qzh[r]+qzh[l-1]
+    - 然后我们就发现可以通过O(n)的处理得出每一部分得权重，然后贪心最大化
+  - 注意这里有一个小细节：r>=l,所以我们在处理的时候需要注意处理l得同时处理r
+  - 这里还有个实现层面的优化：你可能会发现如果对于每个r都要扫一边l我们前面做的降维全都白费了，我们通过同时维护ans1和ans2(两个需要最大化的贪心模块)让他在一边扫的时候可以同时更新同时过。这也是一个重要的trick
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n + 1);
+    vi qzh(n + 1);
+    vi chaxun1(n + 1);
+    vi chaxun2(n + 1);
+    for (int i = 1; i <= n; i++)
+    {
+        int d;
+        cin >> d;
+        nums[i] = d;
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        qzh[i] = qzh[i - 1] + nums[i];
+        chaxun1[i] = (i * i) + i - qzh[i];
+        chaxun2[i] = (i * i) + i - qzh[i];
+    }
+    int ans1 = 0;
+    int zuobian = 0;
+    int youbian = 0;
+
+    int ans2 = 0;
+
+    for (int i = 1; i <= n; i++)
+    {
+
+        if (chaxun2[i] - chaxun2[zuobian] > ans2)
+        {
+            ans2 = chaxun2[i] - chaxun2[zuobian];
+        }
+        if (chaxun2[i] < ans1)
+        {
+            ans1 = chaxun2[i];
+            zuobian = i;
+        }
+    }
+
+    cout << qzh[n] + ans2 << '\n';
+}
+```
 
 ---
 

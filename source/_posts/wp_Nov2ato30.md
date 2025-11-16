@@ -7,6 +7,7 @@ tags:
   - Problems
 cover:
     /img/cover/熏鱼我爱你.png
+math: true
 ---
 
 

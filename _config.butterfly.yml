@@ -68,5 +68,5 @@ index_post_cover:
 # 详情: https://butterfly.js.org/posts/ceeb7cbf/
 
   math:
-  enable: true
-  katex: true
+    enable: true
+    katex: true

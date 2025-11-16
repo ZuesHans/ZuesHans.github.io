@@ -17,65 +17,6 @@ cover:
 >
 >大概是我绞劲脑汁都没想到如此精妙的解法
 
-### 简单 Dijkstra 模板题
-
-#### P4779 【模板】单源最短路径（标准版）
-
-- **题号**: P4799
-- **链接**: [题目链接](https://www.luogu.com.cn/problem/P4799)
-- **算法类型**: 图论模板
-- **AC 代码**:
-
-```cpp
-void solve()
-{
-    ll n,m,s;
-    cin>>n>>m>>s;
-    //前面是点,后面是距离
-    vector<vector<pair<int,ll>>> mp(n+1);
-    rep(i,0,m-1)
-    {
-        int u,v,w;
-        cin>>u>>v>>w;
-        mp[u].push_back({v,w});
-   //     mp[v].push_back({u,w});这道题是有向边所以不要入两次！！
-    }
-
-    priority_queue<pair<ll,int>, vector<pair<ll,int>>, greater<pair<ll,int>>>pos ;
-    vector<ll> dist(n+1,LINF);
-    dist[s]=0;
-    pos.emplace(0,s);
-
-    while(!pos.empty())
-    {
-        auto [nowd,nowp] = pos.top();
-        pos.pop();
-        if(nowd>dist[nowp])continue;
-        for(auto [nextp,nextd]:mp[nowp])
-        {
-            if(dist[nextp]>dist[nowp]+nextd)
-            {
-                dist[nextp]=dist[nowp]+nextd;
-                pos.emplace(dist[nextp],nextp);
-            }
-        }
-    }
-    rep(i,1,n)
-    {
-        cout<<dist[i]<<' ';
-    }
-}
-
-```
-
-- **注意事项**:
-  - 注意Dijkstra算法用最小堆优化可以时间复杂度最低
-  - Dijkstra算法只能处理非负权路径问题
-  - 为什么不用队列？：贪心最快，如果是菊花图复杂度会退化到nm
-  - 含负权路用什么算法？用队列
-- **思路**:
-  - 认真研读并学习114514次
-
 ### 图论
 
 #### P4017 最大食物链计数（拓扑排序，挺简单的）
@@ -196,6 +137,65 @@ void solve()
   - DAG 上的动态规划
   - 检测环路:如果拓扑排序无法将所有节点都加入到最终的序列中（
   - **“顺序”、“依赖”、“先决条件”，或者需要在一个有向图中进行基于依赖的计算（如 DP）时
+
+#### 简单 Dijkstra 模板题
+
+ P4779 【模板】单源最短路径（标准版）
+
+- **题号**: P4799
+- **链接**: [题目链接](https://www.luogu.com.cn/problem/P4799)
+- **算法类型**: 图论模板
+- **AC 代码**:
+
+```cpp
+void solve()
+{
+    ll n,m,s;
+    cin>>n>>m>>s;
+    //前面是点,后面是距离
+    vector<vector<pair<int,ll>>> mp(n+1);
+    rep(i,0,m-1)
+    {
+        int u,v,w;
+        cin>>u>>v>>w;
+        mp[u].push_back({v,w});
+   //     mp[v].push_back({u,w});这道题是有向边所以不要入两次！！
+    }
+
+    priority_queue<pair<ll,int>, vector<pair<ll,int>>, greater<pair<ll,int>>>pos ;
+    vector<ll> dist(n+1,LINF);
+    dist[s]=0;
+    pos.emplace(0,s);
+
+    while(!pos.empty())
+    {
+        auto [nowd,nowp] = pos.top();
+        pos.pop();
+        if(nowd>dist[nowp])continue;
+        for(auto [nextp,nextd]:mp[nowp])
+        {
+            if(dist[nextp]>dist[nowp]+nextd)
+            {
+                dist[nextp]=dist[nowp]+nextd;
+                pos.emplace(dist[nextp],nextp);
+            }
+        }
+    }
+    rep(i,1,n)
+    {
+        cout<<dist[i]<<' ';
+    }
+}
+
+```
+
+- **注意事项**:
+  - 注意Dijkstra算法用最小堆优化可以时间复杂度最低
+  - Dijkstra算法只能处理非负权路径问题
+  - 为什么不用队列？：贪心最快，如果是菊花图复杂度会退化到nm
+  - 含负权路用什么算法？用队列
+- **思路**:
+  - 认真研读并学习114514次
 
 #### 图的遍历（tarjan算法）
 
@@ -531,6 +531,23 @@ void solve()
 - **代码实现**：所以事实上我们要做的是求出log2n是否是奇数，用while循环固然只管但是可能吃一发20分钟的罚时
 - **求一个数是否是2的正整数次幂**：`(n & (n - 1))`
 
+### trick(Educantional)
+
+#### C. Range Operation
+
+- **题目**
+
+>You are given an integer array $a$ of length $n$.
+You can perform the following operation: choose a range $[l, r]$ ($1 \le l \le r \le n$) and replace the value of elements $a_l, a_{l+1}, \dots, a_r$ with $(l + r)$.
+Your task is to calculate the maximum possible total array sum if you can perform the aforementioned operation at most once.
+>您将得到一个长度为 $n$ 的整数数组 $a$ 。
+您可以执行以下操作：选择范围 $[l, r]$ （ $1 \le l \le r \le n$ ），并将元素 $a_l, a_{l+1}, \dots, a_r$ 的值替换为 $(l + r)$ 。
+您的任务是计算最大可能的阵列总和，前提是您最多可以执行一次上述操作。
+
+- **思路**
+  - `区间总和`->前缀和优化
+  - 
+
 ---
 
 ## 错题整理
@@ -670,7 +687,6 @@ void solve()
   - 适用于固定区间长度的数据处理
   - 维护r的界限和nums[r]的更新逻辑是难点
 [相似的滑动窗口](https://codeforces.com/problemset/problem/2117/C)
-
 
 ---
 

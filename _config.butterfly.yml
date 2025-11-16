@@ -62,11 +62,11 @@ index_post_cover:
   enable: true
   position: top # 封面图显示在卡片顶部
 
-  # -----------------
+# -----------------
 # 数学公式 (Math)
 # -----------------
 # 详情: https://butterfly.js.org/posts/ceeb7cbf/
-math:
+
+  math:
   enable: true
-  engine: 'mathjax' 
-  per_page: false
+  katex: true

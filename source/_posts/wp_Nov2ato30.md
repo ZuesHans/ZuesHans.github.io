@@ -782,6 +782,142 @@ void solve()
 }
 ```
 
+#### P2859 [USACO06FEB] Stall Reservations S(收录意义是学会读题以及请和Sunscreen一起学习)
+
+- 这道题可以和上面三道题以及后悔贪心那道题一起看
+- 个人认为这道题并不贪心，只是一个堆的使用典例。我认为是Monopati的前戏
+- 这里主要在证明为什么用这样的贪心策略:先排序左端点，然后将右端点如堆。可以保证对于每一次的运算不会漏掉情况。因为可能漏掉的情况一定同时满足以下两个条件:左端点比当前位置更前，右端点比当前位置更前。可以简单的发现根据这样的排列不存在例外插入情况。
+- 这里依旧贴出大根堆代码，用来多多评鉴。
+- 这里有一些小细节，因为最后要输出每个牛在那个栅栏，这个细节调了挺久的
+
+```cpp
+sort(all(nums), [](hsh a, hsh b)
+         {
+    if(a.st!=b.st) return a.st<b.st;
+    else return a.et<b.et; });
+
+    priority_queue<pii, vector<pii>, greater<pii>> dui;
+    vector<hsh> ans(n);
+    int weilan = 1;
+    for (int i = 0; i < n; i++)
+    { // 对于第i头牛
+        auto it = nums[i];
+        int now=0;
+        if (dui.empty())
+        {
+            dui.push({it.et, weilan});
+            ans[i].et = weilan;
+            ans[i].id = it.id;
+
+            continue;
+        }
+        auto ljl = dui.top();
+
+        if (it.st <= ljl.first)
+        {
+            weilan++;
+            dui.push({it.et, weilan});
+
+            now=weilan;
+        }
+        else
+        {
+            dui.pop();
+            dui.push({it.et, ljl.second});
+            now=ljl.second;
+        }
+        ans[i].et=now;
+        ans[i].id=it.id;
+
+    }
+    cout << dui.size() << '\n';
+    sort(all(ans), [](hsh a, hsh b)
+         { return a.id < b.id; });
+    for (auto jjj : ans)
+    {
+        cout << jjj.et << '\n';
+    }
+```
+
+### 贪心
+
+- 如上P2887 [USACO07NOV] Sunscreen就是典型的贪心，重点是如何去通过我们固定左端点的大胆尝试去实现
+
+#### P2949 [USACO09OPEN] Work Scheduling G (全局贪心)
+
+- **我一开始的错误思路**
+  - 人人都能想得到去走时间，然后将最紧急的任务先做了然后再紧急的任务里面贪心
+  - 最大的问题是:你的贪心是占用时间的，是有后效性的，万一后面有价值更高的任务他就不是期望值了
+  - DP？时间跨度巨大：$D_i \le 10^9$。任务数量（N）较大：$N \le 10^5$。离散化时间之后依然n方
+
+- **正确思路以及为什么**:
+以后你在做题时，如果满足以下特征，请立刻想到反悔贪心：
+
+选择带有顺序性（或者可以排序）。
+
+当前的选择会影响后续的资源（比如占用了时间、金钱）。
+
+我们在乎的是“数量”或者“总价值”。
+
+如果发生冲突，我们可以通过“撤销”之前的某个劣质选择，来接纳当前的优质选择，且这种交换一定是不亏的（甚至更赚）
+
+- **AC代码**
+
+```cpp
+struct hsh
+{
+    int d, p;
+};
+
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<hsh> nums(n);
+    rep(i, 0, n - 1)
+    {
+        cin >> nums[i].d >> nums[i].p;
+    }
+    ll ans = 0;
+    sort(all(nums), [](hsh a, hsh b)
+         { return a.d < b.d; });
+    // int dpin = 0;
+    // int xpin = 0;
+    int time1 = 0;
+    priority_queue<int,vi,greater<int>> dui;
+    for(auto ljl:nums)  //记住这个反悔的思想和实现方式
+    {
+        if(time1+1<=ljl.d)
+        {
+            dui.emplace(ljl.p);
+            time1+=1;
+        }
+        else 
+        {
+            if(!dui.empty())
+            {
+                auto ljl2=dui.top();
+                dui.pop();
+                if(ljl.p>ljl2)
+                {
+                    dui.emplace(ljl.p);
+                }
+                else dui.emplace(ljl2);
+            }
+
+        }
+    }
+    while(!dui.empty())
+    {
+        auto jj=dui.top();
+        dui.pop();
+        ans+=jj;
+    }
+       cout << ans << '\n';
+}
+
+```
+
 ### 构造
 
 #### C. Cyclic Merging(贪心)

@@ -557,6 +557,24 @@ Your task is to calculate the maximum possible total array sum if you can perfor
   - 这里还有个实现层面的优化：你可能会发现如果对于每个r都要扫一边l我们前面做的降维全都白费了，我们通过同时维护ans1和ans2(两个需要最大化的贪心模块)让他在一边扫的时候可以同时更新同时过。这也是一个重要的trick
 
 ```cpp
+for (int i = 1; i <= n; i++)
+    {
+
+        if (chaxun2[i] - chaxun2[zuobian] > ans2)
+        {
+            ans2 = chaxun2[i] - chaxun2[zuobian];
+        }
+        if (chaxun2[i] < ans1)//这里的更新顺序是因为我们的优化已经让i=l-1了，所以顺序不能错
+        {
+            ans1 = chaxun2[i];//边处理边更新线性扫过去是非常常见的优化方法
+            zuobian = i;
+        }
+    }
+
+    cout << qzh[n] + ans2 << '\n';
+```
+
+```cpp
 void solve()
 {
     int n;
@@ -600,6 +618,290 @@ void solve()
     cout << qzh[n] + ans2 << '\n';
 }
 ```
+
+#### C. Monopati
+
+- [link](https://codeforces.com/contest/2163/problem/C)
+- **思路**
+    题意转换：对于每个合法的路径，必然存在某一个合法的转换列i让他从上行过度到下行。因为要求出lr的区间所以我们需要得上行从前往后的最大值和最小值，下行从后往前的最小值和最大值。√
+    对于每个 $i$，路径存在的充要条件是：$l \le L_i$ 且 $r \ge R_i$。（其中 $L_i$ 是该路径上的最小值，$R_i$ 是该路径上的最大值）。
+    ->最终目标：统计 $(l, r)$ 的数量，使得 存在至少一个 $i$ 满足上述条件。即求 $n$ 个约束区域（矩形）的 并集 覆盖的整数点数。
+    如果对每个点i进行分析太难了，我们可以考虑进一步转化问题：
+
+    要求合法的lr对数:固定每一个l，统计合法的r的数量。原理：**固定一个变量，用数据结构（堆/线段树）维护另一个变量的可行域。**
+    更新方程是：`sum+=2*n+prdq.top()[0];`
+
+    容器选择：理想的实现应该做到:过滤过期：随着 $l$ 增大，剔除那些 $L_i < l$ 的约束（因为它们不再能覆盖当前的 $l$）。
+    查询最优：在剩下的合法约束中，找到 $R_i$ 最小的那个（$R$ 越小，合法的 $r$ 越多）。
+
+    **易被忽视的细节**：对于每个r的约束是：我们找到的和他配对的l'必须小于r在的数对的l
+    所以在堆里的排序规则是：r越小越好，l越大越好。这样子我们筛掉的点对既不会漏掉r也不会漏掉l
+
+- `priority_queue<array<int, 2>> prdq;`默认按照prdq()[0]大小排序
+
+- **AC代码**(优先队列法)
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi mpu(n);
+    vi mpd(n);
+    vi mxu(n);
+    vi mnu(n);
+    vi mxd(n);
+    vi mnd(n);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> mpu[i];
+        mpu[i]--;
+        if (!i)
+        {
+            mxu[i] = mpu[i];
+            mnu[i] = mpu[i];
+        }
+        else
+        {
+            mxu[i] = max(mxu[i - 1], mpu[i]);
+            mnu[i] = min(mnu[i - 1], mpu[i]);
+        }
+    }
+    for (int i = 0; i < n; i++)
+    {
+        cin >> mpd[i];
+        mpd[i]--;
+    }
+    for (int i = n - 1; i >= 0; i--)
+    {
+        if (i == n - 1)
+        {
+            mxd[i] = mpd[i];
+            mnd[i] = mpd[i];
+        }
+        else
+        {
+            mxd[i] = max(mxd[i + 1], mpd[i]);
+            mnd[i] = min(mnd[i + 1], mpd[i]);
+        }
+    }
+    priority_queue<array<int, 2>> prdq;
+    for (int i = 0; i < n; i++)
+    {
+        prdq.push({-max(mxd[i], mxu[i]), min(mnd[i], mnu[i])});
+    }
+    ll sum = 0;
+    for (int i = 0; i < 2 * n; ++i)
+    {
+        while (!prdq.empty() && prdq.top()[1] < i)
+        {
+            prdq.pop();
+        }
+        if (!prdq.empty())
+        {
+            sum += 2 * n + prdq.top()[0];
+        }
+    }
+    cout << sum << '\n';
+}
+```
+
+#### P2887 [USACO07NOV] Sunscreen (收录意义是请和C. Monopati对比学习)
+
+- **题目**
+
+>题目描述
+有 $C$ 头奶牛进行日光浴，第 $i$ 头奶牛需要 $minSPF[i]$ 到 $maxSPF[i]$ 单位强度之间的阳光。
+每头奶牛在日光浴前必须涂防晒霜，防晒霜有 $L$ 种，涂上第 $i$ 种之后，身体接收到的阳光强度就会稳定为 $SPF[i]$，第 $i$ 种防晒霜有 $cover[i]$ 瓶。
+求最多可以满足多少头奶牛进行日光浴。
+
+- **思路**
+  - Monopati也是用到了这个思路。把l固定然后遍历r。但是贪心是要证明无后效性的。就是你这个牛子过了之后你能保证他后面没有可能匹配到别人。最适合的就是拿右值来排序
+  - 我本来写的区间大小，但是这样子就和我通过统一左值来做的方法矛盾了
+
+- **AC代码**
+
+```cpp
+struct spf
+{
+    int low, hei;
+};
+struct fss
+{
+    int sp, fg;
+};
+
+void solve()
+{
+    int c, l;
+    cin >> c >> l;
+    vector<spf> cows(c);
+    rep(i, 0, c - 1)
+    {
+        cin >> cows[i].low >> cows[i].hei;
+    }
+    vector<fss> choi(l);
+    rep(i, 0, l - 1)
+    {
+        cin >> choi[i].sp >> choi[i].fg;
+    }
+
+    sort(all(choi), [](fss a, fss b)
+         {
+    if(a.sp!=b.sp)return a.sp<b.sp;
+    else return a.fg>b.fg; });
+    sort(all(cows), [](spf a, spf b)
+         {
+    if(a.low!=b.low)return a.low<b.low;
+    else return a.hei>b.hei; });
+    priority_queue<int,vector<int>,greater<int>> dui;
+  
+    int ans=0;
+    int niuniu=0;
+   
+    for(int i=0;i<l;i++)
+    {
+        while(niuniu<c&&cows[niuniu].low<=choi[i].sp)
+        {
+            dui.push(cows[niuniu].hei);
+            niuniu++;
+        }
+        while(!dui.empty()&&dui.top()<choi[i].sp)
+        {
+            dui.pop();
+        }
+        while(choi[i].fg>0&&!dui.empty())
+        {
+            ans++;
+            choi[i].fg--;
+            dui.pop();
+        }
+    }
+    cout<<ans;
+}
+```
+
+### 构造
+
+#### C. Cyclic Merging(贪心)
+
+- **题目**
+- >You are given $n$ non-negative integers $a_1,a_2,\ldots,a_n$ arranged on a ring. For each $1\le i< n$, $a_i$ and $a_{i+1}$ are adjacent; $a_1$ and $a_n$ are adjacent.
+You need to perform the following operation **exactly** $n-1$ times:
+ Choose any pair of adjacent elements on the ring, let their values be $x$ and $y$, and merge them into a single element of value $\max(x,y)$ with cost $\max(x,y)$.
+Note that this operation will decrease the size of the ring by $1$ and update the adjacent relationships accordingly.
+Please calculate the minimum total cost to merge the ring into one element.
+
+>给你一个排列在环上的非负整数 $$$n$$$ 。对于每个 $$$1\le i&lt; n$$$ ， $$$a &#95; i$$$ 和 $$$a &#95; {i+1}$$$ 相邻； $$$a &#95; 1$$$ 和 $$$a &#95; n$$$ 相邻。
+以下操作需要**精确** $$$n-1$$$ 次：
+-在环上选择任意一对相邻的元素，设它们的值为 $$$x$$$ 和 $$$y$$$ ，并将它们合并成一个值为 $$$\max(x,y)$$$ ，代价为 $$$\max(x,y)$$$ 的元素。
+注意，此操作将使环的大小减少 $$$1$$$ ，并相应地更新相邻关系。
+请计算将圆环合并为一个元件的最低总成本。
+
+- **错误想法**
+  - 双指针：双指针/滑动窗口通常用于处理固定不变的序列，寻找满足某种条件的连续子段（比如和、最值等）。而这道题首先是环形，其次是他会破坏掉数字的结构
+  - DP？数据范围2e5秒了肯定不是
+  >2e5我们最好想一些数据结构或者贪心（某种意义上的排列）来优化这一切（logn或者n，这很常见）
+- **思考路径(看完整清晰的请往下看，这是我个人的一个思路整理)**
+  - 当我拆解数据 1 1 4 5 1 4 1的时候我总是会算错，这个样例我研究了20分钟我才研究出来他的正确合成方法:而这道题的正确做法就藏在我的试错里面:只是我忽略了:当我从小合并到大(其实这是猜猜看的结果)他最优
+  - 贪心最大的难度就是让我相信：他是贪心
+  - 相信他是贪心最主要的点在：对于每个数他的命运岔路口只有当左右两边的数字都大于他的时候。可以简单想到，通过更改(合成)左右两个数来改变消掉我们这个数的代价绝对不是最优，最优解**存在且仅存在于**他与隔壁的一个数字合体或着他与隔壁两个数字中更小的数字合体
+  - 这里我们可以发现从最小的数字开始合并收益一定最大(如果从一个不是最大也不是最小的数字开始合并，他的消失他就可能会影响更小的数字合成代价变大。因为他消失了更小的数字只能和更大的数字合成了)
+
+- **细节难点**：
+  - 实现方法上需要学习的:**模拟环形**(模拟链表)以及左右更新
+  - 大根堆的处理:要认清楚:**大根堆的最用只是帮你快速定位到最小的元素是谁**
+
+- **AC代码**
+
+```cpp
+
+struct node
+{
+    int idx, num;
+};
+
+struct cmp
+{
+    bool operator()(const node &a, const node &b)
+    {
+        return a.num > b.num; // 小根堆逻辑
+    }
+};
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n);
+    vi left(n);
+    vi right(n);
+    left[0] = n - 1;
+    right[n - 1] = 0;
+    priority_queue<node, vector<node>, cmp> dl;
+    rep(i, 0, n - 1)
+    {
+        cin >> nums[i];
+        if (i != 0)
+        {
+            left[i] = i - 1;
+        }
+        if (i != n - 1)
+        {
+            right[i] = i + 1;
+        }
+        dl.push({i, nums[i]});
+    }
+
+    int cz = n - 1;
+    ll ans=0;
+    while (cz && !dl.empty())
+    {
+        auto hsh = dl.top();
+        dl.pop();
+        int idl = left[hsh.idx];
+        int idr = right[hsh.idx];
+
+        if(nums[idl]>nums[idr])ans+=nums[idr];
+        if(nums[idl]<=nums[idr])ans+=nums[idl];
+     //   cerr<<ans<<'\n';
+        left[idr]=idl;
+        right[idl]=idr;
+        cz--;
+    }
+    cout<<ans<<'\n';
+}
+```
+
+你以为到这里就结束了吗？并非
+诚然这个算法很直观，但是却不是最简单，没有找到这道题最本质的一点
+**我们容易发现**: merge 取的是 max，这意味着**邻居只会越变越大**。对于一个当前的最小值来说，“现在”永远是它能遇到的最好时机。任何推迟操作都可能导致它身边的邻居变大，从而增加它最终被消除的代价。
+
+!这样子我们就能获得时间复杂度O(n)，空间复杂度O(1)的算法:
+
+```cpp
+void solve()
+{
+    int n,first,now=0;
+    ll ans = 0;
+    cin >> n;
+    cin >> first;
+    int last = first;
+    int mx=first;
+    rep(i, 2, n)
+    {
+        cin >> now;
+        mx = max(mx, now);
+        ans += max(last, now);
+        last = now;
+    }
+    ans+=max(first,now);
+    cout<<ans-mx<<'\n';
+}
+```
+
+- 后话:**我们该如何证明贪心是对的**
+  - 如果数据范围是 $N=2 \times 10^5$，而且不像线段树/图论，那只能是贪心或者数学推导。
+  - 贪心规则，检查有没有:后效性，更优？
 
 ---
 
@@ -1434,87 +1736,6 @@ void solve()
         else
             cout << "NO" << '\n';
     }
-}
-```
-
-### div2 11_10 CF
-
-#### c
-
-- **思路**（可以一眼，但是我我不确定当时我是不是一眼出来的）
-    对于每个l，r，会有某个路线能满足题目的要求。对于R而言（这里指的是右下，左上对称同理），如果有任意R超出了我们待选区间的范围，则这个待选区间不成立。所以要维护上列前缀最大最小和下列后缀最大最小（这一步简单，好想）。
-    下一步是如何计算（确定）我们要的区间：很显然，在（转折点）处就能找到我们要的（l，r），一共有n个待选极限（l，r）（当`l<=li<ri<=r`时显然对于一个成立的l，r时成立的。所以更新方程是：`sum+=2*n+prdq.top()[0];`
-    这个时候我们要想几个细节的点：来决定我们用什么遍历方式和容器，显而易见：我们要达到O（n）或者O（nlogn）的复杂度
-    对于每一个待选的（l，r），他们的出现是有可能重复的：我们需要一个去重的容器：
-    为了保证每个区间是单一的我们会想到一个经典的处理方式：详情：[线段覆盖](https://www.luogu.com.cn/problem/P1803)
-    在位置i，对于每个不递减的l，考虑他带着的线段
-    外层循环走`for (int i = 0; i < 2 * n; ++i)`可以保证：模拟从左到右不会重复计算，可以清理过期值
-- 注意：`priority_queue<array<int, 2>> prdq;`默认按照prdq()[0]大小排序
-
-- **AC代码**(优先队列法)（我感觉我还没完全搞懂他的实现）
-
-```cpp
-void solve()
-{
-    int n;
-    cin >> n;
-    vi mpu(n);
-    vi mpd(n);
-    vi mxu(n);
-    vi mnu(n);
-    vi mxd(n);
-    vi mnd(n);
-    for (int i = 0; i < n; i++)
-    {
-        cin >> mpu[i];
-        mpu[i]--;
-        if (!i)
-        {
-            mxu[i] = mpu[i];
-            mnu[i] = mpu[i];
-        }
-        else
-        {
-            mxu[i] = max(mxu[i - 1], mpu[i]);
-            mnu[i] = min(mnu[i - 1], mpu[i]);
-        }
-    }
-    for (int i = 0; i < n; i++)
-    {
-        cin >> mpd[i];
-        mpd[i]--;
-    }
-    for (int i = n - 1; i >= 0; i--)
-    {
-        if (i == n - 1)
-        {
-            mxd[i] = mpd[i];
-            mnd[i] = mpd[i];
-        }
-        else
-        {
-            mxd[i] = max(mxd[i + 1], mpd[i]);
-            mnd[i] = min(mnd[i + 1], mpd[i]);
-        }
-    }
-    priority_queue<array<int, 2>> prdq;
-    for (int i = 0; i < n; i++)
-    {
-        prdq.push({-max(mxd[i], mxu[i]), min(mnd[i], mnu[i])});
-    }
-    ll sum = 0;
-    for (int i = 0; i < 2 * n; ++i)
-    {
-        while (!prdq.empty() && prdq.top()[1] < i)
-        {
-            prdq.pop();
-        }
-        if (!prdq.empty())
-        {
-            sum += 2 * n + prdq.top()[0];
-        }
-    }
-    cout << sum << '\n';
 }
 ```
 

@@ -99,15 +99,15 @@ busuanzi:
   site_pv: true
   page_pv: true
 
-# 5. 网站运行时间 (展示你的坚持)
+# 5. 网站运行时间 
 footer:
   owner:
     enable: true
     since: 2025 # 修改为你建站的年份
-  custom_text: 'I am a little coding cat . PLZ love men' # 底部自定义文字
+  custom_text: 'I am a little coding cat . PLZ love me' # 底部自定义文字
   copyright: true
 
-# 6. 代码块样式增强 (Mac 风格窗口，看起来更高级)
+# 6. 代码块样式增强 (Mac 风格窗口看起来更高级)
 highlight_theme: mac
 code_word_wrap: true
 

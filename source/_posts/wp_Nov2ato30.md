@@ -318,6 +318,28 @@ void solve()
 
 ### DP
 
+- **我该怎么看出这是一道DP**
+  - 求*最大/小值*求*方案数量*求*子序列*
+  - 贪心做不了(有反例)
+  - 依赖前面的值，无后效性
+
+- **怎么写DP**
+  - 状态是谁？状态有哪些？状态必须包含所有能够影响下一阶段决策的信息
+  - 怎么转移？dp[i]是从哪里转移过来的？怎么转移代价最小/收益最大/能计算全部路径？
+  - 初始状态
+
+- **DP数组怎么写**
+  - 一般求什么什么就是DP数组
+  - 要不要开二维？就问自己:“如果有两个人同时走到第 $i$ 步，但他们之前的经历不同，这种不同会限制他们接下来的选择吗？”
+  - 能不能压缩？用滚动数组来代替二维，我们只考虑会影响结果的值。只记我们需要记的，过期的扔掉。
+
+>状态
+>背包问题：放或者不放;线性dp：选择或者不选择(甚至说有几个状态);爬楼梯：走1234步？;LCS:两个指针;取石子:左右区间
+>要不要开二维：
+>爬楼梯:如果大家都走到i层，接下来都是面对一样权重的选择，一维数组就行
+>01背包:考虑到第i个物品，如果前面拿了很多东西，我背包可能就放不下了，如果前面拿的东西不是很多我背包就放得下了，所以得开二维
+>01背包一维优化：原始方程：dp[i][w] = max(dp[i-1][w], dp[i-1][w - weight[i]] + value[i])
+
 #### 最大子段和
 >
 > P1115 最大子段和
@@ -363,6 +385,19 @@ cout<<ans<<'\n';
 }
 
 ```
+
+#### A. Against the Difference
+
+- **题目**
+
+>We define that a block is an array where all elements in it are equal to the length of the array. For example, $[3, 3, 3]$, $[1]$, and $[4, 4, 4, 4]$ are blocks, while $[1, 1, 1]$ and $[2, 3, 3]$ are not.
+An array is called neat if it can be obtained by the concatenation of an arbitrary number of blocks (possibly zero). Note that an empty array is always neat.
+You are given an array $a$ consisting of $n$ integers. Find the length of its longest neat subsequence$^{\text{∗}}$.
+$^{\text{∗}}$A sequence $c$ is a subsequence of a sequence $a$ if $c$ can be obtained from $a$ by the deletion of several (possibly, zero or all) element from arbitrary positions.
+>我们定义block是一个数组，其中的所有元素都等于该数组的长度。例如， $[3, 3, 3]$ ， $[1]$ 和 $[4, 4, 4, 4]$ 是块，而 $[1, 1, 1]$ 和 $[2, 3, 3]$ 不是块。
+如果数组可以通过任意数量的块（可能为零）的连接获得，则称为整齐数组。注意，空数组总是整洁的。
+给定一个由 $n$ 个整数组成的数组 $a$ 。求它的最长整洁子序列 $^{\text{∗}}$ 的长度。
+$^{\text{∗}}$ 序列 $c$ 是序列 $a$ 的子序列，如果 $c$ 可以从 $a$ 中删除任意位置的几个（可能为零或全部）元素。
 
 ### 计算几何
 

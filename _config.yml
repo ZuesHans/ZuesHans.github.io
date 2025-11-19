@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: ZuseHans's little bag
+title: ZuesHans's little bag
 subtitle: 'a coding cat_with love in its heart'
 description: ''
 keywords:
-author: ZuseHans
+author: ZuesHans
 language: zh-CN
 timezone: ''
 
@@ -119,3 +119,4 @@ markdown:
   plugins:
     # 确保这个插件还在
     - plugin: markdown-it-katex
+

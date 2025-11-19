@@ -48,11 +48,21 @@ menu:
 # -----------------
 # 侧边栏 (Aside)
 # -----------------
+# aside:
+#   # 公告
+#   card_announcement:
+#     enable: true
+#     content: '这里是一只会打字的小猫<br>欢迎来找我玩！<br>小猫永远喜欢unk大人/小声'
 aside:
-  # 公告
   card_announcement:
     enable: true
-    content: '这里是一只会打字的小猫<br>欢迎来找我玩！<br>小猫永远喜欢unk大人/小声'
+    content: |
+      这里是一只会打字的小猫<br>
+      欢迎来找我玩！<br>
+      小猫永远喜欢unk大人/小声<br>
+      <a href="https://codeforces.com/profile/keronshans" target="_blank">
+        <img src="https://codeforces-readme-stats.vercel.app/api/card?username=keronshans&theme=radical" style="width:100%; border-radius: 8px;" alt="Codeforces Stats">
+      </a>
 
 # -----------------
 # 首页文章封面 (!! 新增以满足你的需求)
@@ -67,6 +77,49 @@ index_post_cover:
 # -----------------
 # 详情: https://butterfly.js.org/posts/ceeb7cbf/
 
-  math:
+#   math:
+#     enable: true
+#     katex: true
+# 保持你现有的开启状态，建议添加 per_page 选项
+# 这样你可以只在需要公式的文章头设置 math: true，提高其他页面的加载速度
+math:
+  enable: true
+  per_page: false # 开启后，需要在文章的 front-matter 里写 math: true 才会加载公式
+  katex:
     enable: true
-    katex: true
+    hide_scrollbar: true
+# 2. 页面加载动画 
+preloader:
+  enable: true
+  source: 1 # 1=普通的旋转圈, 3=很多圈 (你可以试试改成 1 到 10 的数字)
+# 4. 底部数据统计 (Busuanzi)
+# 它可以统计你有多少个访客 (UV) 和点击量 (PV)
+busuanzi:
+  site_uv: true
+  site_pv: true
+  page_pv: true
+
+# 5. 网站运行时间 (展示你的坚持)
+footer:
+  owner:
+    enable: true
+    since: 2025 # 修改为你建站的年份
+  custom_text: 'I am a little coding cat . PLZ love men' # 底部自定义文字
+  copyright: true
+
+# 6. 代码块样式增强 (Mac 风格窗口，看起来更高级)
+highlight_theme: mac
+code_word_wrap: true
+
+post_copyright:
+  enable: true
+  decode: true # 解码版权信息
+  author_href: true # 作者链接
+  license: 'CC BY-NC-SA 4.0' # 知识共享协议
+  license_url: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+
+
+
+inject:
+  bottom:
+    - <script src="/js/crash_cheat.js"></script>

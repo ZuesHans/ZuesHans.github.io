@@ -1,5 +1,5 @@
 ---
-title: 图论
+title: KH图论
 date: 2025-11-06 12:02:53
 tags:
     - 算法
@@ -79,7 +79,6 @@ void solve()
 - 实现：stack dfs
 - 讨论有向图的连通性
 - Tarjan 算法是找出割点、桥和双连通分量的标准算法。
-
 
 ### Tarjan怎么用？
 
@@ -197,6 +196,7 @@ void Tarjan(int u) {
 - **链接**: [题目链接](https://www.luogu.com.cn/problem/P3916)
 - **算法类型**:Tarjan
 - **AC 代码**:
+
 ```cpp
 const int MAXN = 100005;
 

@@ -4,7 +4,7 @@ date: 2025-11-11 10:00:23
 tags:
     - 算法
     - C++
-cover:
+cover: /img/cover/picg_4.png
     /img/cover/神赵.png
 ---
 ## 单调栈模板

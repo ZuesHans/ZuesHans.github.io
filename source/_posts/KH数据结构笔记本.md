@@ -5,7 +5,7 @@ tags:
     - C++
     - 数据结构
     - 算法
-cover:
+cover: /img/cover/picg_6.png
     /img/cover/斗地主必ban.png
 ---
 

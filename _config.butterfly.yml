@@ -1,19 +1,19 @@
 # -----------------
 # 1. 头像 (Avatar)
 
-favicon: /img/头像im.jpg
+favicon: /img/im.jpg
 # -----------------
 avatar:
-  img: /img/头像im.jpg
+  img: /img/cover_2.jpg
   effect: false 
 
 # -----------------
 # 2. 头图 (Banner)
 # -----------------
 # 首页头图
-index_img: /img/夏至.png
+index_img: /img/cover_1.png
 # 其他页面的默认头图
-default_top_img: /img/杜预.png
+default_top_img: /img/cover_3.png
 
 # -----------------
 # 主页副标题 (打字机)

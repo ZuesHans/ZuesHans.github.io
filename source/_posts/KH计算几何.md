@@ -5,7 +5,7 @@ tags:
     - C++
     - 计算几何
     - 算法
-cover:
+cover: /img/cover/picg_7.png
     /img/cover/现代丞相.png
 ---
 这里是计算几何

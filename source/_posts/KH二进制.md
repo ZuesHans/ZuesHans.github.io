@@ -6,7 +6,7 @@ tags:
     - 算法
     - Trick
     - 二进制
-cover: /img/cover/喜欢你喜羊羊.png
+cover: /img/cover/picg_3.png
 ---
 
 ## 二进制常见trick

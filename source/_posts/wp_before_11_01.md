@@ -5,7 +5,7 @@ tags:
   - 算法
   - C++
   - Problems
-cover:
+cover: /img/cover/picg_9.png
     /img/cover/穿屋神将.png
 ---
 

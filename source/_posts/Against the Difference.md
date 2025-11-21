@@ -4,7 +4,7 @@ date: 2025-11-19
 tags:
     - 算法
     - dp
-cover: /img/cover/我的老杀头像.png
+cover: /img/cover/picg_1.png
 ---
 
 这道题卡了我两天，遂单独收集

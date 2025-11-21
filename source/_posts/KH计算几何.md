@@ -25,7 +25,7 @@ inline int dcmp(double x) {
     if (x < -EPS) return -1;
     if (x >  EPS) return  1;
     return 0;
-}//这个函数可以做到：1，提取数字的符号 2，比较两个数的大小：调用的时候:dcmp(a-b)
+}//这个函数可以做到：1，提取数字的符号 2，比较两个数的大小:调用的时候:dcmp(a-b)
 inline double sqr(double x) { return x * x; }//取平方
 ```
 

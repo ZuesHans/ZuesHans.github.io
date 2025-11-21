@@ -6,7 +6,7 @@ tags:
   - C++
   - Problems
 cover: /img/cover/picg_10.png
-    /img/cover/熏鱼我爱你.png
+
 math: true
 ---
 

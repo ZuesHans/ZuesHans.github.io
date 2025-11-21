@@ -5,7 +5,7 @@ tags:
     - 算法
     - C++
 cover: /img/cover/picg_4.png
-    /img/cover/神赵.png
+  
 ---
 ## 单调栈模板
 

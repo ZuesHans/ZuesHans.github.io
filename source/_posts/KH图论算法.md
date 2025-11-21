@@ -8,7 +8,7 @@ tags:
     - 最短路
     - SCC
 cover: /img/cover/picg_5.png
-    img/cover/白露.png
+
 ---
 ## Dijkstra最短路算法
 

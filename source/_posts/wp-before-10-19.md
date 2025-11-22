@@ -10,7 +10,7 @@ cover: /img/cover/picg_8.png
 ---
 
 
-## 交互模板题
+## 交互模板
 
 - **C++ 代码**:
 
@@ -50,7 +50,7 @@ int main() {
 
 -
 
-## 看题解看到的神人板子：超级快读
+## 快读
 
 ```cpp
 
@@ -75,7 +75,7 @@ int main(){
 
 ```
 
-## 超级快写
+## 快写
 
 ```cpp
 
@@ -89,10 +89,10 @@ void write(int x) {
 ## 快速乘
 
 ```cpp
-i64 qmul(i64 x, i64 y, i64 m) {// 快速模乘：计算 (x * y) % m，避免大数乘法溢出
-    i64 z = (f80) x / m * y + 0.5L;// 将 x / m * y 转为浮点数运算，估算商 z，z ≈ (x * y) / m
-    u64 c = (u64) x * y - (u64) z * m;// 计算 c = (x * y) - z * m，得到模 m 后的结果
-    return c < m ? (i64) c : (i64) (c + m);// 如果 c < m，直接返回 c；否则返回 c + m，保证结果在 [0, m) 范围内
+ll qmul(ll x, ll y, ll m) {// 快速模乘：计算 (x * y) % m，避免大数乘法溢出
+    ll z = (long double) x / m * y + 0.5L;// 将 x / m * y 转为浮点数运算，估算商 z，z ≈ (x * y) / m
+    u64 c = (unsigned long long) x * y - (unsigned long long) z * m;// 计算 c = (x * y) - z * m，得到模 m 后的结果
+    return c < m ? (ll) c : (ll) (c + m);// 如果 c < m，直接返回 c；否则返回 c + m，保证结果在 [0, m) 范围内
 }
 
 ```
@@ -101,8 +101,8 @@ i64 qmul(i64 x, i64 y, i64 m) {// 快速模乘：计算 (x * y) % m，避免大�
 
 ```cpp
 // 快速幂：计算 (a^n) % m，高效处理大指数
-i64 qpow(i64 a, i64 n, i64 m) {
-    i64 res = 1;  // 初始化结果为 1
+ll qpow(ll a, ll n, ll m) {
+    ll res = 1;  // 初始化结果为 1
     while (n) {   // 当 n > 0 时循环
         if (n & 1) res = qmul(res, a, m);  // 如果 n 的最低位为 1，res = res * a % m
         a = qmul(a, a, m);                 // a = a * a % m
@@ -112,14 +112,372 @@ i64 qpow(i64 a, i64 n, i64 m) {
 }
 ```
 
--记住用法：
+- 记住用法：
 
-    - 题目要求 (a^n) % m，直接调用 qpow(a, n, m)。
-    -题目要求大数乘法 (x * y) % m，用 qmul(x, y, m)。
+  - 题目要求 (a^n) % m，直接调用 qpow(a, n, m)。
+  - 题目要求大数乘法 (x * y) % m，用 qmul(x, y, m)。
 
-# 比赛标准模板库：常用库函数
+## qpow简洁版
 
-## __builtin 位运算
+```cpp
+using ll = long long;
+
+ll qpow(ll a, ll b, ll mod) {
+    ll res = 1;
+    a %= mod;
+    while (b > 0) {
+        if (b & 1) res = (res * a) % mod;
+        a = (a * a) % mod;
+        b >>= 1;
+    }
+    return res;
+}
+```
+
+## 费马小定理求乘法逆元
+
+- mod必须是质数
+
+```cpp
+using ll = long long;
+
+// 依赖之前的 qpow 函数
+ll qpow(ll a, ll b, ll mod) {
+    ll res = 1;
+    a %= mod;
+    while (b > 0) {
+        if (b & 1) res = (res * a) % mod;
+        a = (a * a) % mod;
+        b >>= 1;
+    }
+    return res;
+}
+
+// 求 a 在 mod 下的逆元
+ll inv(ll a, ll mod) {
+    return qpow(a, mod - 2, mod);
+}
+```
+
+## 除法取模
+
+- `(a * qpow(b, p-2, p)) % p`
+
+```cpp
+// 假设要求 (A / B) % mod
+// 这里的 mod 必须是质数
+
+ll inv_B = qpow(B, mod - 2, mod); // 算出 B 的逆元
+ll ans = (A * inv_B) % mod;       // 变成乘法运算
+
+```
+
+## 扩展欧几里得求逆元
+
+- mod 不是质数，但满足 $\gcd(a, mod) = 1$。
+- 原理：求解 $ax + by = 1$，则 $x$ 即为逆元。
+
+```cpp
+using ll = long long;
+
+ll exgcd(ll a, ll b, ll &x, ll &y) {
+    if (b == 0) {
+        x = 1; y = 0;
+        return a;
+    }
+    ll d = exgcd(b, a % b, y, x);
+    y -= a / b * x;
+    return d;
+}
+
+ll inv_exgcd(ll a, ll mod) {
+    ll x, y;
+    ll d = exgcd(a, mod, x, y);
+    if (d != 1) return -1; // 不存在逆元
+    return (x % mod + mod) % mod; // 调整为正数
+}
+```
+
+## bool isPrime
+
+``` cpp
+bool is_prime(int x) {
+    // 1. 处理小于2的特殊情况 (0和1不是素数)
+    if (x < 2) return false;
+
+    // 2. 核心循环：只枚举到 sqrt(x)
+    // 写法注意：用 i <= x / i 哪怕 x 接近 INT_MAX 也不会溢出
+    for (int i = 2; i <= x / i; i++) {
+        if (x % i == 0) return false; // 只要发现一个因子，就立即判定为合数
+    }
+
+    // 3. 挺过循环没死，就是素数
+    return true;
+}
+```
+
+## 素数埃氏筛$O(n \log \log n)$
+
+```cpp
+const int N = 1e6 + 10; // 根据题目范围调整
+bool is_composite[N];   // 标记数组：false表示是素数，true表示是合数
+// 也可以用 vector<int> primes 存储具体的素数
+
+void get_primes(int n) {
+    // 初始化：0和1不是素数，手动标记（虽然算法里一般从2开始，但为了严谨）
+    is_composite[0] = is_composite[1] = true;
+
+    // 核心循环
+    for (int i = 2; i * i <= n; i++) { // 优化1：只需要枚举到 sqrt(n)
+        if (!is_composite[i]) {
+            // 如果 i 没有被标记过，说明 i 是素数
+            // 接下来把 i 的所有倍数都标记为合数
+            for (int j = i * i; j <= n; j += i) { // 优化2：从 i*i 开始
+                is_composite[j] = true;
+            }
+        }
+    }
+}
+
+int main() {
+    int n = 100;
+    get_primes(n);
+
+    for(int i = 2; i <= n; i++) {
+        if (!is_composite[i]) cout << i << " ";
+    }
+    return 0;
+}
+
+```
+
+### 欧拉筛
+
+```cpp
+
+const int N = 1e7 + 10; // 10^7 级别
+int primes[N], cnt;     // primes存质数，cnt存质数个数
+bool st[N];             // st[i]为true表示i是合数(被筛掉了)，false表示是质数
+
+void get_primes(int n) {
+    for (int i = 2; i <= n; i++) {
+        // 如果没有被标记过，说明 i 是质数，加入 primes 列表
+        if (!st[i]) primes[cnt++] = i;
+        
+        // 核心循环：用当前的质数 primes[j] 去筛合数
+        for (int j = 0; primes[j] <= n / i; j++) { // primes[j] * i <= n
+            // 1. 标记 primes[j] * i 为合数
+            st[primes[j] * i] = true;
+            
+            // 2. 【最关键的一行】
+            // 如果 i 能被 primes[j] 整除，说明 primes[j] 已经是 i 的最小质因子了
+            // 那么 primes[j] 也一定是 primes[j] * i 的最小质因子
+            // 我们必须立刻停止，避免重复筛
+            if (i % primes[j] == 0) break;
+        }
+    }
+}
+
+int main() {
+    int n = 100;
+    get_primes(n);
+
+    for(int i = 0; i < cnt; i++) {
+        cout << primes[i] << " ";
+    }
+    return 0;
+}
+```
+
+---
+
+## 高精度
+
+### 输入输出
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm> // max needs this usually
+using namespace std;
+
+// 读入处理：string -> vector<int> (倒序)
+vector<int> s2v(string s) {
+    vector<int> A;
+    for (int i = s.size() - 1; i >= 0; i--) A.push_back(s[i] - '0');
+    return A;
+}
+
+// 输出处理：倒序打印
+void print(vector<int> &A) {
+    for (int i = A.size() - 1; i >= 0; i--) cout << A[i];
+    cout << endl;
+}
+
+```
+
+### 比大小**（减法前判断大小）**
+
+```cpp
+bool cmp(vector<int> &A, vector<int> &B) {
+    if (A.size() != B.size()) return A.size() > B.size();
+    for (int i = A.size() - 1; i >= 0; i--) {
+        if (A[i] != B[i]) return A[i] > B[i];
+    }
+    return true; // A == B
+}
+
+```
+
+### 加法
+
+```cpp
+vector<int> add(vector<int> &A, vector<int> &B) {
+    vector<int> C;
+    int t = 0; // 进位
+    for (int i = 0; i < A.size() || i < B.size(); i++) {
+        if (i < A.size()) t += A[i];
+        if (i < B.size()) t += B[i];
+        C.push_back(t % 10);
+        t /= 10;
+    }
+    if (t) C.push_back(t);
+    return C;
+}
+
+```
+
+### 减法 **必须判断大小**
+
+```cpp
+vector<int> sub(vector<int> &A, vector<int> &B) {
+    vector<int> C;
+    int t = 0; // 借位
+    for (int i = 0; i < A.size(); i++) {
+        t = A[i] - t;
+        if (i < B.size()) t -= B[i];
+        C.push_back((t + 10) % 10); // 借位处理技巧
+        if (t < 0) t = 1; else t = 0;
+    }
+    // 去除前导0（即vector末尾的0），主要为了防止结果像 007 这种情况
+    while (C.size() > 1 && C.back() == 0) C.pop_back();
+    return C;
+}
+
+```
+
+### 乘法
+
+```cpp
+vector<int> mul(vector<int> &A, vector<int> &B) {
+    // 结果长度最多为 A+B
+    vector<int> C(A.size() + B.size(), 0); 
+    
+    for (int i = 0; i < A.size(); i++) {
+        for (int j = 0; j < B.size(); j++) {
+            C[i + j] += A[i] * B[j]; // 先累加，最后统一处理进位
+        }
+    }
+    
+    int t = 0;
+    for (int i = 0; i < C.size(); i++) {
+        C[i] += t;
+        t = C[i] / 10;
+        C[i] %= 10;
+    }
+    
+    // 去除前导0
+    while (C.size() > 1 && C.back() == 0) C.pop_back();
+    return C;
+}
+
+```
+
+### 除法
+
+```cpp
+#include <algorithm> // 需要用到 reverse
+
+// A: 被除数 (vector), b: 除数 (int), r: 余数 (引用传回)
+vector<int> div(vector<int> &A, int b, int &r) {
+    vector<int> C;
+    r = 0;
+    // 从高位（vector末尾）开始除
+    for (int i = A.size() - 1; i >= 0; i--) {
+        r = r * 10 + A[i]; // 上一位余数移位 + 当前位
+        C.push_back(r / b); // 产生商的这一位
+        r %= b;             // 更新余数
+    }
+    
+    // C现在的顺序是 [最高位, ..., 个位]，不符合我们系统 [个位, ..., 最高位] 的规矩
+    // 所以必须翻转
+    reverse(C.begin(), C.end());
+    
+    // 去除前导0
+    while (C.size() > 1 && C.back() == 0) C.pop_back();
+    
+    return C;
+}
+
+```
+
+### 调用方法
+
+```cpp
+int main() {
+    string s1, s2;
+    cin >> s1 >> s2;
+    
+    vector<int> A = s2v(s1);
+    vector<int> B = s2v(s2);
+
+    // 加法
+    vector<int> C_add = add(A, B);
+    print(C_add);
+
+    // 减法 (处理负号逻辑)
+    if (cmp(A, B)) {
+        vector<int> C_sub = sub(A, B);
+        print(C_sub);
+    } else {
+        cout << "-";
+        vector<int> C_sub = sub(B, A); // 大减小
+        print(C_sub);
+    }
+
+    // 乘法
+    vector<int> C_mul = mul(A, B);
+    print(C_mul);
+
+//=============除法===============//
+string s;
+    int b;
+    cin >> s >> b; // 读入大整数 s 和 普通整数 b
+
+    vector<int> A = s2v(s); // 记得用上一条回答里的 s2v 转一下
+    int r = 0; // 用于接收余数
+
+    vector<int> C = div(A, b, r);
+
+    // 输出商
+    print(C); // 用上一条回答里的 print
+    
+    // 输出余数
+    cout << r << endl; 
+
+    return 0;
+
+    return 0;
+}
+
+```
+
+---
+
+## 比赛标准模板库：常用库函数
+
+### __builtin 位运算
 
 高效位运算，`bit` 库的替代品。
 
@@ -130,7 +488,7 @@ i64 qpow(i64 a, i64 n, i64 m) {
 - `__builtin_popcount(x)`：返回括号内数的二进制表示**1 的个数**。
 - `__builtin_parity(x)`：判断括号中数的二进制表示**1 的个数的奇偶性**（偶数返回 `0`，奇数返回 `1`）。
 
-## algorithm 库
+### algorithm 库
 
 `algorithm` 库提供通用算法函数（如 `sort`、`find`、`reverse`、`max`），用于排序、搜索、遍历及容器操作，支持迭代器模式，适用于数据批量处理和竞赛编程优化。
 
@@ -169,7 +527,7 @@ i64 qpow(i64 a, i64 n, i64 m) {
 | `transform(v.begin(), v.end(), dest, op)`                       | 应用函数 `op` 到输入范围，并将结果存储到 `dest` 指向的序列。                                                 |
 | `replace(v.begin(), v.end(), old_value, new_value)`             | 以 `new_value` **替换**序列中所有值为 `old_value` 的元素。                                          |
 
-## string 库
+### string 库
 
 `string` 库提供字符串处理功能（如 `find`、`substr`、`stoi`），用于文本操作、转换及解析，支持动态内存管理和高效字符串算法，适用于输入处理、数据格式化及竞赛编程中的文本需求。
 
@@ -177,7 +535,7 @@ i64 qpow(i64 a, i64 n, i64 m) {
 - `stoi(str)`：将字符串 `str` 转化为**有符号整数**。
 - `stof(str)`：将字符串 `str` 转化为**浮点数**。
 
-## cctype 库
+### cctype 库
 
 `cctype` 库提供字符处理函数（如 `isdigit`、`isalpha`、`toupper`），用于字符分类、转换及验证，支持基于 ASCII 的高效文本操作，适用于输入解析或格式化处理。
 
@@ -188,7 +546,7 @@ i64 qpow(i64 a, i64 n, i64 m) {
 - `isdigit(ch)`：检查字符 `ch` 是否为**数字**。
 - `ispunct(ch)`：检查字符是否为**标点符**（默认：`!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~`）。
 
-## numeric 库
+### numeric 库
 
 `numeric` 库提供数值计算函数（如 `accumulate`、`inner_product`、`partial_sum` 和 `adjacent_difference`），用于累加、内积、前缀和及差分等算法操作。
 
@@ -201,7 +559,7 @@ i64 qpow(i64 a, i64 n, i64 m) {
 - `partial_sum(v.begin(), v.end(), dest)`：计算序列**前缀和**，赋值给 `dest` 指向的序列。
 - `adjacent_difference(v.begin(), v.end(), dest)`：计算序列**差分**，用法同前缀和。
 
-## cmath 库
+### cmath 库
 
 `cmath` 库提供数学计算函数（如 `sqrt`、`pow`、`abs`、`sin`），涵盖数值运算、几何计算及科学问题，支持浮点和整数类型的数学操作与常用算法需求。
 
@@ -226,7 +584,7 @@ i64 qpow(i64 a, i64 n, i64 m) {
 | `round(x)` | **四舍五入取整**（不管正负）。 |
 | `trunc(x)` | **向零取整**（舍去小数部分）。 |
 
-## bit 库
+### bit 库
 
 `bit` 库提供底层位操作函数（如 `countl_zero`、`bit_ceil`、`byteswap`），用于位计数、掩码生成和字节序转换，支持高效位运算及数值优化。
 

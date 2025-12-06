@@ -49,7 +49,7 @@ cover: /img/cover/picg_6.png
 - O(n) insert(),erase()
 - 连续空间，可以直接指针++
 - resize() 改变大小且填充默认值；reserve() 只预留空间不改大小（优化常数神器）。
-- 邻接表存图 vector<int> G[N]
+- 邻接表存图 `vector<int> G[N]`
 
 ## deque 支持双向
 

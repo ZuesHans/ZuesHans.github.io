@@ -1,10 +1,10 @@
 ---
-title: 打印
+title: 基础算法
 date: 2025年11月22日
 tags:
     - 算法
     - C++
-    
+  
 cover: /img/cover/picg_19.png
 
 ---
@@ -86,6 +86,23 @@ void write(int x) {
 }
 ```
 
+## qpow简洁版
+
+```cpp
+using ll = long long;
+
+ll qpow(ll a, ll b, ll mod) {
+    ll res = 1;
+    a %= mod;
+    while (b > 0) {
+        if (b & 1) res = (res * a) % mod;
+        a = (a * a) % mod;
+        b >>= 1;
+    }
+    return res;
+}
+```
+
 ## 快速乘
 
 ```cpp
@@ -116,23 +133,6 @@ ll qpow(ll a, ll n, ll m) {
 
   - 题目要求 (a^n) % m，直接调用 qpow(a, n, m)。
   - 题目要求大数乘法 (x * y) % m，用 qmul(x, y, m)。
-
-## qpow简洁版
-
-```cpp
-using ll = long long;
-
-ll qpow(ll a, ll b, ll mod) {
-    ll res = 1;
-    a %= mod;
-    while (b > 0) {
-        if (b & 1) res = (res * a) % mod;
-        a = (a * a) % mod;
-        b >>= 1;
-    }
-    return res;
-}
-```
 
 ## 费马小定理求乘法逆元
 
@@ -251,7 +251,7 @@ int main() {
 
 ```
 
-### 欧拉筛
+## 欧拉筛
 
 ```cpp
 
@@ -885,103 +885,6 @@ int main() {
 - `countr_one(x)`：从**最低位**起计量**连续的 1 位**数量。
 - `pop_count(x)`：返回 `x` 中**1 的个数**。
 
-## C++ 版本特性
-
-### C++98
-
-第一个官方标准，**啥都没有**。
-
-### C++11
-
-- **自动类型推导**：`auto` 关键字根据初始化表达式推导类型。
-
-  ```cpp
-  auto x = 5;          // int
-  auto y = 5.0;        // double
-  auto z = "Hello";    // const char*
-  
-  vector<int> v = {1, 2, 3, 4, 5};
-  for (auto it = v.begin(); it != v.end(); ++it) {
-      cout << *it << " ";  // 使用 auto 推导迭代器类型
-  }
-
-  # 高精度运算与素数判断代码解析
-
-## 1. highmult 函数
-
-**功能**：实现高精度乘法，计算两个大整数（以字符串形式输入）的乘积。
-
-**原理**：
-
-- 将输入字符串 `A` 和 `B` 转换为数字数组，逆序存储（低位在前）。
-- 模拟手算乘法，每位相乘结果累加到结果数组 `c`。
-- 处理进位，确保每位数字小于10。
-- 去掉前导零，将结果数组转为字符串返回。
-
-**调用方法**：
-
-```cpp
-string result = highmult("123", "456"); // 返回 "56088"
-```
-
-**使用场景**：
-
-- 处理超过 `long long` 范围的大整数乘法。
-- 适合比赛中需要精确计算大数乘积的题目。
-
----
-
-## 2. highplus 函数
-
-**功能**：实现高精度加法，计算两个大整数（以字符串形式输入）的和。
-
-**原理**：
-
-- 将输入字符串 `A` 和 `B` 转为数字数组，逆序存储。
-- 逐位相加，处理进位。
-- 去掉前导零，将结果数组转为字符串返回。
-
-**调用方法**：
-
-```cpp
-string result = highplus("123", "456"); // 返回 "579"
-```
-
-**使用场景**：
-
-- 处理大整数加法，适用于数据范围超大的题目。
-
----
-
-## 3. jd 函数
-
-**功能**：判断一个整数 `n` 是否为素数。
-
-**原理**：
-
-- 小于2的数不是素数。
-- 2和3是素数。
-- 排除2和3的倍数。
-- 检查从5开始的数（步长6，检查 `i` 和 `i+2`），若 `n` 能被这些数整除，则非素数。
-
-**调用方法**：
-
-```cpp
-bool isPrime = jd(17); // 返回 true
-```
-
-**使用场景**：
-
-- 快速判断一个数是否为素数，适用于数论相关题目。
-- 适合中小范围整数（`n` 不太大时效率较高）。
-
----
-
-**注意事项**：
-
-- 高精度函数输入为字符串，输出为字符串，需确保输入合法（纯数字）。
-- `jd` 函数适合中小规模素数判断，大数需优化或使用高精度算法。
-
 ---
 
 ## 二分
@@ -1030,33 +933,33 @@ return l;
 ### 整数三分
 
 ```cpp
-//求极小值
-//求极大值：if (f(m1) > f(m2)) r = m2; else l = m1;
-//极大值缩点：if (f(i) > f(ans)) ans = i;
-long long integer_ternary_search(long long l, long long r) {
-    // 1. 先三分缩小范围，直到区间长度小于 3 (r - l <= 2)
-    // 这样保证 m1 和 m2 始终不会重合，且区间稳定缩小
+// 假设求【极小值】(谷底)
+// 如果求极大值，只需把 check(m1) < check(m2) 改成 check(m1) > check(m2)
+// 并且最后的暴力找最大即可
+ll ternary_search(ll l, ll r) {
+    // 1. 核心循环：保证区间长度 > 2 时才三分
+    // 有效避免 (0,1), (0,2) 这种死循环边界
     while (r - l > 2) {
-        long long m1 = l + (r - l) / 3;
-        long long m2 = r - (r - l) / 3;
+        ll m1 = l + (r - l) / 3;
+        ll m2 = r - (r - l) / 3;
         
-        // 求【极小值】逻辑：
-        // 如果左边更小，说明谷底在左边，舍弃右边
-        if (f(m1) < f(m2)) {
-            r = m2;
+        // 核心判断：谷底在较小值那边
+        if (check(m1) < check(m2)) {
+            r = m2; // 谷底在 m2 左侧（含m2）
         } else {
-            l = m1;
+            l = m1; // 谷底在 m1 右侧（含m1）
         }
     }
     
-    // 2. 最后剩下的区间 [l, r] 长度很小（1~3个点），直接暴力找最小值
-    long long ans = l; // 假设 l 是答案
-    for (long long i = l + 1; i <= r; i++) {
-        if (f(i) < f(ans)) { // 这一步同样根据求极小/极大调整符号
+    // 2. 暴力扫尾：区间长度 <= 3，直接暴力找
+    // 这一步虽然土，但是它是金牌的保障，绝对不出错
+    ll ans = l;
+    for (ll i = l + 1; i <= r; i++) {
+        if (check(i) < check(ans)) {
             ans = i;
         }
     }
-    return ans;
+    return ans; // 返回极值点位置，如果要求极值本身，返回 check(ans)
 }
 ```
 
@@ -1134,23 +1037,15 @@ for(int i = 1; i <= n; i++) {
 ### 二级差分（实现等差数列）
 
 ```cpp
+
+// A (原数组) 
+// D1 (一阶差分) 
+// D2 (二阶差分) 
 void add_AP(int l, int r, int s, int d) {
-    // 1. 也就是 D2[l] += s
-    //    原因：s 是首项，影响 D1[l] 的突变，进而影响 D2[l]
+    
     D2[l] += s;
-    
-    // 2. 也就是 D2[l+1] += d - s
-    //    原因：从 l+1 开始进入等差增长，D1 应该变成常数 d，
-    //    但 D1[l] 突变了 s，所以这里要修正。
     D2[l + 1] += d - s;
-    
-    // 3. 也就是 D2[r+1] -= s + (r - l + 1) * d
-    //    原因：这是最难理解的。
-    //    这里减去的是 (末项 + 公差)，为了抵消掉 D1 在 r+1 处的正向突变
     D2[r + 1] -= s + (long long)(r - l + 1) * d;
-    
-    // 4. 也就是 D2[r+2] += s + (r - l) * d
-    //    原因：加回 (末项)，用于平复 r+2 及以后的波动
     D2[r + 2] += s + (long long)(r - l) * d;
 }
 
@@ -1159,6 +1054,47 @@ void add_AP(int l, int r, int s, int d) {
 for(int i = 1; i <= n; i++) D2[i] += D2[i-1]; // 此时 D2 变成了 D1
 // 2. 计算 A
 for(int i = 1; i <= n; i++) D2[i] += D2[i-1]; // 此时 D2 变成了 A
+
+```
+
+### 三阶差分
+
+```cpp
+// 数组开大点！涉及 r+3
+long long D3[MAXN]; 
+
+void add_quadratic(int l, int r, long long s, long long k, long long a) {
+
+    D3[l]     += s;
+    D3[l + 1] += k - 2 * s;
+    D3[l + 2] += a - k + s;
+    
+
+    long long len = r - l + 1;
+
+    long long v1 = s + len * k + len * (len - 1) / 2 * a;
+    
+
+    long long speed_at_r1 = k + len * a; 
+    long long v2 = v1 + speed_at_r1;
+    
+    long long speed_at_r2 = speed_at_r1 + a;
+    long long v3 = v2 + speed_at_r2;
+
+    D3[r + 1] -= v1;
+    D3[r + 2] -= (v2 - 3 * v1);
+    D3[r + 3] -= (v3 - 3 * v2 + 3 * v1);
+}
+
+// “修改指令”变成“最终答案”
+void build(int n) {
+    // 变成二阶差分
+    for (int i = 1; i <= n + 3; i++) D3[i] += D3[i - 1];
+    // 变成一阶差分
+    for (int i = 1; i <= n + 3; i++) D3[i] += D3[i - 1];
+    // 变成原数组
+    for (int i = 1; i <= n + 3; i++) D3[i] += D3[i - 1];
+}
 ```
 
 ### xor差分
@@ -2086,3 +2022,249 @@ int LIS_nlogn(vector<int>& a) {
   - LCS解法->将一个数组的每一个数字跟他的位置映射在一起，相当于开了个桶
 
 - **注意**：求下降序列需要`auto it= upper_bound(all(hei),hsh,greater<int>());`。普通的公式只能算：**排列好后的不下降数列**
+
+## 并查集 (DSU) Pro版
+
+```cpp
+struct DSU {
+    std::vector<int> fa, sz;
+    int count; // 连通块数量
+
+    // 初始化：传入点数 n (支持 0~n 或 1~n)
+    DSU(int n) : fa(n + 1), sz(n + 1, 1), count(n) {
+        std::iota(fa.begin(), fa.end(), 0); // 0, 1, 2...
+    }
+
+    // 查找 + 路径压缩
+    int find(int x) {
+        return x == fa[x] ? x : fa[x] = find(fa[x]);
+    }
+
+    // 合并 x 和 y
+    // 返回 true 表示合并成功（原来不连通）
+    // 返回 false 表示原来就是连通的
+    bool merge(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+        
+        if (rootX == rootY) return false;
+
+        // 启发式合并：把小的树接到大的树下面
+        if (sz[rootX] < sz[rootY]) std::swap(rootX, rootY);
+        
+        fa[rootY] = rootX;      // Y 认 X 做爹
+        sz[rootX] += sz[rootY]; // X 吸收 Y 的人口
+        count--;                // 连通块少一个
+        return true;
+    }
+
+    // 判断是否连通
+    bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+
+    // 获取 x 所在连通块的大小
+    int size(int x) {
+        return sz[find(x)];
+    }
+};
+
+int main() {
+    int n = 5;
+    DSU dsu(n);
+    
+    dsu.merge(1, 2);
+    dsu.merge(3, 4);
+    
+    cout << dsu.same(1, 2) << endl; // true
+    cout << dsu.size(1) << endl;    // 2 (因为1和2连通)
+    cout << dsu.count << endl;      // 3 (连通块: {1,2}, {3,4}, {5})
+}
+```
+
+## 树状数组 (Fenwick Tree/BIT)
+
+```cpp
+struct Fenwick {
+    int n;
+    vector<long long> tr;
+
+    // 初始化：传入最大长度 n
+    Fenwick(int size) : n(size), tr(size + 1, 0) {}
+
+    // 核心位运算：获取二进制最低位的 1
+    int lowbit(int x) { 
+        return x & -x; 
+    }
+
+    // 单点修改：在位置 x 加上 val
+    void add(int x, long long val) {
+        for (; x <= n; x += lowbit(x)) {
+            tr[x] += val;
+        }
+    }
+
+    // 查询前缀和：查询 [1, x] 的和
+    long long ask(int x) {
+        long long res = 0;
+        for (; x > 0; x -= lowbit(x)) {
+            res += tr[x];
+        }
+        return res;
+    }
+
+    // 区间查询：查询 [l, r] 的和
+    long long range_ask(int l, int r) {
+        if (l > r) return 0;
+        return ask(r) - ask(l - 1);
+    }
+};
+
+int main() {
+    int n = 10;
+    Fenwick bit(n); // 初始化大小
+
+    // 1. 比如输入数组 a[1...n]
+    for(int i = 1; i <= n; i++) {
+        int x; cin >> x;
+        bit.add(i, x); // 初始化树状数组
+    }
+
+    // 2. 单点修改：把第 3 个数加上 5
+    bit.add(3, 5);
+
+    // 3. 区间查询：查 [2, 5] 的和
+    cout << bit.range_ask(2, 5) << endl;
+}
+```
+
+>常用变体思路
+>
+> - 区间修改 + 单点查询：维护一个 差分数组 的树状数组。区间 [l, r] 加 v $\rightarrow$ add(l, v) 和 add(r+1, -v)。
+> - 单点 x 查询 $\rightarrow$ ask(x) (因为差分的前缀和就是原数组的值)。求逆序对：权值树状数组。将数字看作下标，出现一次就 add(num, 1)，统计 ask(num-1) 或 total - ask(num)。
+
+## ST表
+
+- 相比线段树，ST 表最大的优势是 查询时间严格 $O(1)$，常数极小。
+- 缺点是 不支持修改（静态）且内存占用稍大 ($O(N \log N)$)。 F
+
+```cpp
+
+template <typename T>
+struct ST {
+    int n;
+    vector<vector<T>> st;
+
+    // 构造函数：传入 vector<int> a 即可
+    // 默认实现的是区间【最大值】，如需最小值请把 max 改 min
+    ST(const vector<T> &a) {
+        n = a.size();
+        int K = __lg(n) + 1; // 计算需要的最大层数
+        st.assign(n, vector<T>(K));
+
+        // 1. 初始化第一层 (长度为 1)
+        for (int i = 0; i < n; i++) 
+            st[i][0] = a[i];
+
+        // 2. 倍增预处理
+        for (int j = 1; j < K; j++) {
+            for (int i = 0; i + (1 << j) <= n; i++) {
+                // st[i][j] = max(左半段, 右半段)
+                st[i][j] = max(st[i][j - 1], st[i + (1 << (j - 1))][j - 1]);
+            }
+        }
+    }
+
+    // 查询闭区间 [l, r] 的最大值 (0-based)
+    T query(int l, int r) {
+        int k = __lg(r - l + 1); // 快速计算 log2(len)
+        return max(st[l][k], st[r - (1 << k) + 1][k]);
+    }
+};
+
+int main() {
+    // 假设输入数据
+    vector<int> a = {1, 9, 2, 8, 3, 7};
+    
+    // 1. 初始化 (自动预处理)
+    ST<int> st(a);
+
+    // 2. 查询区间 [1, 4] (即 9, 2, 8, 3) 的最大值
+    // 注意：如果是题目给的 1-based 坐标 l, r，这里要写 query(l-1, r-1)
+    cout << st.query(1, 4) << endl; // 输出 9
+    
+    return 0;
+}
+```
+
+## 字符串哈希
+
+- 下标建议从 1 开始逻辑（模板内部已处理，你传入 0-based 字符串即可）。
+
+- 两个字符串子串相等的充要条件是：它们的 get_hash() 返回的 pair 完全相等。
+
+```cpp
+#include <chrono>
+#include <random>
+
+// 双哈希核心结构体
+struct StringHash {
+    // 定义两组模数
+    static const long long MOD1 = 1e9 + 7;
+    static const long long MOD2 = 1e9 + 9;
+    
+    // 存储哈希前缀和
+    vector<long long> h1, h2;
+    // 存储 Base 的幂次
+    vector<long long> p1, p2;
+
+    // 构造函数：传入字符串 s
+    StringHash(const string &s) {
+        int n = s.size();
+        h1.resize(n + 1); h2.resize(n + 1);
+        p1.resize(n + 1); p2.resize(n + 1);
+
+        // 随机生成 Base (131 ~ 13331 之间)，防止被卡
+        mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+        long long BASE1 = uniform_int_distribution<long long>(131, 13331)(rng);
+        long long BASE2 = uniform_int_distribution<long long>(131, 13331)(rng);
+
+        // 预处理
+        p1[0] = 1; p2[0] = 1;
+        h1[0] = 0; h2[0] = 0;
+
+        for (int i = 0; i < n; i++) {
+            p1[i + 1] = (p1[i] * BASE1) % MOD1;
+            p2[i + 1] = (p2[i] * BASE2) % MOD2;
+            
+            // s[i] 也就是第 i+1 个字符
+            h1[i + 1] = (h1[i] * BASE1 + s[i]) % MOD1;
+            h2[i + 1] = (h2[i] * BASE2 + s[i]) % MOD2;
+        }
+    }
+
+    // 查询子串 s[l...r] 的哈希值 (闭区间，1-based)
+    // 例如：查询 s 的前 3 个字符，传入 get(1, 3)
+    pair<long long, long long> get(int l, int r) {
+        long long res1 = (h1[r] - h1[l - 1] * p1[r - l + 1] % MOD1 + MOD1) % MOD1;
+        long long res2 = (h2[r] - h2[l - 1] * p2[r - l + 1] % MOD2 + MOD2) % MOD2;
+        return {res1, res2};
+    }
+};
+
+int main() {
+    string s = "ababcab";
+    // 1. 初始化
+    StringHash sh(s);
+
+    // 2. 查询 s[1...2] ("ab") 和 s[3...4] ("ab")
+    // 注意：这里的下标是 1-based，对应字符串原本的 index 0 和 1
+    if (sh.get(1, 2) == sh.get(3, 4)) {
+        cout << "Same!" << endl; // 输出 Same!
+    } else {
+        cout << "Different!" << endl;
+    }
+    
+    return 0;
+}
+```

@@ -6,6 +6,7 @@ tags:
     - 算法
 cover: /img/cover/picg_3.png
 ---
+[toc]
 
 ## 差分与前缀和
 
@@ -204,6 +205,40 @@ void solve()
     b[i]+=b[i-1]+ a[i];
   ```
 
+### 三阶差分
+
+#### 说重话:简单推式子，沉住气同时处理就好
+
+>小 A 的好好师兄牛哥在去上班前给小 A 拟定了一份 $m$ 项的奋斗清单。清单每行包含两个数字，分别代表奋斗事项类型和从第几天开始。已知对于第 $x$ 天开始的奋斗事项有：
+>
+> - 奋斗事项 1：从 $x$ 天开始多奋斗 $1$ 小时，第 $x+1$ 天多奋斗 $2$ 小时，第 $x+2$ 天多奋斗 $3$ 小时... ，从 $x$ 天往后的第 $k$ 天多奋斗 $k+1$ 个小时，持续到第 $n$ 天。
+>
+> - 奋斗事项 2：从 $x$ 天开始多奋斗 $1$ 小时，第 $x+1$ 天多奋斗 $4$ 小时，第 $x+2$ 天多奋斗 $9$ 小时... ，从 $x$ 天往后的第 $k$ 天多奋斗 $(k+1)^2$ 个小时，持续到第 $n$ 天。
+>
+>帮他算出每天需要奋斗多少个小时。请输出答案对 $10^9+7$ 取模后的结果。
+>
+> 数据范围
+>
+>保证所有测试用例的 $n$ 之和与 $m$ 之和均不大于 $10^5$
+
+```cpp
+
+for (int i = 1; i <= n; i++)
+    {
+        b1[i] = (b1[i - 1] + a1[i])%MOD;
+        b2[i] = (b2[i - 1] + a2[i])%MOD;
+        c1[i]=(c1[i-1]+b1[i])%MOD;
+        c2[i]=(c2[i-1]+b2[i])%MOD;
+        d[i]=(d[i-1]+c2[i])%MOD;
+        ans[i]=((d[i]+d[i-1])%MOD+c1[i])%MOD;
+    }
+for (int i = 1; i <= n; i++)
+    {
+        cout<<ans[i]<<' ';
+    }
+
+```
+
 ---
 
 ### 重叠线段覆盖处理
@@ -231,5 +266,61 @@ void solve() {
 ```
 
 **复杂度**：O(n*log n)，空间 O(n)。
+
+---
+
+## 离散化
+
+### 离散化裸题
+
+#### [赤壁之战]([题目URL](https://www.luogu.com.cn/problem/P1496))
+
+- **核心模型**:离散化
+- **思维误区 (Bug)**:记住离散化的前缀和是只用给pre[r]--，因为是把距离压缩到前面那个点
+- **修正逻辑 (Patch)**:使用erase和uniqe，记得erase需要nums.end(*)
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<int> arr = {(int)-1e18,(int)1e18};
+    vector<int> bg(n);
+    vector<int> ed(n);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> bg[i] >> ed[i];
+        arr.push_back(bg[i]);
+        arr.push_back(ed[i]);
+    }
+    sort(arr.begin(), arr.end());
+    arr.erase(unique(arr.begin(), arr.end()));
+    int m = arr.size();
+    vector<int> pre(m + 2);
+    for (int i = 0; i < n; i++)
+    {
+        int l = lower_bound(arr.begin(), arr.end(), bg[i]) - arr.begin();
+        int r = lower_bound(arr.begin(), arr.end(), ed[i]) - arr.begin();
+        pre[l]++;
+        pre[r]--;
+    }
+
+    int ans = 0;
+    for (int i = 1; i < m + 1; i++)
+    {
+        pre[i] = pre[i] + pre[i - 1];
+    }
+    bool ok = true;
+    for(int i=0;i<m-1;++i)
+    {
+        if(pre[i])
+        {
+            ans+=arr[i+1]-arr[i];
+        }
+    }
+    cout << ans;
+}
+```
 
 ---

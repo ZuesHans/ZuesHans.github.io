@@ -517,10 +517,6 @@ void solve()
 > 3\.**绝对化坐标** 一般来说就是用计算完的结果加回去
 > 4\.**带入原始坐标**
   
-## 数学
-
-## 几何
-
 ## 博弈
 
 ### 普通博弈
@@ -605,6 +601,270 @@ void solve()
 
 ## 细节
 
+### 逻辑维护
+
+#### [F. Longest Strike](https://codeforces.com/problemset/problem/1676/F)
+
+- **核心模型**:离散化后寻找两个数字要求这两个数字之间的所有数字在数组里面出现的次数大于等于k
+- **思维误区 (Bug)**:不会维护
+- **修正逻辑 (Patch)**:临时变量分类讨论
+- **关键代码**:
+
+```cpp
+  ans ans2 = {-1, 0, 0};//len l r
+    bool can = 0;//是否有解
+    bool cage = 0; // 标记当前是否在一个合法的连续段中
+    int len = 0; //目前长度
+    int p = 0;     // 记录当前连续段的起点数值 (l)
+    //可以直接跟着i来更新r
+
+    for (int i = 0; i < arr.size(); i++)
+    {
+    
+        if (!hhh[i]) 
+        {
+            cage = 0;
+            len = 0;
+        }//当她是不合法的段可以全部都是0
+        else 
+        {
+            
+            if (cage && (i > 0 && arr[i] != arr[i-1] + 1)) //直接判断是否和前面相连接，因为以前更新过了
+            {
+                cage = 0;
+                len = 0;
+            }
+
+            if (!cage)
+            {
+                
+                cage = 1;
+                p = arr[i];
+                len = 1;
+            }
+            else
+            {
+       
+                len++;
+            }
+            
+            can = 1; 
+
+       
+            if (len > ans2.len)
+            {
+                ans2.len = len;
+                ans2.l = p;
+                ans2.r = arr[i];
+            }
+        }
+    }
+```
+
+---
+
+### 基础实现
+
+- 字符串处理
+
+#### [C. Needle in a Haystack](https://codeforces.com/contest/2175/problem/C)
+
+- **核心模型**:贪心，双指针
+- **思维误区 (Bug)**:主要是害怕字符串题目，这里主要记录如此字串的贪心实现
+  - 本来我想的是按照不下降为索引一个一个放进去，但是没有维护的实力
+  - 容易发现要做到答案的字典序最小，对于每一位都贪心的找最小就好了，而且由于是子序列更简单了。。直接从两堆东西里面一个一个拿就行
+  - 这里教教你怎么用`string`
+- **修正逻辑 (Patch)**:
+  - 常见字符串匹配:桶计数
+  - 一些简单的写法->双指针
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    string s;
+    cin >> s;
+    string t;
+    cin >> t;
+
+    vi cnt(26);
+    for (auto hsh : t)
+    {
+        cnt[hsh - 'a']++;
+    }
+    for (int i = 0; i < s.size(); i++)
+    {
+        cnt[s[i] - 'a']--;
+        if (cnt[s[i] - 'a'] < 0)
+        {
+            std::cout << "Impossible" << '\n';
+            return;
+        }
+    }
+    string ans;
+    int tp = 0;
+    for (int i = 0; i < 26;)
+    {
+        if (tp >= s.size() || i + 'a' < s[tp])
+        {
+            ans += string(cnt[i], i + 'a');//加上一个字符串
+            i++;//记得滑动指针
+        }
+        else
+        {
+            ans += s[tp];
+            tp++;
+        }
+    }
+    std::cout << ans << '\n';
+}
+```
+
+---
+
+#### [A MAD Interactive Problem](题目URL)
+
+- **核心模型**:交互题，在3n次查询里面找到每个数字的位置
+- **思维误区 (Bug)**:不会
+- **修正逻辑 (Patch)**:用vector实现维护一串不重复的数字，然后一个一个查询某个数字在哪里
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    int n2 = 2 * n;
+    vi q1, q2;
+    auto qury = [](vi a) -> int
+    {
+        sort(all(a));
+        cout << "? "<<a.size()<< ' ';
+        for (auto hsh : a)
+        {
+            cout << hsh << ' ';
+        }
+        cout<<endl;
+        int s;
+        cin >> s;
+        return s;
+    };
+    vi ans(n2+1);
+    for(int i=1;i<=n2;i++)
+    {
+        q1.push_back(i);
+        int g=qury(q1);
+        if(g)
+        {
+            q1.pop_back();
+            ans[i]=g;
+            q2.push_back(i);
+        }
+    }
+
+    for(int i=1;i<=n2;i++)
+    {
+        if(!ans[i])
+        {
+            q2.push_back(i);
+            ans[i]=qury(q2);
+            q2.pop_back();
+        }
+    }
+    cout<<"! ";
+    for(int i=1;i<=n2;i++)
+    {
+        cout<<ans[i]<<' ';
+    }
+    cout<<endl;
+}
+
+```
+
+#### [家谱->实现字符串映射到数字数字再多次反查询到字符串](https://www.luogu.com.cn/problem/P2814)
+
+- **核心模型**:并查集。使用`vector<string>` 与`map<string,int>` 实现字符串映射到数字数字再多次反查询到字符串
+
+- **关键代码**:
+
+```cpp
+//这里应该有个struct dsu
+void solve()
+{
+    string s;
+    map<string, int> sti;
+    vector<string> its;
+    auto getid = [&](string nme) -> int
+    {
+        if (sti.count(nme))
+        {
+            return sti[nme];
+        }
+        else
+        {
+            sti[nme] = its.size();
+            its.push_back(nme);//注意这里的顺序，先获取size（）再放进去要不然会ub
+            return sti[nme];
+        }
+    };
+    // vi ask;
+    int father;
+    int son;
+    vector<pii> per;
+    bool ask = 0;
+    vi que;
+    while (cin >> s)
+    {
+        string nme;
+        if (s[0] == '$')
+            break;
+        for (int i = 1; i < 7; i++)
+        {
+            nme += s[i];
+        }
+        if (s[0] == '?')
+            ask = 1;
+        int ren = getid(nme);
+        //  cerr<<ren<<'\n';
+        if (!ask)
+        {
+            if (s[0] == '#')
+            {
+                father = ren;
+                continue;
+            }
+            if (s[0] == '+')
+            {
+                son = ren;
+            }
+            per.push_back({father, son});
+        }
+        else
+        {
+            que.push_back(ren);
+        }
+        //    cerr << "cek" << '\n';
+    }
+    //   cerr << "cek" << '\n';
+    DSU dsu(its.size() + 1);
+    for (auto hsh : per)
+    {
+        //  cerr << "cek" << '\n';
+        dsu.merge(hsh.first, hsh.second);
+    }
+    for (auto hsh : que)
+    {
+        cout << its[hsh] << ' ';
+        cout << its[dsu.find(hsh)] << '\n';
+    }
+}
+
+```
+
+---
+
+---
+
 ### stl-map
 
 #### 在ACM里面打ACM（map的使用：模拟：数据处理）
@@ -668,6 +928,71 @@ void solve()
 }
 
 ```
+
+#### [P3029 [USACO11NOV] Cow Lineup S]([题目URL](https://www.luogu.com.cn/problem/P3029))
+
+- **核心模型**:用map来做到记录双指针区间里面有多少种类个数目
+- **思维误区 (Bug)**:记得erase需要nums.end()
+- **修正逻辑 (Patch)**:下次看到需要滑动窗口一个区间的种类数目可以用map做到logn
+- **关键代码**:
+
+```cpp
+
+struct hsh1
+{
+    int nums, idx;
+};
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<hsh1> hsh(n);
+    vector<int> hsh2;
+    rep(i, 0, n - 1)
+    {
+        cin >> hsh[i].nums >> hsh[i].idx;
+        hsh2.push_back(hsh[i].idx);
+    }
+    sort(all(hsh2));
+    hsh2.erase(unique(all(hsh2)), hsh2.end());
+    int p = hsh2.size();
+    sort(all(hsh), [](hsh1 a, hsh1 b)
+         { return a.nums < b.nums; });
+    int l = 0;
+    int r = l;
+    map<int, int> ljl;
+    ljl[hsh[0].idx]++;
+    ll ans = INF;
+    auto remve = [&](int x) -> void//这个lambda就是用来维护的
+    {
+        ljl[x]--;
+        if (ljl[x] == 0)
+        {
+            ljl.erase(x);
+        }
+    };
+
+    while (r < n)
+    {
+
+        while (r < n - 1 && ljl.size() < p)
+        {
+            r++;
+            ljl[hsh[r].idx]++;
+        }
+        if (ljl.size() < p)
+            break;
+        ans = min(ans, (ll)(hsh[r].nums - hsh[l].nums));
+
+        remve(hsh[l].idx);
+        l++;
+    }
+    cout << ans << '\n';
+}
+
+```
+
+---
 
 ### 浮点数
 

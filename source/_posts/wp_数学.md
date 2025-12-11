@@ -10,6 +10,63 @@ math: true
 
 ## 数学
 
+### 数论
+
+#### C. Fadi and LCM
+>
+>今天，Osama给了Fadi一个整数 X，Fadi想知道 max(a,b)的最小值，使得 LCM(a,b)等于 X。 a和 b都应该是正整数。
+>
+>LCM(a,b)是能被 a和 b整除的最小正整数。例如， LCM(6,8)=24, LCM(4,12)=12, LCM(2,3)=6。
+
+-**解题思路**
+    - 根据题意有X=a*b 除以 gcd（a，b）
+    - 为了让ab更小我们贪心的从根号X开始找
+    - 贪心数学推论->正整数 $X$，至少有一对互质因子。(他和1)->任何一个数字都可以通过质数相乘得到->LCM的取法是：对于每一个质数，取两人中指数“最高”的那个。
+    - 切分lcm定理:对于任何一个质因子（比如一堆2，或者一堆3），它们必须作为‘一坨’整体，要么全给 a，要么全给 b，绝对不能切开。
+
+- **AC代码**
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi prob;
+    auto findyz = [&]() -> void  //这里只是单纯练习一下lambda表达式
+    {
+        for (int i = 1; i * i <= n; i++)  // 根号n的复杂度
+        {
+            if (n % i == 0)
+            {
+                prob.push_back(i);
+            }
+        }
+    }();
+    sort(prob.rbegin(), prob.rend());
+    for (auto hsh : prob)
+    {
+        if (gcd(hsh, n / hsh) == 1)
+        {
+            cout << hsh << ' ' << n / hsh;
+            return;
+        }
+    }
+}
+
+
+```
+
+#### LCM结论
+
+- $$a \times b = GCD(a, b) \times LCM(a, b)$$
+  - 推论： 如果 $GCD(a, b) = 1$（互质），那么 $LCM(a, b) = a \times b$。
+  - 算 LCM 的时候，为了防止先乘法爆 long long，必须写成：lcm = (a / std::gcd(a, b)) * b; （先除后乘）
+- 相邻必互质（ 找$LCM$ 最大
+- $GCD$ 会越算越小，哪怕是 $10^{18}$ 的数，取几次 GCD 就变成很小的数了。复杂度是 $O(\log N)$
+- 前 43 个整数的 LCM 就已经超过 long long 范围了。警觉点： 如果题目让你算一堆数的 LCM，结果还要模 $10^9+7$，那通常不是让你真的算出来，而是让你对“质因子的指数”取 max
+- $$GCD(k \cdot a, k \cdot b) = k \cdot GCD(a, b)$$
+- $$LCM(k \cdot a, k \cdot b) = k \cdot LCM(a, b)$$
+
 ### 数学取模
 
 #### [逆=辶+屰](https://ac.nowcoder.com/acm/contest/97487/B)

@@ -9,9 +9,216 @@ math: true
 ---
 
 
-### 中位数性质构造数组
+## 通过性质或者数学构造优化
 
-#### D. A and B
+### 通过元素代价优化
+
+#### C. Quotient and Remainder->抽象题意与数学性质贪心
+
+> 给两个整数数组q和r，给出整数k。可以执行以下操作若干次
+> 选择一对x和y 1≤y<x≤k
+>
+> - 存在一个索引 i使得 qi=⌊x/y⌋（向下舍入）
+> - 存在一个索引 j使得 rj=xmody
+>
+> 同时满足以上的qi和rj可以被消除
+> 请问最多可以进行多少次操作？
+
+- **解析**
+  - 条件转换->满足x,y有q=x/y && r=x%y && x<k
+  - 所以有->满足x=q*y+r 且 x<k 的qr（商和余数配对）对尽可能的多
+  - 由于模数性质我们知道几个conercase->r<y
+  - 所以问题转化为在数组q和r里面找到尽量多的qr匹配满足以上性质
+  - 对于式子`x=q*y+r`我们要x尽可能地小,所以y要尽可能地小。y最小为 r+1 所以我们化简有 x=q*(r+1)+r 继续化简有结论:
+  - 一对 $(q_i, r_j)$ 可以匹配并消除，当且仅当 $(q_i + 1)(r_j + 1) \le k + 1$。
+  - “配对问题” + “限制条件” $\rightarrow$ 贪心
+  - 为了让结果更可能地多我们要在能做到地范围内小的r尽量匹配大的q
+  - “乘积最小化” $\rightarrow$ 逆序配对
+  - 只要看到“求最大值”，且这个值满足“小了容易满足，大了难满足”，立刻想到二分答案。
+
+```cpp
+int n, k;
+vi a;//全局数组
+vi b;
+bool check(int x)
+{
+    if (x == 0)
+        return true;
+    ll limit = k + 1;
+
+    for (int i = 0; i < x; ++i)
+    {
+        ll q = a[i];
+        ll r = b[x - 1 - i]; // 这一组里倒数第 i+1 个
+
+        if ((q + 1) > limit / (r + 1))//这里室常见的防溢出处理
+        {
+            return false;
+        }
+    }
+    return true;
+}//这里就是倒着大小匹配看看能不能满足足够有x对
+void solve()
+{
+
+    cin >> n >> k;
+    a.resize(n);
+    b.resize(n);//记得resize()
+    rep(i, 0, n - 1)
+    {
+        cin >> a[i];
+    }
+    rep(i, 0, n - 1)
+    {
+        cin >> b[i];
+    }
+
+    sort(all(a));
+    sort(all(b));//从小到大
+    int q = 0;
+
+    int l = 0, r = n;
+    while (l < r)//经典找符合的最大值
+    {
+       
+        int mid = (l + r + 1) >> 1;
+
+        if (check(mid))
+        {
+            l = mid; 
+        }
+        else
+        {
+            r = mid - 1;
+        }
+    }
+    cout << l << endl;
+}
+```
+
+#### C. Cyclic Merging(贪心构造数列)
+
+- 可以发现元素特性支持贪心
+
+- **题目**
+- >You are given $n$ non-negative integers $a_1,a_2,\ldots,a_n$ arranged on a ring. For each $1\le i< n$, $a_i$ and $a_{i+1}$ are adjacent; $a_1$ and $a_n$ are adjacent.
+You need to perform the following operation **exactly** $n-1$ times:
+ Choose any pair of adjacent elements on the ring, let their values be $x$ and $y$, and merge them into a single element of value $\max(x,y)$ with cost $\max(x,y)$.
+Note that this operation will decrease the size of the ring by $1$ and update the adjacent relationships accordingly.
+Please calculate the minimum total cost to merge the ring into one element.
+
+>给你一个排列在环上的非负整数 $$$n$$$ 。对于每个 $$$1\le i&lt; n$$$ ， $$$a &#95; i$$$ 和 $$$a &#95; {i+1}$$$ 相邻； $$$a &#95; 1$$$ 和 $$$a &#95; n$$$ 相邻。
+以下操作需要**精确** $$$n-1$$$ 次：
+-在环上选择任意一对相邻的元素，设它们的值为 $$$x$$$ 和 $$$y$$$ ，并将它们合并成一个值为 $$$\max(x,y)$$$ ，代价为 $$$\max(x,y)$$$ 的元素。
+注意，此操作将使环的大小减少 $$$1$$$ ，并相应地更新相邻关系。
+请计算将圆环合并为一个元件的最低总成本。
+
+- **错误想法**
+  - 双指针：双指针/滑动窗口通常用于处理固定不变的序列，寻找满足某种条件的连续子段（比如和、最值等）。而这道题首先是环形，其次是他会破坏掉数字的结构
+  - DP？数据范围2e5秒了肯定不是
+  >2e5我们最好想一些数据结构或者贪心（某种意义上的排列）来优化这一切（logn或者n，这很常见）
+- **思考路径(看完整清晰的请往下看，这是我个人的一个思路整理)**
+  - 当我拆解数据 1 1 4 5 1 4 1的时候我总是会算错，这个样例我研究了20分钟我才研究出来他的正确合成方法:而这道题的正确做法就藏在我的试错里面:只是我忽略了:当我从小合并到大(其实这是猜猜看的结果)他最优
+  - 贪心最大的难度就是让我相信：他是贪心
+  - 相信他是贪心最主要的点在：对于每个数他的命运岔路口只有当左右两边的数字都大于他的时候。可以简单想到，通过更改(合成)左右两个数来改变消掉我们这个数的代价绝对不是最优，最优解**存在且仅存在于**他与隔壁的一个数字合体或着他与隔壁两个数字中更小的数字合体
+  - 这里我们可以发现从最小的数字开始合并收益一定最大(如果从一个不是最大也不是最小的数字开始合并，他的消失他就可能会影响更小的数字合成代价变大。因为他消失了更小的数字只能和更大的数字合成了)
+
+- **细节难点**：
+  - 实现方法上需要学习的:**模拟环形**(模拟链表)以及左右更新
+  - 大根堆的处理:要认清楚:**大根堆的最用只是帮你快速定位到最小的元素是谁**
+
+- **AC代码**
+
+```cpp
+
+struct node
+{
+    int idx, num;
+};
+
+struct cmp
+{
+    bool operator()(const node &a, const node &b)
+    {
+        return a.num > b.num; // 小根堆逻辑
+    }
+};
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n);
+    vi left(n);
+    vi right(n);
+    left[0] = n - 1;
+    right[n - 1] = 0;
+    priority_queue<node, vector<node>, cmp> dl;
+    rep(i, 0, n - 1)
+    {
+        cin >> nums[i];
+        if (i != 0)
+        {
+            left[i] = i - 1;
+        }
+        if (i != n - 1)
+        {
+            right[i] = i + 1;
+        }
+        dl.push({i, nums[i]});
+    }
+
+    int cz = n - 1;
+    ll ans=0;
+    while (cz && !dl.empty())
+    {
+        auto hsh = dl.top();
+        dl.pop();
+        int idl = left[hsh.idx];
+        int idr = right[hsh.idx];
+
+        if(nums[idl]>nums[idr])ans+=nums[idr];
+        if(nums[idl]<=nums[idr])ans+=nums[idl];
+
+        left[idr]=idl;
+        right[idl]=idr;
+        cz--;
+    }
+    cout<<ans<<'\n';
+}
+```
+
+你以为到这里就结束了吗？并非
+诚然这个算法很直观，但是却不是最简单，没有找到这道题最本质的一点
+**我们容易发现**: merge 取的是 max，这意味着**邻居只会越变越大**。对于一个当前的最小值来说，“现在”永远是它能遇到的最好时机。任何推迟操作都可能导致它身边的邻居变大，从而增加它最终被消除的代价。
+
+!这样子我们就能获得时间复杂度O(n)，空间复杂度O(1)的算法:
+
+```cpp
+void solve()
+{
+    int n,first,now=0;
+    ll ans = 0;
+    cin >> n;
+    cin >> first;
+    int last = first;
+    int mx=first;
+    rep(i, 2, n)
+    {
+        cin >> now;
+        mx = max(mx, now);
+        ans += max(last, now);
+        last = now;
+    }
+    ans+=max(first,now);
+    cout<<ans-mx<<'\n';
+}
+```
+
+- 后话:**我们该如何证明贪心是对的**
+  - 如果数据范围是 $N=2 \times 10^5$，而且不像线段树/图论，那只能是贪心或者数学推导。
+  - 贪心规则，检查有没有:后效性，更优？
+
+#### D. A and B（中位数性质）
 
 - **题目**
 
@@ -85,83 +292,94 @@ void solve()
 
 ```
 
-### 前缀和取模问题
+### 通过推数学式子优化
 
-- 新生赛初赛e题...（谈起是它可以是trick）
+- 从n方缩减成O(n)或者nlogn,我们通过分离lr与计算贡献的方式抽象题目的问法
 
-#### P3131  Subsequences Summing to Sevens S
+#### C. Range Operation
 
-- 做法：桶存下标根据模数性质解 $$S_i \equiv S_j \pmod M$$
-- **易错**：**需要在mp[0]里面事先放idx0**`mp[0].push_back(0);`
-- AC代码
+- **题目**
+
+>You are given an integer array $a$ of length $n$.
+>You can perform the following operation: choose a range $[l, r]$ ($1 \le l \le r \le n$) and replace the value of elements $a_l, a_{l+1}, \dots, a_r$ with $(l + r)$.
+>Your task is to calculate the maximum possible total array sum if you can perform the aforementioned operation at most once.
+>您将得到一个长度为 $n$ 的整数数组 $a$ 。
+您可以执行以下操作：选择范围 $[l, r]$ （ $1 \le l \le r \le n$ ），并将元素 $a_l, a_{l+1}, \dots, a_r$ 的值替换为 $(l + r)$ 。
+您的任务是计算最大可能的阵列总和，前提是您最多可以执行一次上述操作。
+
+- **思路**
+  - `区间总和`->前缀和优化
+  - 对于每个数字我们是否能判断他更改的收益从而确定他要不要被更改,随后贪心解决一切？
+  - 第一条思路：让他和他自己比较的贪心：但是你会发现这只能确定一些“必须更改”的数字，不符合题目里面的边界，l和r的改变随时能够影响更改的权重。这个思路假的很明显
+  - 第二条思路：要去寻找rl的最优值肯定是n方解法，我们能不能通过假设存在lr然后推导出对于每一组lr的收益表达式来找到他贪心的点呢？
+    - 对于确定的lr，更改之后的收益是: (l+r)*(r-l+1)-(qzh[r]-qzh[l-1])
+    - 学过高中数学我们就知道l和r是可以分离开的:得到贪心最大化式子:l^2-r^2+l+r+qzh[r]+qzh[l-1]
+    - 然后我们就发现可以通过O(n)的处理得出每一部分得权重，然后贪心最大化
+  - 注意这里有一个小细节：r>=l,所以我们在处理的时候需要注意处理l得同时处理r
+  - 这里还有个实现层面的优化：你可能会发现如果对于每个r都要扫一边l我们前面做的降维全都白费了，我们通过同时维护ans1和ans2(两个需要最大化的贪心模块)让他在一边扫的时候可以同时更新同时过。这也是一个重要的trick
+
+```cpp
+for (int i = 1; i <= n; i++)
+    {
+
+        if (chaxun2[i] - chaxun2[zuobian] > ans2)
+        {
+            ans2 = chaxun2[i] - chaxun2[zuobian];
+        }
+        if (chaxun2[i] < ans1)//这里的更新顺序是因为我们的优化已经让i=l-1了，所以顺序不能错
+        {
+            ans1 = chaxun2[i];//边处理边更新线性扫过去是非常常见的优化方法
+            zuobian = i;
+        }
+    }
+
+    cout << qzh[n] + ans2 << '\n';
+```
 
 ```cpp
 void solve()
 {
     int n;
-    cin>>n;
-    int d=0;
-    vector<vi> mp(7);
-    bool k=false;
-    mp[0].push_back(0);//注意注意！
-    for(int i=1;i<=n;i++)
+    cin >> n;
+    vi nums(n + 1);
+    vi qzh(n + 1);
+    vi chaxun1(n + 1);
+    vi chaxun2(n + 1);
+    for (int i = 1; i <= n; i++)
     {
-        int a;
-        cin>>a;
-        if(a%7==0)k=1;
-        d+=a;
-        mp[d%7].push_back(i);
+        int d;
+        cin >> d;
+        nums[i] = d;
     }
-
-    int ans=0;
-    if(k)ans=1;
-    for(int i=0;i<7;i++)
+    for (int i = 1; i <= n; i++)
     {
-        if(mp[i].empty())continue;
-        else 
+        qzh[i] = qzh[i - 1] + nums[i];
+        chaxun1[i] = (i * i) + i - qzh[i];
+        chaxun2[i] = (i * i) + i - qzh[i];
+    }
+    int ans1 = 0;
+    int zuobian = 0;
+    int youbian = 0;
+
+    int ans2 = 0;
+
+    for (int i = 1; i <= n; i++)
+    {
+
+        if (chaxun2[i] - chaxun2[zuobian] > ans2)
         {
-            ans=max(ans,mp[i].back()-mp[i].front());
+            ans2 = chaxun2[i] - chaxun2[zuobian];
+        }
+        if (chaxun2[i] < ans1)
+        {
+            ans1 = chaxun2[i];
+            zuobian = i;
         }
     }
-    cout<<ans;
 
-
+    cout << qzh[n] + ans2 << '\n';
 }
-
 ```
-
-### O(1)空间查找最大子段和->修改某个数字
-
-#### 查找到n的最大子段和
-
-```cpp
-        ans=-LINF;
-        rep(i, 0, n - 1)
-        {
-            // 标准 Kadane
-            if (cur < 0) cur = a[i];
-            else cur += a[i];
-            ans = max(ans, cur);
-        }
-        cout << ans << '\n';
-        return;
-```
-
-#### C. Annoying Game
-
-- **题目简化**：a可以修改数组里的某个数字使他加上特定的数字（数组b，此时ab下标相同）。求最大子段和
-- **假的做法**：更改a里面最小b里面最大的
-- **正解**：维护前后缀，然后`int poans = L[i] + R[i] - a[i] + b[i];`
-**LR分别是前缀到i，后缀从i开始的子段连续最大和。**
-依旧数学题
-
-### 排列切割点判定
-
-#### 性质1
-
-- 遍历数组，维护前缀最大值 mx。
-- 如果 mx == i（当前位置下标），说明前 $i$ 个数刚好是 $\{0, 1, \dots, i\}$ 的排列。
-- 如果满足 Trick，说明左边和右边值域不交叉
 
 ### 数学性质构造数列
 
@@ -247,97 +465,241 @@ void solve()
 
 ```
 
-### 抽象题意数学->贪心
+### 前缀和取模问题（数学）
 
-#### C. Quotient and Remainder
+- 新生赛初赛e题->鸽笼原理
 
-> 给两个整数数组q和r，给出整数k。可以执行以下操作若干次
-> 选择一对x和y 1≤y<x≤k
->
-> - 存在一个索引 i使得 qi=⌊x/y⌋（向下舍入）
-> - 存在一个索引 j使得 rj=xmody
->
-> 同时满足以上的qi和rj可以被消除
-> 请问最多可以进行多少次操作？
+#### P3131  Subsequences Summing to Sevens S
 
-- **解析**
-  - 条件转换->满足x,y有q=x/y && r=x%y && x<k
-  - 所以有->满足x=q*y+r 且 x<k 的qr（商和余数配对）对尽可能的多
-  - 由于模数性质我们知道几个conercase->r<y
-  - 所以问题转化为在数组q和r里面找到尽量多的qr匹配满足以上性质
-  - 对于式子`x=q*y+r`我们要x尽可能地小,所以y要尽可能地小。y最小为 r+1 所以我们化简有 x=q*(r+1)+r 继续化简有结论:
-  - 一对 $(q_i, r_j)$ 可以匹配并消除，当且仅当 $(q_i + 1)(r_j + 1) \le k + 1$。
-  - “配对问题” + “限制条件” $\rightarrow$ 贪心
-  - 为了让结果更可能地多我们要在能做到地范围内小的r尽量匹配大的q
-  - “乘积最小化” $\rightarrow$ 逆序配对
-  - 只要看到“求最大值”，且这个值满足“小了容易满足，大了难满足”，立刻想到二分答案。
+- 做法：桶存下标根据模数性质解 $$S_i \equiv S_j \pmod M$$
+- **易错**：**需要在mp[0]里面事先放idx0**`mp[0].push_back(0);`
+- AC代码
 
 ```cpp
-int n, k;
-vi a;//全局数组
-vi b;
-bool check(int x)
-{
-    if (x == 0)
-        return true;
-    ll limit = k + 1;
-
-    for (int i = 0; i < x; ++i)
-    {
-        ll q = a[i];
-        ll r = b[x - 1 - i]; // 这一组里倒数第 i+1 个
-
-        if ((q + 1) > limit / (r + 1))//这里室常见的防溢出处理
-        {
-            return false;
-        }
-    }
-    return true;
-}//这里就是倒着大小匹配看看能不能满足足够有x对
 void solve()
 {
-
-    cin >> n >> k;
-    a.resize(n);
-    b.resize(n);//记得resize()
-    rep(i, 0, n - 1)
+    int n;
+    cin>>n;
+    int d=0;
+    vector<vi> mp(7);
+    bool k=false;
+    mp[0].push_back(0);//注意注意！
+    for(int i=1;i<=n;i++)
     {
-        cin >> a[i];
+        int a;
+        cin>>a;
+        if(a%7==0)k=1;
+        d+=a;
+        mp[d%7].push_back(i);
     }
-    rep(i, 0, n - 1)
+
+    int ans=0;
+    if(k)ans=1;
+    for(int i=0;i<7;i++)
     {
-        cin >> b[i];
-    }
-
-    sort(all(a));
-    sort(all(b));//从小到大
-    int q = 0;
-
-    int l = 0, r = n;
-    while (l < r)//经典找符合的最大值
-    {
-       
-        int mid = (l + r + 1) >> 1;
-
-        if (check(mid))
+        if(mp[i].empty())continue;
+        else 
         {
-            l = mid; 
-        }
-        else
-        {
-            r = mid - 1;
+            ans=max(ans,mp[i].back()-mp[i].front());
         }
     }
-    cout << l << endl;
+    cout<<ans;
+
+
+}
+
+```
+
+## 前缀和优化
+
+### 前缀和优化线段重叠
+
+#### 小红的区间构造->数列前缀和构造（区间重叠用前缀和）
+
+- **算法** ：前缀和
+- **思路&错误原因**
+  - 这道题想要你构造区间，最坏情况是所有点都是一个区间。题目给出来的条件就非常前缀和，直接差分处理然后一个一个insert左右端点就完事儿了
+- **注意事项**
+  - 注意数据范围**提前退出**以免mle（致敬我调了一个晚上的点）
+  - 注意学习左右端点的处理方法：因为是差分处理所以两个数组大小一定一样
+- **AC代码**
+
+```cpp
+    void solve()
+
+{
+    int n, m;
+    cin >> n >> m;
+    vi nums(n + 2);
+    vi cf(n + 2);
+    int sum=0;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> nums[i];
+        sum += nums[i];
+        if (nums[i] > m)
+        {
+            cout << "-1" << '\n';
+            return;
+        }
+        cf[i] = nums[i] - nums[i - 1];
+    }
+    if(sum < m){cout << -1 << '\n';return;}
+    cf[n + 1] = nums[n + 1] - nums[n];
+    vi left;
+    vi right;
+    for (int i = 1; i <= n + 1; i++)
+    {
+        if (cf[i] > 0)
+            for (int j = 0; j < cf[i]; j++)
+                left.push_back(i);
+        if (cf[i] < 0)
+            for (int j = 0; j < abs(cf[i]); j++)
+                right.push_back(i - 1);
+    }
+    int k = left.size();
+    int gap = m - left.size();
+    if (left.size() > m)
+    {
+        cout << "-1" << '\n';
+        return;
+    }
+    ll cnt=0;
+    for (int j = 0; j < k; j++)
+    {
+        cnt+= right[j] - left[j] + 1;
+    }
+    if(cnt<m)
+    {
+         cout << "-1" << '\n';
+        return;
+    }
+
+    for (int j = 0; j < k; j++)
+    {
+        if(gap==0)
+        cout<<left[j]<<' '<<right[j]<<'\n';
+
+        if (right[j] - left[j] < gap&& gap!=0)
+        {    for (int i = left[j]; i <=right[j]; i++)
+            {
+                cout<<i<<' '<<i<<'\n';
+            }
+            gap-=(right[j] - left[j]);
+            continue;
+        }
+        if (right[j] - left[j]  >= gap && gap!=0)
+        {    for (int i = left[j] ; i < left[j]+gap; i++)
+            {
+                cout<<i<<' '<<i<<'\n';
+            }
+         
+            cout<<left[j]+gap<<' '<<right[j]<<'\n';
+            gap=0;
+            continue;
+        }
+
+    }
 }
 ```
 
-### stl优化复杂度
+### 广义维护前缀->在这个点获取其最需要的数据
 
-#### Map 前缀和
+#### [C. Triple Removal->维护前缀有几个我要的值]([题目URL](https://codeforces.com/contest/2152/problem/C))
 
-**用途**：用 Map 记录前缀和，求最短满足条件的子串。  
-**常见坑**：初始化 Map，处理空字符串情况。
+- 这种运用于：威武前缀最大值最小值有几个值这样子快速查询区间里面有什么
+
+- **核心模型**:观察出现的01规律来贪心的构造出最小代价
+- **思维误区 (Bug)**:当串出现如010101时，实际上可以通过抓取两个相邻的1然后再抓取一个遥远的1来构成有00部分的字符串。可以简单证明当数列出现00或者11必然有`cout << (r - l + 1) / 3 << '\n';`
+- **修正逻辑 (Patch)**:还有一个细节：一个是要O1查询某个区间里有没有某个元素，可以直接用前缀和;一个是==多测不要return==
+- **关键代码**:
+
+```cpp
+
+void solve()
+{
+    int n, q;
+    cin >> n >> q;
+    vi nums(n + 1);
+    vector<vi> pre(n + 1, vi(2));
+    rep(i, 1, n)
+    {
+        cin >> nums[i];
+        if (nums[i])
+            pre[i][1]++;
+        else
+            pre[i][0]++;
+    }
+    vi hsh1(n + 1);
+    rep(i, 1, n)
+    {
+        if (nums[i] == nums[i-1] && i != 1)
+        {
+            hsh1[i]++;
+        }
+        pre[i][0] += pre[i - 1][0];
+        pre[i][1] += pre[i - 1][1];
+        hsh1[i] += hsh1[i - 1];
+    }
+    rep(i, 0, q - 1)
+    {
+        int l, r;
+        cin >> l >> r;
+        if ((pre[r][0] - pre[l - 1][0]) % 3 || (pre[r][1] - pre[l - 1][1]) % 3)
+        {
+            cout << -1 << '\n';
+            continue;
+        }
+        if(hsh1[r]-hsh1[l])
+        {
+            cout<<(r-l+1)/3<<'\n';
+
+        }
+        else cout << (r - l + 1) / 3 + 1 << '\n';
+    }
+}
+
+
+```
+
+#### 查找到n的最大子段和
+
+```cpp
+        ans=-LINF;
+        rep(i, 0, n - 1)
+        {
+            // 标准 Kadane
+            if (cur < 0) cur = a[i];
+            else cur += a[i];
+            ans = max(ans, cur);
+        }
+        cout << ans << '\n';
+        return;
+```
+
+#### C. Annoying Game->O(1)空间查找最大子段和->修改某个数字
+
+- **题目简化**：a可以修改数组里的某个数字使他加上特定的数字（数组b，此时ab下标相同）。求最大子段和
+- **假的做法**：更改a里面最小b里面最大的
+- **正解**：维护前后缀，然后`int poans = L[i] + R[i] - a[i] + b[i];`
+**LR分别是前缀到i，后缀从i开始的子段连续最大和。**
+依旧数学题
+
+## 排列切割点判定
+
+### 性质1
+
+- 遍历数组，维护前缀最大值 mx。
+- 如果 mx == i（当前位置下标），说明前 $i$ 个数刚好是 $\{0, 1, \dots, i\}$ 的排列。
+- 如果满足 Trick，说明左边和右边值域不交叉
+
+## stl优化复杂度
+
+### Map
+
+#### Map实现O（logn）查询前缀和
+
+- 优化角度：从原本扫两次优化成扫一次，难点在状态转移
 
 ```cpp
 void solve() {
@@ -359,6 +721,8 @@ void solve() {
 ```
 
 **复杂度**：O(n*log n)，空间 O(n)。
+
+### set-常数比较大
 
 #### Cool Partition
 
@@ -396,7 +760,9 @@ void solve() {
   - 事实上这是一个set使用快乐题，一道普及-的贪心。
   - 需要划分区间尽可能地多，就是需要每个区间京可能地小。对于一个区间存在的数的种类，必然等于从0到他的数的种类
 
-#### C
+### multiset
+
+#### C->实现多次操作放入和删除且支持lowerbound查找的容器
 
 - **记录原因**：介绍可以进行O(logn)复杂度查询的容器：set，map，multiset
 - **思路**：可以轻易的发现，我们需要贪心：分成两块，如果有奖励（可以不断刷新剑的伤害）我们先做，后面再开没有奖励的怪物。
@@ -500,8 +866,11 @@ void solve()
 }
 ```
 
-#### P2058 [NOIP 2016 普及组] 海港
+### ==桶==
 
+#### P2058  海港->桶计种类 —>可以把前面的set和map里面的两道例题优化掉
+
+- **要点**：当数量变成0就kind--，数量从0变成1就kind++
 - **错点**：TLE
 - 错题记录：
 
@@ -606,96 +975,7 @@ int LIS_nlogn(vector<int>& a) {
 - **错误原因**：在处理这个条件`或者通过人数是所有题目前三多的题（也就是最多有两个题目通过人数严格比它多）叫做签到题。`的时候第一次用的set，本来想的是找到第三大的数字然后直接比较，获得set的rbegin() (**set容器从小到大排**)。结果发现：bro，他说是最多两个题目。。。谢谢你的脑抽：贡献了13发罚时
 ==以后觉得有问题先考虑是不是读错题了==
 
-### 推式子优化复杂度
-
-- 从n方缩减成O(n)或者nlogn,我们通过分离lr与计算贡献的方式抽象题目的问法
-
-#### C. Range Operation
-
-- **题目**
-
->You are given an integer array $a$ of length $n$.
->You can perform the following operation: choose a range $[l, r]$ ($1 \le l \le r \le n$) and replace the value of elements $a_l, a_{l+1}, \dots, a_r$ with $(l + r)$.
->Your task is to calculate the maximum possible total array sum if you can perform the aforementioned operation at most once.
->您将得到一个长度为 $n$ 的整数数组 $a$ 。
-您可以执行以下操作：选择范围 $[l, r]$ （ $1 \le l \le r \le n$ ），并将元素 $a_l, a_{l+1}, \dots, a_r$ 的值替换为 $(l + r)$ 。
-您的任务是计算最大可能的阵列总和，前提是您最多可以执行一次上述操作。
-
-- **思路**
-  - `区间总和`->前缀和优化
-  - 对于每个数字我们是否能判断他更改的收益从而确定他要不要被更改,随后贪心解决一切？
-  - 第一条思路：让他和他自己比较的贪心：但是你会发现这只能确定一些“必须更改”的数字，不符合题目里面的边界，l和r的改变随时能够影响更改的权重。这个思路假的很明显
-  - 第二条思路：要去寻找rl的最优值肯定是n方解法，我们能不能通过假设存在lr然后推导出对于每一组lr的收益表达式来找到他贪心的点呢？
-    - 对于确定的lr，更改之后的收益是: (l+r)*(r-l+1)-(qzh[r]-qzh[l-1])
-    - 学过高中数学我们就知道l和r是可以分离开的:得到贪心最大化式子:l^2-r^2+l+r+qzh[r]+qzh[l-1]
-    - 然后我们就发现可以通过O(n)的处理得出每一部分得权重，然后贪心最大化
-  - 注意这里有一个小细节：r>=l,所以我们在处理的时候需要注意处理l得同时处理r
-  - 这里还有个实现层面的优化：你可能会发现如果对于每个r都要扫一边l我们前面做的降维全都白费了，我们通过同时维护ans1和ans2(两个需要最大化的贪心模块)让他在一边扫的时候可以同时更新同时过。这也是一个重要的trick
-
-```cpp
-for (int i = 1; i <= n; i++)
-    {
-
-        if (chaxun2[i] - chaxun2[zuobian] > ans2)
-        {
-            ans2 = chaxun2[i] - chaxun2[zuobian];
-        }
-        if (chaxun2[i] < ans1)//这里的更新顺序是因为我们的优化已经让i=l-1了，所以顺序不能错
-        {
-            ans1 = chaxun2[i];//边处理边更新线性扫过去是非常常见的优化方法
-            zuobian = i;
-        }
-    }
-
-    cout << qzh[n] + ans2 << '\n';
-```
-
-```cpp
-void solve()
-{
-    int n;
-    cin >> n;
-    vi nums(n + 1);
-    vi qzh(n + 1);
-    vi chaxun1(n + 1);
-    vi chaxun2(n + 1);
-    for (int i = 1; i <= n; i++)
-    {
-        int d;
-        cin >> d;
-        nums[i] = d;
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        qzh[i] = qzh[i - 1] + nums[i];
-        chaxun1[i] = (i * i) + i - qzh[i];
-        chaxun2[i] = (i * i) + i - qzh[i];
-    }
-    int ans1 = 0;
-    int zuobian = 0;
-    int youbian = 0;
-
-    int ans2 = 0;
-
-    for (int i = 1; i <= n; i++)
-    {
-
-        if (chaxun2[i] - chaxun2[zuobian] > ans2)
-        {
-            ans2 = chaxun2[i] - chaxun2[zuobian];
-        }
-        if (chaxun2[i] < ans1)
-        {
-            ans1 = chaxun2[i];
-            zuobian = i;
-        }
-    }
-
-    cout << qzh[n] + ans2 << '\n';
-}
-```
-
-### 对区间以及结果进行排列—>切换入点
+### 扫描线 + 优先队列维护有效性
 
 #### C. Monopati
 
@@ -941,279 +1221,5 @@ void solve() {
 ```
 
 **复杂度**：O(n)，空间 O(n)。
-
-## 构造数列
-
-### 数列贪心构造
-
-#### C. Cyclic Merging(贪心)
-
-- **题目**
-- >You are given $n$ non-negative integers $a_1,a_2,\ldots,a_n$ arranged on a ring. For each $1\le i< n$, $a_i$ and $a_{i+1}$ are adjacent; $a_1$ and $a_n$ are adjacent.
-You need to perform the following operation **exactly** $n-1$ times:
- Choose any pair of adjacent elements on the ring, let their values be $x$ and $y$, and merge them into a single element of value $\max(x,y)$ with cost $\max(x,y)$.
-Note that this operation will decrease the size of the ring by $1$ and update the adjacent relationships accordingly.
-Please calculate the minimum total cost to merge the ring into one element.
-
->给你一个排列在环上的非负整数 $$$n$$$ 。对于每个 $$$1\le i&lt; n$$$ ， $$$a &#95; i$$$ 和 $$$a &#95; {i+1}$$$ 相邻； $$$a &#95; 1$$$ 和 $$$a &#95; n$$$ 相邻。
-以下操作需要**精确** $$$n-1$$$ 次：
--在环上选择任意一对相邻的元素，设它们的值为 $$$x$$$ 和 $$$y$$$ ，并将它们合并成一个值为 $$$\max(x,y)$$$ ，代价为 $$$\max(x,y)$$$ 的元素。
-注意，此操作将使环的大小减少 $$$1$$$ ，并相应地更新相邻关系。
-请计算将圆环合并为一个元件的最低总成本。
-
-- **错误想法**
-  - 双指针：双指针/滑动窗口通常用于处理固定不变的序列，寻找满足某种条件的连续子段（比如和、最值等）。而这道题首先是环形，其次是他会破坏掉数字的结构
-  - DP？数据范围2e5秒了肯定不是
-  >2e5我们最好想一些数据结构或者贪心（某种意义上的排列）来优化这一切（logn或者n，这很常见）
-- **思考路径(看完整清晰的请往下看，这是我个人的一个思路整理)**
-  - 当我拆解数据 1 1 4 5 1 4 1的时候我总是会算错，这个样例我研究了20分钟我才研究出来他的正确合成方法:而这道题的正确做法就藏在我的试错里面:只是我忽略了:当我从小合并到大(其实这是猜猜看的结果)他最优
-  - 贪心最大的难度就是让我相信：他是贪心
-  - 相信他是贪心最主要的点在：对于每个数他的命运岔路口只有当左右两边的数字都大于他的时候。可以简单想到，通过更改(合成)左右两个数来改变消掉我们这个数的代价绝对不是最优，最优解**存在且仅存在于**他与隔壁的一个数字合体或着他与隔壁两个数字中更小的数字合体
-  - 这里我们可以发现从最小的数字开始合并收益一定最大(如果从一个不是最大也不是最小的数字开始合并，他的消失他就可能会影响更小的数字合成代价变大。因为他消失了更小的数字只能和更大的数字合成了)
-
-- **细节难点**：
-  - 实现方法上需要学习的:**模拟环形**(模拟链表)以及左右更新
-  - 大根堆的处理:要认清楚:**大根堆的最用只是帮你快速定位到最小的元素是谁**
-
-- **AC代码**
-
-```cpp
-
-struct node
-{
-    int idx, num;
-};
-
-struct cmp
-{
-    bool operator()(const node &a, const node &b)
-    {
-        return a.num > b.num; // 小根堆逻辑
-    }
-};
-void solve()
-{
-    int n;
-    cin >> n;
-    vi nums(n);
-    vi left(n);
-    vi right(n);
-    left[0] = n - 1;
-    right[n - 1] = 0;
-    priority_queue<node, vector<node>, cmp> dl;
-    rep(i, 0, n - 1)
-    {
-        cin >> nums[i];
-        if (i != 0)
-        {
-            left[i] = i - 1;
-        }
-        if (i != n - 1)
-        {
-            right[i] = i + 1;
-        }
-        dl.push({i, nums[i]});
-    }
-
-    int cz = n - 1;
-    ll ans=0;
-    while (cz && !dl.empty())
-    {
-        auto hsh = dl.top();
-        dl.pop();
-        int idl = left[hsh.idx];
-        int idr = right[hsh.idx];
-
-        if(nums[idl]>nums[idr])ans+=nums[idr];
-        if(nums[idl]<=nums[idr])ans+=nums[idl];
-     //   cerr<<ans<<'\n';
-        left[idr]=idl;
-        right[idl]=idr;
-        cz--;
-    }
-    cout<<ans<<'\n';
-}
-```
-
-你以为到这里就结束了吗？并非
-诚然这个算法很直观，但是却不是最简单，没有找到这道题最本质的一点
-**我们容易发现**: merge 取的是 max，这意味着**邻居只会越变越大**。对于一个当前的最小值来说，“现在”永远是它能遇到的最好时机。任何推迟操作都可能导致它身边的邻居变大，从而增加它最终被消除的代价。
-
-!这样子我们就能获得时间复杂度O(n)，空间复杂度O(1)的算法:
-
-```cpp
-void solve()
-{
-    int n,first,now=0;
-    ll ans = 0;
-    cin >> n;
-    cin >> first;
-    int last = first;
-    int mx=first;
-    rep(i, 2, n)
-    {
-        cin >> now;
-        mx = max(mx, now);
-        ans += max(last, now);
-        last = now;
-    }
-    ans+=max(first,now);
-    cout<<ans-mx<<'\n';
-}
-```
-
-- 后话:**我们该如何证明贪心是对的**
-  - 如果数据范围是 $N=2 \times 10^5$，而且不像线段树/图论，那只能是贪心或者数学推导。
-  - 贪心规则，检查有没有:后效性，更优？
-
-#### 小红的区间构造->数列前缀和构造（区间重叠用前缀和）
-
-- **算法** ：前缀和
-- **思路&错误原因**
-  - 这道题想要你构造区间，最坏情况是所有点都是一个区间。题目给出来的条件就非常前缀和，直接差分处理然后一个一个insert左右端点就完事儿了
-- **注意事项**
-  - 注意数据范围**提前退出**以免mle（致敬我调了一个晚上的点）
-  - 注意学习左右端点的处理方法：因为是差分处理所以两个数组大小一定一样
-- **AC代码**
-
-```cpp
-    void solve()
-
-{
-    int n, m;
-    cin >> n >> m;
-    vi nums(n + 2);
-    vi cf(n + 2);
-    int sum=0;
-    for (int i = 1; i <= n; i++)
-    {
-        cin >> nums[i];
-        sum += nums[i];
-        if (nums[i] > m)
-        {
-            cout << "-1" << '\n';
-            return;
-        }
-        cf[i] = nums[i] - nums[i - 1];
-    }
-    if(sum < m){cout << -1 << '\n';return;}
-    cf[n + 1] = nums[n + 1] - nums[n];
-    vi left;
-    vi right;
-    for (int i = 1; i <= n + 1; i++)
-    {
-        if (cf[i] > 0)
-            for (int j = 0; j < cf[i]; j++)
-                left.push_back(i);
-        if (cf[i] < 0)
-            for (int j = 0; j < abs(cf[i]); j++)
-                right.push_back(i - 1);
-    }
-    int k = left.size();
-    int gap = m - left.size();
-    if (left.size() > m)
-    {
-        cout << "-1" << '\n';
-        return;
-    }
-    ll cnt=0;
-    for (int j = 0; j < k; j++)
-    {
-        cnt+= right[j] - left[j] + 1;
-    }
-    if(cnt<m)
-    {
-         cout << "-1" << '\n';
-        return;
-    }
-
-    for (int j = 0; j < k; j++)
-    {
-        if(gap==0)
-        cout<<left[j]<<' '<<right[j]<<'\n';
-
-        if (right[j] - left[j] < gap&& gap!=0)
-        {    for (int i = left[j]; i <=right[j]; i++)
-            {
-                cout<<i<<' '<<i<<'\n';
-            }
-            gap-=(right[j] - left[j]);
-            continue;
-        }
-        if (right[j] - left[j]  >= gap && gap!=0)
-        {    for (int i = left[j] ; i < left[j]+gap; i++)
-            {
-                cout<<i<<' '<<i<<'\n';
-            }
-         
-            cout<<left[j]+gap<<' '<<right[j]<<'\n';
-            gap=0;
-            continue;
-        }
-
-    }
-}
-```
-
----
-
-## 观察性质优化查询/优化做法
-
-### 贪心
-
-#### [C. Triple Removal]([题目URL](https://codeforces.com/contest/2152/problem/C))
-
-- **核心模型**:观察出现的01规律来贪心的构造出最小代价
-- **思维误区 (Bug)**:当串出现如010101时，实际上可以通过抓取两个相邻的1然后再抓取一个遥远的1来构成有00部分的字符串。可以简单证明当数列出现00或者11必然有`cout << (r - l + 1) / 3 << '\n';`
-- **修正逻辑 (Patch)**:还有一个细节：一个是要O1查询某个区间里有没有某个元素，可以直接用前缀和;一个是==多测不要return==
-- **关键代码**:
-
-```cpp
-
-void solve()
-{
-    int n, q;
-    cin >> n >> q;
-    vi nums(n + 1);
-    vector<vi> pre(n + 1, vi(2));
-    rep(i, 1, n)
-    {
-        cin >> nums[i];
-        if (nums[i])
-            pre[i][1]++;
-        else
-            pre[i][0]++;
-    }
-    vi hsh1(n + 1);
-    rep(i, 1, n)
-    {
-        if (nums[i] == nums[i-1] && i != 1)
-        {
-            hsh1[i]++;
-        }
-        pre[i][0] += pre[i - 1][0];
-        pre[i][1] += pre[i - 1][1];
-        hsh1[i] += hsh1[i - 1];
-    }
-    rep(i, 0, q - 1)
-    {
-        int l, r;
-        cin >> l >> r;
-        if ((pre[r][0] - pre[l - 1][0]) % 3 || (pre[r][1] - pre[l - 1][1]) % 3)
-        {
-            cout << -1 << '\n';
-            continue;
-        }
-        if(hsh1[r]-hsh1[l])
-        {
-            cout<<(r-l+1)/3<<'\n';
-
-        }
-        else cout << (r - l + 1) / 3 + 1 << '\n';
-    }
-}
-
-
-```
 
 ---

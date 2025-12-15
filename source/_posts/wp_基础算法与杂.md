@@ -412,6 +412,40 @@ void solve()
   - 维护r的界限和nums[r]的更新逻辑是难点
 [相似的滑动窗口]<https://codeforces.com/problemset/problem/2117/C>
 
+#### P1638 逛画展
+
+- 写双指针的时候一定要知道你在写什么
+- 这个时for循环的版本
+- ==**小技巧** 存替答案的时候可以`array<int, 3> ans = {INF, -1, -1};` 这样子，优先比较第一个值，意思是按照整个array的字典序来比较满足的化就替换与存答案。array可以优化开销==
+
+```cpp
+void solve()
+{
+    int n, m;
+    cin >> n >> m;
+    vi a(n);
+    rep(i, 0, n - 1)
+    {
+        cin >> a[i];
+    }
+
+    int kind = 0;
+    array<int, 3> ans = {INF, -1, -1};
+    vector<int> cnt(m + 1);
+    for (int l = 0, r = 0; l < n; l++)
+    {
+        while (r < n && kind < m)
+        {
+            kind += cnt[a[r]]++ == 0;
+            r++;
+        }
+        if (kind == m) ans = min(ans, {r - l, l + 1, r});//按照字典序比较；
+        kind -= --cnt[a[l]] == 0;
+    }
+    cout << ans[1] << ' ' << ans[2] << '\n';
+}
+```
+
 ---
 
 ## 模拟
@@ -601,6 +635,51 @@ void solve()
 
 ## 细节
 
+### 区间
+
+#### [铺设线段]((https://www.luogu.com.cn/problem/P2082))
+
+- **修正逻辑 (Patch)**:注意左闭右开还是左闭右闭，以及你家多了多少次
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    ll s, t;
+    cin >> n;
+    vi zuo(n);
+    vi you(n);
+
+    rep(i, 0, n - 1)
+    {
+        cin >> zuo[i] >> you[i];
+    }
+    ll ans = 0;
+    sort(all(zuo));
+    sort(all(you));
+    for (int i = 0; i < n; i++)
+    {
+        if (!i)
+        {
+            ans += you[i] - zuo[i] + 1;
+        }
+        else
+        {
+            if (zuo[i] <= you[i - 1])
+            {
+                ans = ans + (you[i] - zuo[i] + 1) - (you[i - 1] - zuo[i]+1);
+            }
+            else
+                ans += you[i] - zuo[i] + 1;
+        }
+    }
+    cout << ans << '\n';
+}
+```
+
+---
+
 ### 逻辑维护
 
 #### [F. Longest Strike](https://codeforces.com/problemset/problem/1676/F)
@@ -659,206 +738,6 @@ void solve()
             }
         }
     }
-```
-
----
-
-### 基础实现
-
-- 字符串处理
-
-#### [C. Needle in a Haystack](https://codeforces.com/contest/2175/problem/C)
-
-- **核心模型**:贪心，双指针
-- **思维误区 (Bug)**:主要是害怕字符串题目，这里主要记录如此字串的贪心实现
-  - 本来我想的是按照不下降为索引一个一个放进去，但是没有维护的实力
-  - 容易发现要做到答案的字典序最小，对于每一位都贪心的找最小就好了，而且由于是子序列更简单了。。直接从两堆东西里面一个一个拿就行
-  - 这里教教你怎么用`string`
-- **修正逻辑 (Patch)**:
-  - 常见字符串匹配:桶计数
-  - 一些简单的写法->双指针
-- **关键代码**:
-
-```cpp
-void solve()
-{
-    string s;
-    cin >> s;
-    string t;
-    cin >> t;
-
-    vi cnt(26);
-    for (auto hsh : t)
-    {
-        cnt[hsh - 'a']++;
-    }
-    for (int i = 0; i < s.size(); i++)
-    {
-        cnt[s[i] - 'a']--;
-        if (cnt[s[i] - 'a'] < 0)
-        {
-            std::cout << "Impossible" << '\n';
-            return;
-        }
-    }
-    string ans;
-    int tp = 0;
-    for (int i = 0; i < 26;)
-    {
-        if (tp >= s.size() || i + 'a' < s[tp])
-        {
-            ans += string(cnt[i], i + 'a');//加上一个字符串
-            i++;//记得滑动指针
-        }
-        else
-        {
-            ans += s[tp];
-            tp++;
-        }
-    }
-    std::cout << ans << '\n';
-}
-```
-
----
-
-#### [A MAD Interactive Problem](题目URL)
-
-- **核心模型**:交互题，在3n次查询里面找到每个数字的位置
-- **思维误区 (Bug)**:不会
-- **修正逻辑 (Patch)**:用vector实现维护一串不重复的数字，然后一个一个查询某个数字在哪里
-- **关键代码**:
-
-```cpp
-void solve()
-{
-    int n;
-    cin >> n;
-    int n2 = 2 * n;
-    vi q1, q2;
-    auto qury = [](vi a) -> int
-    {
-        sort(all(a));
-        cout << "? "<<a.size()<< ' ';
-        for (auto hsh : a)
-        {
-            cout << hsh << ' ';
-        }
-        cout<<endl;
-        int s;
-        cin >> s;
-        return s;
-    };
-    vi ans(n2+1);
-    for(int i=1;i<=n2;i++)
-    {
-        q1.push_back(i);
-        int g=qury(q1);
-        if(g)
-        {
-            q1.pop_back();
-            ans[i]=g;
-            q2.push_back(i);
-        }
-    }
-
-    for(int i=1;i<=n2;i++)
-    {
-        if(!ans[i])
-        {
-            q2.push_back(i);
-            ans[i]=qury(q2);
-            q2.pop_back();
-        }
-    }
-    cout<<"! ";
-    for(int i=1;i<=n2;i++)
-    {
-        cout<<ans[i]<<' ';
-    }
-    cout<<endl;
-}
-
-```
-
-#### [家谱->实现字符串映射到数字数字再多次反查询到字符串](https://www.luogu.com.cn/problem/P2814)
-
-- **核心模型**:并查集。使用`vector<string>` 与`map<string,int>` 实现字符串映射到数字数字再多次反查询到字符串
-
-- **关键代码**:
-
-```cpp
-//这里应该有个struct dsu
-void solve()
-{
-    string s;
-    map<string, int> sti;
-    vector<string> its;
-    auto getid = [&](string nme) -> int
-    {
-        if (sti.count(nme))
-        {
-            return sti[nme];
-        }
-        else
-        {
-            sti[nme] = its.size();
-            its.push_back(nme);//注意这里的顺序，先获取size（）再放进去要不然会ub
-            return sti[nme];
-        }
-    };
-    // vi ask;
-    int father;
-    int son;
-    vector<pii> per;
-    bool ask = 0;
-    vi que;
-    while (cin >> s)
-    {
-        string nme;
-        if (s[0] == '$')
-            break;
-        for (int i = 1; i < 7; i++)
-        {
-            nme += s[i];
-        }
-        if (s[0] == '?')
-            ask = 1;
-        int ren = getid(nme);
-        //  cerr<<ren<<'\n';
-        if (!ask)
-        {
-            if (s[0] == '#')
-            {
-                father = ren;
-                continue;
-            }
-            if (s[0] == '+')
-            {
-                son = ren;
-            }
-            per.push_back({father, son});
-        }
-        else
-        {
-            que.push_back(ren);
-        }
-        //    cerr << "cek" << '\n';
-    }
-    //   cerr << "cek" << '\n';
-    DSU dsu(its.size() + 1);
-    for (auto hsh : per)
-    {
-        //  cerr << "cek" << '\n';
-        dsu.merge(hsh.first, hsh.second);
-    }
-    for (auto hsh : que)
-    {
-        cout << its[hsh] << ' ';
-        cout << its[dsu.find(hsh)] << '\n';
-    }
-}
-
 ```
 
 ---
@@ -1341,6 +1220,290 @@ void solve()
     sum=max(sum,(s[0]+s[i])*(px+a[i+1]));
   }
 ```
+
+---
+
+## 基础实现
+
+### 字符串处理
+
+#### [C. Needle in a Haystack]( https://codeforces.com/contest/2175/problem/C )
+
+- **核心模型**:贪心，双指针
+- **思维误区 (Bug)**:主要是害怕字符串题目，这里主要记录如此字串的贪心实现
+  - 本来我想的是按照不下降为索引一个一个放进去，但是没有维护的实力
+  - 容易发现要做到答案的字典序最小，对于每一位都贪心的找最小就好了，而且由于是子序列更简单了。。直接从两堆东西里面一个一个拿就行
+  - 这里教教你怎么用`string`
+- **修正逻辑 (Patch)**:
+  - 常见字符串匹配:桶计数
+  - 一些简单的写法->双指针
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    string s;
+    cin >> s;
+    string t;
+    cin >> t;
+
+    vi cnt(26);
+    for (auto hsh : t)
+    {
+        cnt[hsh - 'a']++;
+    }
+    for (int i = 0; i < s.size(); i++)
+    {
+        cnt[s[i] - 'a']--;
+        if (cnt[s[i] - 'a'] < 0)
+        {
+            std::cout << "Impossible" << '\n';
+            return;
+        }
+    }
+    string ans;
+    int tp = 0;
+    for (int i = 0; i < 26;)
+    {
+        if (tp >= s.size() || i + 'a' < s[tp])
+        {
+            ans += string(cnt[i], i + 'a');//加上一个字符串
+            i++;//记得滑动指针
+        }
+        else
+        {
+            ans += s[tp];
+            tp++;
+        }
+    }
+    std::cout << ans << '\n';
+}
+```
+
+---
+
+#### [A MAD Interactive Problem](题目URL)
+
+- **核心模型**:交互题，在3n次查询里面找到每个数字的位置
+- **思维误区 (Bug)**:不会
+- **修正逻辑 (Patch)**:用vector实现维护一串不重复的数字，然后一个一个查询某个数字在哪里
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    int n2 = 2 * n;
+    vi q1, q2;
+    auto qury = [](vi a) -> int
+    {
+        sort(all(a));
+        cout << "? "<<a.size()<< ' ';
+        for (auto hsh : a)
+        {
+            cout << hsh << ' ';
+        }
+        cout<<endl;
+        int s;
+        cin >> s;
+        return s;
+    };
+    vi ans(n2+1);
+    for(int i=1;i<=n2;i++)
+    {
+        q1.push_back(i);
+        int g=qury(q1);
+        if(g)
+        {
+            q1.pop_back();
+            ans[i]=g;
+            q2.push_back(i);
+        }
+    }
+
+    for(int i=1;i<=n2;i++)
+    {
+        if(!ans[i])
+        {
+            q2.push_back(i);
+            ans[i]=qury(q2);
+            q2.pop_back();
+        }
+    }
+    cout<<"! ";
+    for(int i=1;i<=n2;i++)
+    {
+        cout<<ans[i]<<' ';
+    }
+    cout<<endl;
+}
+
+```
+
+#### [家谱->实现字符串映射到数字数字再多次反查询到字符串](https://www.luogu.com.cn/problem/P2814)
+
+- **核心模型**:并查集。使用`vector<string>` 与`map<string,int>` 实现字符串映射到数字数字再多次反查询到字符串
+
+- **关键代码**:
+
+```cpp
+//这里应该有个struct dsu
+void solve()
+{
+    string s;
+    map<string, int> sti;
+    vector<string> its;
+    auto getid = [&](string nme) -> int
+    {
+        if (sti.count(nme))
+        {
+            return sti[nme];
+        }
+        else
+        {
+            sti[nme] = its.size();
+            its.push_back(nme);//注意这里的顺序，先获取size（）再放进去要不然会ub
+            return sti[nme];
+        }
+    };
+    // vi ask;
+    int father;
+    int son;
+    vector<pii> per;
+    bool ask = 0;
+    vi que;
+    while (cin >> s)
+    {
+        string nme;
+        if (s[0] == '$')
+            break;
+        for (int i = 1; i < 7; i++)
+        {
+            nme += s[i];
+        }
+        if (s[0] == '?')
+            ask = 1;
+        int ren = getid(nme);
+        //  cerr<<ren<<'\n';
+        if (!ask)
+        {
+            if (s[0] == '#')
+            {
+                father = ren;
+                continue;
+            }
+            if (s[0] == '+')
+            {
+                son = ren;
+            }
+            per.push_back({father, son});
+        }
+        else
+        {
+            que.push_back(ren);
+        }
+        //    cerr << "cek" << '\n';
+    }
+    //   cerr << "cek" << '\n';
+    DSU dsu(its.size() + 1);
+    for (auto hsh : per)
+    {
+        //  cerr << "cek" << '\n';
+        dsu.merge(hsh.first, hsh.second);
+    }
+    for (auto hsh : que)
+    {
+        cout << its[hsh] << ' ';
+        cout << its[dsu.find(hsh)] << '\n';
+    }
+}
+
+```
+
+#### [P4147 玉蟾宫->处理最大矩形面积悬线法的dp方法](https://www.luogu.com.cn/problem/P4147 )
+
+- **核心模型**:最大矩形面积，悬线法
+- **思维误区 (Bug)**:非常容易漏掉和越界：1.\需要初始化，自己能到达的最远的格子搜显示自己，然后从右到左从左到右一个一个继承2.\ 记得第一行也要更新面积 3.\记得左闭右闭区间要加一
+- **修正逻辑 (Patch)**:需要两拨预处理，一个初始化。==初始化h为1，lr为自己==，先从左到右右到左扫一遍，然后继承上面的格子
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<vi> mp(n, vi(m, 0));
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            char d;
+            cin >> d;
+            if (d == 'F')
+            {
+                mp[i][j] = 1;
+            }
+        }
+    }
+    //==========================================//
+    vector<vi> le(n, vi(m));
+    vector<vi> ri(n, vi(m));
+    vector<vi> hei(n, vi(m, 1));
+    ll ans = 0;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            le[i][j] = j;
+            ri[i][j] = j;
+        }
+
+        for (int j = 1; j < m; j++)
+        {
+            if (mp[i][j] && mp[i][j - 1])
+            {
+                le[i][j] = le[i][j - 1];
+            }
+        }
+        for (int j = m - 2; j >= 0; j--)
+        {
+            if (mp[i][j] && mp[i][j + 1])
+            {
+                ri[i][j] = ri[i][j + 1];
+            }
+        }
+
+        for (int j = 0; j < m; j++)
+        {
+            if (i)
+            {
+                if (mp[i - 1][j] && mp[i][j])
+                {
+                    hei[i][j] = hei[i - 1][j] + 1;
+                    if (le[i - 1][j] > le[i][j])
+                    {
+                        le[i][j] = le[i - 1][j];
+                    }
+                    if (ri[i - 1][j] < ri[i][j])
+                    {
+                        ri[i][j] = ri[i - 1][j];
+                    }
+                }
+            }
+            if (mp[i][j])
+            {
+                ans = max(ans, (ll)(ri[i][j] - le[i][j] + 1) * hei[i][j]);
+            }
+        }
+    }
+    cout << ans*3 << '\n';
+}
+```
+
+---
+
+---
 
 ---
 

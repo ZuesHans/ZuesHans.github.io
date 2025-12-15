@@ -13,6 +13,118 @@ math: true
 
 ### 通过元素代价优化
 
+#### [ImbalancedArray->根据乘法原理算出每个项的贡献->维护一个区间的最大值/最小值](https://codeforces.com/problemset/problem/817/D)
+
+- **核心模型**:推式子模拟计算
+- **思维误区 (Bug)**:
+
+- **修正逻辑 (Patch)**
+  - 要求区间最大值和最小值的差。进行简单的数学划分就能划出来->sum={min}+{max}.
+  - 对于每个数来说，计算他能影响到的区间，也就是他可以给总结果的贡献
+  - 根据乘法原理可以算出一个数字他可以贡献的价值为nums[i]，他贡献的次数是他作为最大值/最小值出现在某个区间的组合种类数->ans +=(ll) (nums[i] x (i - le[i]+1) X (ri[i] - i+1));（乘法原理）
+  - **单调栈就是用来维护这种**==最近区间==的
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n + 1);
+    rep(i, 1, n)
+    {
+        cin >> nums[i];
+    }
+
+    vi le(n + 1);
+    vi ri(n + 1);
+    //-------------维护最大值-------------------//
+
+    stack<int> stkl;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!stkl.empty() && nums[stkl.top()] <= nums[i])
+        {
+            stkl.pop();
+        }
+        if (stkl.empty())
+        {
+            le[i] = 1;
+        }
+        else
+        {
+            le[i] = stkl.top() + 1;
+        }
+        stkl.emplace(i);
+    }
+    stack<int> stkr;
+    for (int i = n; i >= 1; i--)
+    {
+        while (!stkr.empty() && nums[stkr.top()] < nums[i])
+        {
+            stkr.pop();
+        }
+        if (stkr.empty())
+        {
+            ri[i] = n;
+        }
+        else
+        {
+            ri[i] = stkr.top() - 1;
+        }
+        stkr.emplace(i);
+    }
+    ll ans = 0;
+    for (int i = 1; i <= n; ++i) // 计算贡献
+        ans +=(ll) (nums[i] * (i - le[i]+1) * (ri[i] - i+1));
+    //-------------维护最小值-------------------//
+
+    vi l(n + 1);
+    vi r(n + 1);
+    stack<int> stl;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!stl.empty() && nums[stl.top()] >= nums[i])
+        {
+            stl.pop();
+        }
+        if (stl.empty())
+        {
+            l[i] = 1;
+        }
+        else
+        {
+            l[i] = stl.top() + 1;
+        }
+        stl.emplace(i);
+    }
+    stack<int> str;
+    for (int i = n; i >= 1; i--)
+    {
+        while (!str.empty() && nums[str.top()] > nums[i])
+        {
+            str.pop();
+        }
+        if (str.empty())
+        {
+            r[i] = n;
+        }
+        else
+        {
+            r[i] = str.top() - 1;
+        }
+        str.emplace(i);
+    }
+    
+    for (int i = 1; i <= n; ++i) // 计算贡献
+        ans -= (ll)(nums[i] * (i - l[i]+1) * (r[i] - i+1));
+
+    cout << ans << '\n';
+}
+```
+
+---
+
 #### C. Quotient and Remainder->抽象题意与数学性质贪心
 
 > 给两个整数数组q和r，给出整数k。可以执行以下操作若干次
@@ -1140,7 +1252,7 @@ void solve()
 }
 ```
 
-#### P2859 [USACO06FEB] Stall Reservations S(收录意义是学会读题以及请和Sunscreen一起学习)
+#### P2859 Stall Reservations S优先队列维护有效性
 
 - 这道题可以和上面三道题以及后悔贪心那道题一起看
 - 个人认为这道题并不贪心，只是一个堆的使用典例。我认为是Monopati的前戏

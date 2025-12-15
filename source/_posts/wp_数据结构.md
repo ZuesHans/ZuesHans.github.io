@@ -171,3 +171,211 @@ cout<<ans<<'\n';
 ```
 
 ---
+
+### 单调栈
+
+#### [玉蟾宫](https://www.luogu.com.cn/problem/P4147)
+
+- **核心模型**:单调栈求最大矩形面积，找到以每一行为底的高度（直接累加，线性处理）
+- **思维误区 (Bug)**:单调栈方向反了，以及单调栈里面留下的最后一个元素是最远阻挠元素，我们的通行范围是阻挠元素往里面一点的那一段
+- **修正逻辑 (Patch)**:记得检查数据范围
+- **一些思维上的疑惑**：
+  - 中间消失的那些元素，一定比栈里留下的元素“高”或者“等高”
+  - 计算合法的原因是因为维护的左边和右边由于他的特性一定是匹配的两个
+  - 单调栈的特性：找到最近的那一个，因为元素是有序的所以可以保证逻辑是线性的；
+  - 这份代码里面的单调栈查找逻辑：对于每个点（这一行）维护他的往左区间，**所以更新在emplace前更新（注意更新时间）**由于单调栈的线性逻辑特性top永远是最近的。
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<vi> mp(n, vi(m, 0));
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            char d;
+            cin >> d;
+            if (d == 'F')
+                mp[i][j] = 1;
+        }
+    }
+
+    vi h(m);
+    vi l(m), r(m);
+    ll ans = 0;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            if (mp[i][j])
+            {
+                h[j]++;
+            }
+            else
+                h[j] = 0;
+        }
+
+        stack<int> stk;
+        for (int j = 0; j < m; j++)
+        {
+            while (!stk.empty() && h[stk.top()] >= h[j])
+            {
+                stk.pop();
+            }
+
+            if (stk.empty())
+            {
+                l[j] = 0;
+            }
+            else
+            {
+                l[j] = stk.top()+1;
+            }
+
+            stk.emplace(j);
+        }
+
+        stack<int> stk1;
+        for (int j = m - 1; j >= 0; j--)
+        {
+            while (!stk1.empty() && h[stk1.top()] >= h[j])
+            {
+                stk1.pop();
+            }
+
+            if (stk1.empty())
+            {
+                r[j] = m-1;
+            }
+            else
+            {
+                r[j] = stk1.top() -1;
+            }
+
+            stk1.emplace(j);
+        }
+
+        for (int j = 0; j < m; j++)
+            ans = max(ans, (ll)(r[j] - l[j] + 1) * h[j]);
+    }
+    cout << ans * 3;
+}
+```
+
+#### [ImbalancedArray](https://codeforces.com/problemset/problem/817/D)
+
+- **核心模型**:推式子模拟计算
+- **思维误区 (Bug)**:**记得计算贡献的时候，左闭右闭区间看的是点不是长度！所以要+1**.以及你的操作是左维护一个值右边维护一个值，记得有一个区间开一个区间闭！以下提供ac代码的完美的去重逻辑
+
+- **修正逻辑 (Patch)**
+  - 要求区间最大值和最小值的差。进行简单的数学划分就能划出来->sum={min}+{max}.
+  - 对于每个数来说，计算他能影响到的区间，也就是他可以给总结果的贡献
+  - 根据乘法原理可以算出一个数字他可以贡献的价值为nums[i]，他贡献的次数是他作为最大值/最小值出现在某个区间的组合种类数->ans +=(ll) (nums[i] x (i - le[i]+1) X (ri[i] - i+1));（乘法原理）
+  - **单调栈就是用来维护这种**==最近区间==的
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n + 1);
+    rep(i, 1, n)
+    {
+        cin >> nums[i];
+    }
+
+    vi le(n + 1);
+    vi ri(n + 1);
+    //-------------维护最大值-------------------//
+
+    stack<int> stkl;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!stkl.empty() && nums[stkl.top()] <= nums[i])//区间闭
+        {
+            stkl.pop();
+        }
+        if (stkl.empty())
+        {
+            le[i] = 1;
+        }
+        else
+        {
+            le[i] = stkl.top() + 1;
+        }
+        stkl.emplace(i);
+    }
+    stack<int> stkr;
+    for (int i = n; i >= 1; i--)
+    {
+        while (!stkr.empty() && nums[stkr.top()] < nums[i])//区间开
+        {
+            stkr.pop();
+        }
+        if (stkr.empty())
+        {
+            ri[i] = n;
+        }
+        else
+        {
+            ri[i] = stkr.top() - 1;
+        }
+        stkr.emplace(i);
+    }
+    ll ans = 0;
+    for (int i = 1; i <= n; ++i) // 计算贡献
+        ans +=(ll) (nums[i] * (i - le[i]+1) * (ri[i] - i+1));
+    //-------------维护最小值-------------------//
+
+    vi l(n + 1);
+    vi r(n + 1);
+    stack<int> stl;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!stl.empty() && nums[stl.top()] >= nums[i])
+        {
+            stl.pop();
+        }
+        if (stl.empty())
+        {
+            l[i] = 1;
+        }
+        else
+        {
+            l[i] = stl.top() + 1;
+        }
+        stl.emplace(i);
+    }
+    stack<int> str;
+    for (int i = n; i >= 1; i--)
+    {
+        while (!str.empty() && nums[str.top()] > nums[i])
+        {
+            str.pop();
+        }
+        if (str.empty())
+        {
+            r[i] = n;
+        }
+        else
+        {
+            r[i] = str.top() - 1;
+        }
+        str.emplace(i);
+    }
+    
+    for (int i = 1; i <= n; ++i) // 计算贡献
+        ans -= (ll)(nums[i] * (i - l[i]+1) * (r[i] - i+1));
+
+    cout << ans << '\n';
+}
+```
+
+---
+
+---

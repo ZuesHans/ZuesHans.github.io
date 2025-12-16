@@ -5,7 +5,7 @@ tags:
     - C++
     - 数据结构
     - 算法
-cover: /img/cover/picg_6.png
+cover: /img/cover/picg_4.png
 
 ---
 

@@ -4,7 +4,7 @@ date: 2025-12-06
 tags:
     - 数学
     - 算法
-cover: /img/cover/picg_10.png
+cover: /img/cover/picg_19.png
 math: true
 ---
 

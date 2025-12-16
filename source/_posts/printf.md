@@ -4,8 +4,6 @@ date: 2025年11月22日
 tags:
     - 算法
     - C++
-
-description：算法竞赛入门模板
 highlight_shrink: false
 cover: /img/cover/picg_19.png
 

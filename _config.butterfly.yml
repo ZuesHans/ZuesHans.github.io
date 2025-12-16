@@ -18,14 +18,31 @@ default_top_img: /img/cover_3.png
 # -----------------
 # 主页副标题 (打字机)
 # -----------------
+
+# 主頁subtitle
 subtitle:
-  enable: true
+  enable: false
+  # Typewriter Effect (打字效果)
   effect: true
-  loop: true
+  index_layout: 6
+
+  # Customize typed.js
+  # https://github.com/mattboldt/typed.js/#customization
+  typed_option:
+  # source 調用第三方服務
+  # false 關閉調用
+  # 1  調用一言網的一句話（簡體） https://hitokoto.cn/
+  # 2  調用一句網（簡體） http://yijuzhan.com/
+  # 3  調用今日詩詞（簡體） https://www.jinrishici.com/
+  # subtitle 會先顯示 source , 再顯示 sub 的內容
+  source: true
+  # 如果關閉打字效果，subtitle 只會顯示 sub 的第一行文字
   sub:
-    - 'a coding cat_with love in its heart'
-    - 'Hamilton musical|Mazda RX7|CSisfate'
-    - 'Welcome to my little bag.'
+     - 'a coding cat_with love in its heart'
+     - 'Hamilton musical|Mazda RX7|CSisfate'
+     - 'Welcome to my little bag.'
+
+
 
 # -----------------
 # 社交图标 (Social Icons)
@@ -73,13 +90,31 @@ index_post_cover:
   position: top # 封面图显示在卡片顶部
 
 # -----------------
+# 代码块样式增强
+#------------------
+
+code_blocks:
+  # Code block theme: darker / pale night / light / ocean / false
+  theme: pale night
+  macStyle: true
+  # Code block height limit (unit: px)
+  height_limit: false
+  word_wrap: false
+
+  # Toolbar
+  copy: true
+  language: true
+  # true: shrink the code blocks | false: expand the code blocks | none: expand code blocks and hide the button
+  shrink: true
+  fullpage: false
+
+
+
+# -----------------
 # 数学公式 (Math)
 # -----------------
 # 详情: https://butterfly.js.org/posts/ceeb7cbf/
 
-#   math:
-#     enable: true
-#     katex: true
 # 保持你现有的开启状态，建议添加 per_page 选项
 # 这样你可以只在需要公式的文章头设置 math: true，提高其他页面的加载速度
 math:
@@ -107,9 +142,23 @@ footer:
   custom_text: 'I am a little coding cat . PLZ love me' # 底部自定义文字
   copyright: true
 
-# 6. 代码块样式增强 (Mac 风格窗口看起来更高级)
-highlight_theme: mac
-code_word_wrap: true
+#鼠标点击效果
+# 點擊出現文字，文字可自行修改
+ClickShowText:
+  enable: true
+  text:
+    - AC
+    - TLE
+    - RE
+    - UB
+    - MLE
+    - I Love you
+    - 喵
+    - WA
+  fontSize: 15px
+  random: true # 文字隨機顯示
+  mobile: false
+
 
 post_copyright:
   enable: true
@@ -123,3 +172,27 @@ post_copyright:
 inject:
   bottom:
     - <script src="/js/crash_cheat.js"></script>
+
+#---------------------
+# 页面mata展示
+#---------------------
+post_meta:
+  # Home Page
+  page:
+    # Choose: created / updated / both
+    date_type: updated
+    # Choose: date / relative
+    date_format: date
+    categories: true
+    tags: true
+    label: true
+  post:
+    # Choose: left / center
+    position: left
+    # Choose: created / updated / both
+    date_type: both
+    # Choose: date / relative
+    date_format: date
+    categories: true
+    tags: true
+    label: true

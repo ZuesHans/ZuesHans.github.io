@@ -111,6 +111,31 @@ cover: /img/cover/picg_4.png
 - 离散化映射；建图
 - mp的遍历:    for (auto it = nums.begin(); it != nums.end(); it++) 提取内容写法: auto hsh=it->second;
 
+- 用map做索引放数组
+
+```cpp
+ map<int, vector<pii>> mp;
+    for (int i = 0; i < n; i++)
+    {
+        mp[fdk(aa[i])].push_back({aa[i], i});
+    }
+    vi ans(n + 1);
+    for (auto &[k, hsh] : mp)
+    {
+        vi pp;
+        for (int i = 0; i < hsh.size(); i++)
+        {
+            pp.push_back(hsh[i].first);
+        }
+        sort(all(pp));
+
+        for (int i = 0; i < hsh.size(); i++)
+        {
+            ans[hsh[i].second] = pp[i];
+        }
+    }
+```
+
 ## std::unordered_set / unordered_map —— 哈希表（平均 O(1)）但是好像最坏能到O（n）
 >
 >我不会，也没做过类似的题，以下内容均由ai生成

@@ -116,6 +116,115 @@ void solve()
 
 ### 二进制与位运算
 
+#### [D. Blackslex and Penguin Civilization](https://codeforces.com/contest/2179/problem/D  )
+
+- **核心模型**贪心求排列&前缀和的和最大，有相同的输出字典序最小的排列
+- **思维误区 (Bug)**:以为只有 0011111 0001111 0000111 0000011这样的数字能够维持。hack：0011111 0001111 0000111 **0010111**
+- **修正逻辑 (Patch)**:因为要保持前缀&运算最大：就是把1保留的越久越好。尽可能的让第一个0出现（这里的0可以是最高位往下数或者最低位往上数）的晚，而在同样能保留前缀（或者后缀）1的一个集合中sort就可以了。最高位最多1是一定会保留且作为第一位。容易发现因为要字典序最小，我们得找递减，也就是高位删到低位顺序。因为低位删到高位数字前面书字太大了。因为要留住最低位的1所以所有偶数挑出来sort.复杂度nlogn
+- **做法修正：**打表找规律吧
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    
+    int n;
+    cin>>n;
+    map<int,vi> hsh;
+
+    auto cnt=[&](int a)->int{
+        int cnt1=0;
+        for(int i=0;i<=30;i++)
+        {
+            if (a&(1 << i))
+            {
+                cnt1++;
+            }
+            else break;
+
+        }
+        return cnt1;
+    };
+
+    for(int i=0;i<=(1<<n)-1;i++)
+    {
+        if(i%2)
+        //cerr<<i<<' '<<cnt(i)<<'\n';
+        hsh[-1*cnt(i)].push_back(i);
+    }
+    vi ans;
+    for(auto it:hsh)
+    {
+        vi q=it.second;
+        sort(all(q));
+        for(auto d:q)
+        {
+            ans.push_back(d);
+        }
+    }
+     for(int i=0;i<=(1<<n)-1;i++)
+    {
+        if(i%2==0)
+        ans.push_back(i);
+    }
+    for(auto uu:ans)
+    {
+        cout<<uu<<' ';
+    }
+    cout<<'\n';
+}
+
+```
+
+---
+
+#### [C. XOR-factorization](https://codeforces.com/contest/2180/problem/C)
+
+- **核心模型**: 位运算，异或
+- **思维误区 (Bug)**:贪心贪错了，不会实现，答案反直觉
+- **修正逻辑 (Patch)**:异或和实现
+- **关键代码**:
+
+```cpp
+    int n, k;
+    cin >> n >> k;
+    vi ans(k, n);
+    if (k % 2==0)
+    {
+        int tp = 0;
+        for (int qq = 30; qq >= 0; qq--)
+        {
+            if (n & (1 << qq))
+            {
+                if (tp < k)
+                {
+                    ans[tp] ^= (1 << qq);
+                    tp++;
+                }
+                else
+                {
+                    ans[0] ^= (1 << qq);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < tp-1 ; i+=2)
+                {
+                    ans[i] ^= (1 << qq);
+                    ans[i+1]^=(1<<qq);
+                }
+            }
+        }
+    }
+    for (auto hsh : ans)
+    {
+        cout << hsh << ' ';
+    }
+    cout << '\n';
+```
+
+---
+
 #### 子段异或和
 
 - **题号**: D

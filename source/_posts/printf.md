@@ -2082,7 +2082,7 @@ int main() {
 }
 ```
 
-## 树状数组 (Fenwick Tree/BIT)
+## 树状数组
 
 ```cpp
 struct Fenwick {
@@ -2091,6 +2091,13 @@ struct Fenwick {
 
     // 初始化：传入最大长度 n
     Fenwick(int size) : n(size), tr(size + 1, 0) {}
+    //初始化2：节省时间开销的init
+    void init(int size) {s
+        // assign 会重置大小并全填为0
+        // 如果 vector 之前的 capacity 够大，它不会重新申请内存，只会重置数据
+        // 这样就兼顾了速度和方便
+        tr.assign(n + 1, 0); 
+    }
 
     // 核心位运算：获取二进制最低位的 1
     int lowbit(int x) { 
@@ -2145,6 +2152,7 @@ int main() {
 
 ## ST表
 
+- **ST表是解决“静态”区间最值问题的工具**
 - 相比线段树，ST 表最大的优势是 查询时间严格 $O(1)$，常数极小。
 - 缺点是 不支持修改（静态）且内存占用稍大 ($O(N \log N)$)。 F
 

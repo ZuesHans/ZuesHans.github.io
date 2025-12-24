@@ -376,6 +376,80 @@ void solve()
 }
 ```
 
+#### [良好的感觉](https://www.luogu.com.cn/problem/P2422)
+
+- **核心模型**:单调栈维护某个最小值的“生效区间”
+- **思维误区 (Bug)**:单调栈的边界判断-悬线法
+- **修正逻辑 (Patch)**:左边边界收缩（+1）一点，右边边界收缩（-1）一点
+- **单调栈逻辑**：维护最小值堆里面留下大的，维护最大值堆里面留下小的
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    int d;
+    vi qzh(n + 1);
+    vi nms(n + 1);
+    rep(i, 1, n)
+    {
+        cin >> d;
+        nms[i] = d;
+        qzh[i] = qzh[i - 1] + d;
+    }
+
+    vi l(n + 1);
+    vi r(n + 1);
+    stack<int> stl;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!stl.empty() && nms[stl.top()] >= nms[i])
+        {
+            stl.pop();
+        }
+        if (stl.empty())
+        {
+            l[i] = 1;
+        }
+        else
+        {
+            l[i] = stl.top() +1;
+        }
+        stl.emplace(i);
+    }
+    stack<int> str;
+    for (int i = n; i >= 1; i--)
+    {
+        while (!str.empty() && nms[str.top()] > nms[i])
+        {
+            str.pop();
+        }
+        if (str.empty())
+        {
+            r[i] = n;
+        }
+        else
+        {
+            r[i] = str.top()-1;
+        }
+        str.emplace(i);
+    }
+    ll ans = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        ll sumq = qzh[r[i]] - qzh[l[i]-1];
+        ll qq = nms[i];
+       // cerr<<sumq<<' '<<qq<<' '<<nms[i]<<"sss"<<l[i]<<' '<<r[i]<<'\n';
+        ans = max(ans, sumq * qq);
+    }
+    cout<<ans;
+}
+
+```
+
+---
+
 ---
 
 ---

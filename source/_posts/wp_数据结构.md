@@ -5,7 +5,7 @@ tags:
     - 算法
 cover: /img/cover/default.png
 ---
-
+## 数据结构
 
 ### 并查集
 
@@ -448,8 +448,285 @@ void solve()
 
 ```
 
----
+#### [F. Rae Taylor and Trees (hard version)](https://codeforces.com/problemset/problem/2171/F)
+
+- **核心模型**:单调栈维护树状连通块，难点在连通块连接
+- **思维误区 (Bug)**:记录第一直觉为什么错了 (如: 以为是DP其实是贪心 / 读错题)
+- **修正逻辑 (Patch)**:
+  - 连通块链接处理方法->维护前缀最小值，链接到前缀最小值头上去
+  - 错误逻辑二：单调栈写错了
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n+1);
+    vi pre(n+1);
+    pre[0]=n+1;
+    rep(i, 1, n)
+    {
+        cin >> nums[i];
+        pre[i]=min(nums[i],pre[i-1]);
+    }
+
+    auto cek = [&]() -> bool
+    {
+        int mn = -1;
+        for (int i = n , cnt = 1; i > 1; i--, cnt++)
+        {
+            mn = max(mn, nums[i]);
+           
+            if (mn == cnt)
+            {
+                cout << "No" << '\n';
+                return 0;
+            }
+        }
+        return 1;
+    };
+
+    if (!cek())
+        return;
+
+    vi fa(n + 1);
+    stack<int> stk;
+    vi suf;
+    for (int i = n; i >0; i--)
+    {
+        while (!stk.empty() && nums[stk.top()] < nums[i])
+        {
+            stk.pop();
+        }
+        if (stk.empty())
+        {
+            fa[i] = 0;
+            suf.push_back(-1*i);
+        }
+        else 
+        {
+            fa[i]=stk.top();
+        }
+        stk.emplace(i);
+    }
+
+   vi  ans(n+1);
+    for(int i=n;i>0;i--)
+    {
+       
+        if(fa[i]==0&&nums[i]!=n)
+        {
+            int idx;
+            if(upper_bound(all(suf),-1*i)!=suf.end())
+            {
+                 idx=-1*(*upper_bound(all(suf),-1*i));
+            }
+            else idx=i-1;
+            ans[i]=pre[idx];
+        }
+        else ans[i]=nums[fa[i]];
+    }
+
+
+
+    cout << "Yes" << '\n';
+    for(int i=1;i<=n;i++)
+    {
+        if(nums[i]==n)continue;
+        cout<<nums[i]<<' '<<ans[i]<<'\n';
+    }
+
+
+}
+```
+
+#### **关于单调栈得两种写法**
+
+由于学习了悬线法之后脑子变成石头了总是搞反两种写法：以下时讲解
+
+- 倒序遍历
+
+```cpp
+vector<int> nextGreaterElementBackward(const vector<int>& nums) {
+    int n = nums.size();
+    vector<int> ans(n, -1); // 初始化为 -1
+    stack<int> st; // 存下标
+
+    // 从右往左遍历
+    for (int i = n - 1; i >= 0; i--) {
+        // 1. 维护单调性：把栈顶比当前元素 nums[i] 小的（或相等的）都踢掉
+        // 因为 nums[i] 挡在了它们前面，且 nums[i] 更大，所以它们不可能是左边元素的答案了
+        while (!st.empty() && nums[st.top()] <= nums[i]) {
+            st.pop();
+        }
+
+        // 2. 记录答案：现在的栈顶就是右边第一个比我大的
+        if (!st.empty()) {
+            ans[i] = nums[st.top()]; 
+            // 如果题目要求存下标，这里就写 ans[i] = st.top();
+        }
+
+        // 3. 入栈：把自己放进去，作为左边元素的备选
+        st.push(i);
+    }
+    return ans;
+}
+```
+
+- 正序遍历
+
+```cpp
+vector<int> nextGreaterElementForward(const vector<int>& nums) {
+    int n = nums.size();
+    vector<int> ans(n, -1); // 初始化为 -1
+    stack<int> st; // 【必须】存下标，否则不知道答案该填给谁
+
+    // 从左往右遍历
+    for (int i = 0; i < n; i++) {
+        // 1. 结算：如果当前 nums[i] 比栈顶元素大
+        // 说明栈顶那个家伙终于等到它的“右边第一个大数”了
+        while (!st.empty() && nums[i] > nums[st.top()]) {
+            int index = st.top(); // 取出等待者的下标
+            st.pop();
+            ans[index] = nums[i]; // 给这个下标填上答案
+        }
+
+        // 2. 入栈：当前 nums[i] 还没找到比它大的，入栈等待
+        st.push(i);
+    }
+    return ans;
+}
+
+```
+
+>>以下是几个**“不能（或很难）互换”**的关键场景：1 涉及到“数据依赖”的 DP 问题 (Backward 胜出)2.悬线法 / 柱状图最大矩形 (Forward 的一次遍历优化)3. 字典序要求 (特殊场景)4. 环形数组 (Forward 略微好写)
 
 ---
+
+### 字典树
+
+#### [最大异或对 The XOR Largest Pair](https://www.luogu.com.cn/problem/P10471)
+
+- **核心模型**:贪心最高位往下（前缀差异长度）
+- **思维误区 (Bug)**:忘记字典树每一位都需要递归下去
+- **修正逻辑 (Patch)**:字典树的两个循环本质是递归所以记得更新指针
+- **关键代码**:
+
+```cpp
+struct Trie
+{
+    int tre[MAXN][2];
+    int cnt[MAXN];
+    int idx = 0;
+
+    void clear()
+    {
+        for (int i = 0; i <= idx; i++)
+        {
+            for (int j = 0; j < 2; j++)
+                tre[i][j] = 0;
+            cnt[i] = 0;
+        }
+        idx = 0;
+    }
+
+    int getnum(char ch)
+    {
+        // if (ch >= 'A' && ch <= 'Z')
+        // {
+        //     return ch - 'A';
+        // }
+        // else if (ch >= 'a' && ch <= 'z')
+        // {
+        //     return ch - 'a' + 26;
+        // }
+        // else
+        if (ch >= '0' && ch <= '9')
+        {
+            return ch - '0';
+        }
+    }
+
+    void insert(string s)
+    {
+        int ptr1 = 0;
+        int bra = 0;
+        for (int i = 0; i < s.size(); i++)
+        {
+            if (!tre[ptr1][getnum(s[i])])
+            {
+                idx++;
+                tre[ptr1][getnum(s[i])] = idx;
+            }
+            ptr1 = tre[ptr1][getnum(s[i])];
+            cnt[ptr1]++;
+        }
+    }
+
+    int query(string s)
+    {
+        int ans=0;
+        int ptr2 = 0;
+        for (int i = 0; i < s.size(); i++)
+        {
+            if (tre[ptr2][getnum(s[i])^1])
+            {
+                ptr2=tre[ptr2][getnum(s[i]^1)];
+                ans+= (1ll << (s.size() -1 - i));
+               // cerr<<(1 << (s.size()  - i));
+            }
+            else 
+            {
+                ptr2=tre[ptr2][getnum(s[i])];
+            }
+        }
+        return ans;
+    }
+} myTrie;
+
+void solve()
+{
+    int n;
+    cin>>n;
+
+    auto tos=[&](int d)->string
+    {
+        int q=d;
+        string s="";
+        while(d>0)
+        {
+            s+=(d%2)+'0';
+            d/=2;
+        }
+        int yy=(31-s.size());
+        while(yy--)
+        {
+            s+='0';
+        }
+        std::reverse(s.begin(), s.end());
+        return s;
+    };
+    vi nums(n);
+    for(int i=0;i<n;i++)
+    {
+        int d;
+        cin>>d;
+    //cerr<<tos(d)<<'\n';
+        myTrie.insert(tos(d));
+        nums[i]=d;
+    }
+    vi jb(n);
+    for(int i=0;i<n;i++)
+    {
+        jb[i]=myTrie.query(tos(nums[i]));
+      // cerr<<jb[i]<<' ';
+       cerr<<'\n';
+    }
+    cout<<*max_element(all(jb));
+
+}
+
+```
 
 ---

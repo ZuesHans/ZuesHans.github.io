@@ -1370,6 +1370,129 @@ return slow; // slow 即为新数组的长度
 
 ## 数据结构
 
+### 树状数组
+
+```cpp
+struct Fenwick {
+    int n;
+    vector<long long> tr;
+
+    // 初始化：传入最大长度 n
+    Fenwick(int size) : n(size), tr(size + 1, 0) {}
+    //初始化2：节省时间开销的init
+    void init(int size) {s
+        // assign 会重置大小并全填为0
+        // 如果 vector 之前的 capacity 够大，它不会重新申请内存，只会重置数据
+        // 这样就兼顾了速度和方便
+        tr.assign(n + 1, 0); 
+    }
+
+    // 核心位运算：获取二进制最低位的 1
+    int lowbit(int x) { 
+        return x & -x; 
+    }
+
+    // 单点修改：在位置 x 加上 val
+    void add(int x, long long val) {
+        for (; x <= n; x += lowbit(x)) {
+            tr[x] += val;
+        }
+    }
+
+    // 查询前缀和：查询 [1, x] 的和
+    long long ask(int x) {
+        long long res = 0;
+        for (; x > 0; x -= lowbit(x)) {
+            res += tr[x];
+        }
+        return res;
+    }
+
+    // 区间查询：查询 [l, r] 的和
+    long long range_ask(int l, int r) {
+        if (l > r) return 0;
+        return ask(r) - ask(l - 1);
+    }
+};
+
+int main() {
+    int n = 10;
+    Fenwick bit(n); // 初始化大小
+
+    // 1. 比如输入数组 a[1...n]
+    for(int i = 1; i <= n; i++) {
+        int x; cin >> x;
+        bit.add(i, x); // 初始化树状数组
+    }
+
+    // 2. 单点修改：把第 3 个数加上 5
+    bit.add(3, 5);
+
+    // 3. 区间查询：查 [2, 5] 的和
+    cout << bit.range_ask(2, 5) << endl;
+}
+```
+
+>常用变体思路
+>
+> - 区间修改 + 单点查询：维护一个 差分数组 的树状数组。区间 [l, r] 加 v $\rightarrow$ add(l, v) 和 add(r+1, -v)。
+> - 单点 x 查询 $\rightarrow$ ask(x) (因为差分的前缀和就是原数组的值)。求逆序对：权值树状数组。将数字看作下标，出现一次就 add(num, 1)，统计 ask(num-1) 或 total - ask(num)。
+
+### ST表
+
+- **ST表是解决“静态”区间最值问题的工具**
+- 相比线段树，ST 表最大的优势是 查询时间严格 $O(1)$，常数极小。
+- 缺点是 不支持修改（静态）且内存占用稍大 ($O(N \log N)$)。 F
+
+```cpp
+
+template <typename T>
+struct ST {
+    int n;
+    vector<vector<T>> st;
+
+    // 构造函数：传入 vector<int> a 即可
+    // 默认实现的是区间【最大值】，如需最小值请把 max 改 min
+    ST(const vector<T> &a) {
+        n = a.size();
+        int K = __lg(n) + 1; // 计算需要的最大层数
+        st.assign(n, vector<T>(K));
+
+        // 1. 初始化第一层 (长度为 1)
+        for (int i = 0; i < n; i++) 
+            st[i][0] = a[i];
+
+        // 2. 倍增预处理
+        for (int j = 1; j < K; j++) {
+            for (int i = 0; i + (1 << j) <= n; i++) {
+                // st[i][j] = max(左半段, 右半段)
+                st[i][j] = max(st[i][j - 1], st[i + (1 << (j - 1))][j - 1]);
+            }
+        }
+    }
+
+    // 查询闭区间 [l, r] 的最大值 (0-based)
+    T query(int l, int r) {
+        int k = __lg(r - l + 1); // 快速计算 log2(len)
+        return max(st[l][k], st[r - (1 << k) + 1][k]);
+    }
+};
+
+int main() {
+    // 假设输入数据
+    vector<int> a = {1, 9, 2, 8, 3, 7};
+    
+    // 1. 初始化 (自动预处理)
+    ST<int> st(a);
+
+    // 2. 查询区间 [1, 4] (即 9, 2, 8, 3) 的最大值
+    // 注意：如果是题目给的 1-based 坐标 l, r，这里要写 query(l-1, r-1)
+    cout << st.query(1, 4) << endl; // 输出 9
+    
+    return 0;
+}
+```
+
 ### 单调栈/单调队列
 
 - **运用场景**
@@ -2023,189 +2146,9 @@ int LIS_nlogn(vector<int>& a) {
 
 - **注意**：求下降序列需要`auto it= upper_bound(all(hei),hsh,greater<int>());`。普通的公式只能算：**排列好后的不下降数列**
 
-## 并查集 (DSU) Pro版
+## 杂
 
-```cpp
-struct DSU {
-    std::vector<int> fa, sz;
-    int count; // 连通块数量
-
-    // 初始化：传入点数 n (支持 0~n 或 1~n)
-    DSU(int n) : fa(n + 1), sz(n + 1, 1), count(n) {
-        std::iota(fa.begin(), fa.end(), 0); // 0, 1, 2...
-    }
-
-    // 查找 + 路径压缩
-    int find(int x) {
-        return x == fa[x] ? x : fa[x] = find(fa[x]);
-    }
-
-    // 合并 x 和 y
-    // 返回 true 表示合并成功（原来不连通）
-    // 返回 false 表示原来就是连通的
-    bool merge(int x, int y) {
-        int rootX = find(x);
-        int rootY = find(y);
-        
-        if (rootX == rootY) return false;
-
-        // 启发式合并：把小的树接到大的树下面
-        if (sz[rootX] < sz[rootY]) std::swap(rootX, rootY);
-        
-        fa[rootY] = rootX;      // Y 认 X 做爹
-        sz[rootX] += sz[rootY]; // X 吸收 Y 的人口
-        count--;                // 连通块少一个
-        return true;
-    }
-
-    // 判断是否连通
-    bool same(int x, int y) {
-        return find(x) == find(y);
-    }
-
-    // 获取 x 所在连通块的大小
-    int size(int x) {
-        return sz[find(x)];
-    }
-};
-
-int main() {
-    int n = 5;
-    DSU dsu(n);
-    
-    dsu.merge(1, 2);
-    dsu.merge(3, 4);
-    
-    cout << dsu.same(1, 2) << endl; // true
-    cout << dsu.size(1) << endl;    // 2 (因为1和2连通)
-    cout << dsu.count << endl;      // 3 (连通块: {1,2}, {3,4}, {5})
-}
-```
-
-## 树状数组
-
-```cpp
-struct Fenwick {
-    int n;
-    vector<long long> tr;
-
-    // 初始化：传入最大长度 n
-    Fenwick(int size) : n(size), tr(size + 1, 0) {}
-    //初始化2：节省时间开销的init
-    void init(int size) {s
-        // assign 会重置大小并全填为0
-        // 如果 vector 之前的 capacity 够大，它不会重新申请内存，只会重置数据
-        // 这样就兼顾了速度和方便
-        tr.assign(n + 1, 0); 
-    }
-
-    // 核心位运算：获取二进制最低位的 1
-    int lowbit(int x) { 
-        return x & -x; 
-    }
-
-    // 单点修改：在位置 x 加上 val
-    void add(int x, long long val) {
-        for (; x <= n; x += lowbit(x)) {
-            tr[x] += val;
-        }
-    }
-
-    // 查询前缀和：查询 [1, x] 的和
-    long long ask(int x) {
-        long long res = 0;
-        for (; x > 0; x -= lowbit(x)) {
-            res += tr[x];
-        }
-        return res;
-    }
-
-    // 区间查询：查询 [l, r] 的和
-    long long range_ask(int l, int r) {
-        if (l > r) return 0;
-        return ask(r) - ask(l - 1);
-    }
-};
-
-int main() {
-    int n = 10;
-    Fenwick bit(n); // 初始化大小
-
-    // 1. 比如输入数组 a[1...n]
-    for(int i = 1; i <= n; i++) {
-        int x; cin >> x;
-        bit.add(i, x); // 初始化树状数组
-    }
-
-    // 2. 单点修改：把第 3 个数加上 5
-    bit.add(3, 5);
-
-    // 3. 区间查询：查 [2, 5] 的和
-    cout << bit.range_ask(2, 5) << endl;
-}
-```
-
->常用变体思路
->
-> - 区间修改 + 单点查询：维护一个 差分数组 的树状数组。区间 [l, r] 加 v $\rightarrow$ add(l, v) 和 add(r+1, -v)。
-> - 单点 x 查询 $\rightarrow$ ask(x) (因为差分的前缀和就是原数组的值)。求逆序对：权值树状数组。将数字看作下标，出现一次就 add(num, 1)，统计 ask(num-1) 或 total - ask(num)。
-
-## ST表
-
-- **ST表是解决“静态”区间最值问题的工具**
-- 相比线段树，ST 表最大的优势是 查询时间严格 $O(1)$，常数极小。
-- 缺点是 不支持修改（静态）且内存占用稍大 ($O(N \log N)$)。 F
-
-```cpp
-
-template <typename T>
-struct ST {
-    int n;
-    vector<vector<T>> st;
-
-    // 构造函数：传入 vector<int> a 即可
-    // 默认实现的是区间【最大值】，如需最小值请把 max 改 min
-    ST(const vector<T> &a) {
-        n = a.size();
-        int K = __lg(n) + 1; // 计算需要的最大层数
-        st.assign(n, vector<T>(K));
-
-        // 1. 初始化第一层 (长度为 1)
-        for (int i = 0; i < n; i++) 
-            st[i][0] = a[i];
-
-        // 2. 倍增预处理
-        for (int j = 1; j < K; j++) {
-            for (int i = 0; i + (1 << j) <= n; i++) {
-                // st[i][j] = max(左半段, 右半段)
-                st[i][j] = max(st[i][j - 1], st[i + (1 << (j - 1))][j - 1]);
-            }
-        }
-    }
-
-    // 查询闭区间 [l, r] 的最大值 (0-based)
-    T query(int l, int r) {
-        int k = __lg(r - l + 1); // 快速计算 log2(len)
-        return max(st[l][k], st[r - (1 << k) + 1][k]);
-    }
-};
-
-int main() {
-    // 假设输入数据
-    vector<int> a = {1, 9, 2, 8, 3, 7};
-    
-    // 1. 初始化 (自动预处理)
-    ST<int> st(a);
-
-    // 2. 查询区间 [1, 4] (即 9, 2, 8, 3) 的最大值
-    // 注意：如果是题目给的 1-based 坐标 l, r，这里要写 query(l-1, r-1)
-    cout << st.query(1, 4) << endl; // 输出 9
-    
-    return 0;
-}
-```
-
-## 字符串哈希
+### 字符串哈希
 
 - 下标建议从 1 开始逻辑（模板内部已处理，你传入 0-based 字符串即可）。
 

@@ -219,3 +219,94 @@ int main() {
     return 0;
 }
 ```
+
+---
+
+## 字典树模板
+
+```cpp
+struct Trie
+{
+    int tre[MAXN][70];
+    int cnt[MAXN];
+    int idx = 0;
+
+    void clear()
+    {
+        for (int i = 0; i <= idx; i++)
+        {
+            for (int j = 0; j < 65; j++)
+                tre[i][j] = 0;
+            cnt[i] = 0;
+        }
+        idx = 0;
+    }
+
+    int getnum(char ch)
+    {
+        if (ch >= 'A' && ch <= 'Z')
+        {
+            return ch - 'A';
+        }
+        else if (ch >= 'a' && ch <= 'z')
+        {
+            return ch - 'a' + 26;
+        }
+        else if (ch >= '0' && ch <= '9')
+        {
+            return ch - '0' + 52;
+        }
+    }
+
+    void insert(string s)
+    {
+        int ptr1 = 0;
+        int bra = 0;
+        for (int i = 0; i < s.size(); i++)
+        {
+            if (!tre[ptr1][getnum(s[i])])
+            {
+                idx++;
+                tre[ptr1][getnum(s[i])] = idx;
+            }
+            ptr1 = tre[ptr1][getnum(s[i])];
+            cnt[ptr1]++;
+        }
+    }
+
+    int query(string s)
+    {
+        int ptr2 = 0;
+        for (int i = 0; i < s.size(); i++)
+        {
+            if (!tre[ptr2][getnum(s[i])])
+            {
+                return 0;
+            }
+            ptr2 = tre[ptr2][getnum(s[i])];
+        }
+        return cnt[ptr2];
+    }
+}myTrie;
+
+void solve()
+{
+    myTrie.clear();
+    int n, q;
+    cin >> n >> q;
+    for (int i = 0; i < n; i++)
+    {
+        string s;
+        cin >> s;
+        myTrie.insert(s);
+    }
+    for (int i = 0; i < q; i++)
+    {
+        string t;
+        cin >> t;
+        // 调用 query 并输出结果
+        cout << myTrie.query(t) << "\n";
+    }
+}
+
+```

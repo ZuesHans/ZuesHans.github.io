@@ -1,75 +1,51 @@
 # -----------------
-# 1. 头像 (Avatar)
-
+# 1. 头像 /图标
 favicon: /img/cover_2.jpg
-# -----------------
 avatar:
   img: /img/cover_2.jpg
   effect: false 
 
 # -----------------
-# 2. 头图 (Banner)
-# -----------------
-# 首页头图
+# 2. 头图 
 index_img: /img/cover_1.png
-# 其他页面的默认头图
 default_top_img: /img/cover_3.png
 
 # -----------------
 # 主页副标题 (打字机)
-# -----------------
-
-# 主頁subtitle
 subtitle:
   enable: false
-  # Typewriter Effect (打字效果)
   effect: true
-  index_layout: 6
-
-  # Customize typed.js
-  # https://github.com/mattboldt/typed.js/#customization
-  typed_option:
-  # source 調用第三方服務
-  # false 關閉調用
-  # 1  調用一言網的一句話（簡體） https://hitokoto.cn/
-  # 2  調用一句網（簡體） http://yijuzhan.com/
-  # 3  調用今日詩詞（簡體） https://www.jinrishici.com/
-  # subtitle 會先顯示 source , 再顯示 sub 的內容
-  source: true
-  # 如果關閉打字效果，subtitle 只會顯示 sub 的第一行文字
   sub:
      - 'a coding cat_with love in its heart'
      - 'Hamilton musical|Mazda RX7|CSisfate'
      - 'Welcome to my little bag.'
 
+index_layout: 6
 
+#------------------
+# 文章预浏览展示
+index_post_content:
+  method: 4
 
 # -----------------
 # 社交图标 (Social Icons)
-# -----------------
 social:
   fas fa-envelope: mailto:kai779@qq.com || 最正经的联系我的方式
   fab fa-github: https://github.com/ZuesHans || GitHub
-  fas fa-rss: /atom.xml || RSS
   fas fa-code: https://codeforces.com/profile/keronshans || 不要时间我啊555
 
 # -----------------
 # 3. 菜单 (Menu)
-# -----------------
 menu:
   主页: / || fas fa-home
   归档: /archives/ || fas fa-archive
   标签: /tags/ || fas fa-tags
   links: /link/ || fas fa-link
+  關於: /about/ || fas fa-heart
+  音樂: /music/ || fas fa-music
 
 # -----------------
 # 侧边栏 (Aside)
-# -----------------
-# aside:
-#   # 公告
-#   card_announcement:
-#     enable: true
-#     content: '这里是一只会打字的小猫<br>欢迎来找我玩！<br>小猫永远喜欢unk大人/小声'
 aside:
   card_announcement:
     enable: true
@@ -82,7 +58,7 @@ aside:
       </a>
 
 # -----------------
-# 首页文章封面 (!! 新增以满足你的需求)
+# 首页文章封面 
 # -----------------
 # 确保你文章的 Front-matter (开头信息) 中设置了 'cover' 字段
 index_post_cover:
@@ -91,8 +67,6 @@ index_post_cover:
 
 # -----------------
 # 代码块样式增强
-#------------------
-
 code_blocks:
   # Code block theme: darker / pale night / light / ocean / false
   theme: pale night
@@ -112,11 +86,6 @@ code_blocks:
 
 # -----------------
 # 数学公式 (Math)
-# -----------------
-# 详情: https://butterfly.js.org/posts/ceeb7cbf/
-
-# 保持你现有的开启状态，建议添加 per_page 选项
-# 这样你可以只在需要公式的文章头设置 math: true，提高其他页面的加载速度
 math:
   enable: true
   per_page: false # 开启后，需要在文章的 front-matter 里写 math: true 才会加载公式
@@ -142,22 +111,6 @@ footer:
   custom_text: 'I am a little coding cat . PLZ love me' # 底部自定义文字
   copyright: true
 
-#鼠标点击效果
-# 點擊出現文字，文字可自行修改
-ClickShowText:
-  enable: true
-  text:
-    - AC
-    - TLE
-    - RE
-    - UB
-    - MLE
-    - I Love you
-    - 喵
-    - WA
-  fontSize: 15px
-  random: true # 文字隨機顯示
-  mobile: false
 
 
 post_copyright:
@@ -196,3 +149,19 @@ post_meta:
     categories: true
     tags: true
     label: true
+
+#-----------------------
+# 本地搜索
+search:
+  use: local_search  # 这里填 local_search
+
+# Local Search
+local_search:
+  # 是否预加载（建议 false，节省流量；如果想要极致速度设为 true）
+  preload: false
+  # 每篇文章显示多少条结果
+  top_n_per_article: 1
+  # 是否解码 HTML（保持默认 false 即可）
+  unescape: false
+  # CDN 留空即可使用本地生成的 search.xml
+  CDN:

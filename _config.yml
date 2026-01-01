@@ -119,3 +119,9 @@ markdown:
     # 确保这个插件还在
     - plugin: markdown-it-katex
 
+# Search 插件配置
+search:
+  path: search.xml
+  field: post
+  content: true
+  format: striptags

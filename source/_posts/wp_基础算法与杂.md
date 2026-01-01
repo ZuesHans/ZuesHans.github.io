@@ -5,6 +5,8 @@ tags:
   - 算法
   - C++
   - Problems
+  - STL
+  - tricks
 cover: /img/cover/picg_11.png
 
 math: true

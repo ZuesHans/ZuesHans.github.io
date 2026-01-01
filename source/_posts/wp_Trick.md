@@ -4,6 +4,7 @@ date: 2025-12-06
 tags:
     - Trick
     - 算法
+    - Problems
 cover: /img/cover/picg_9.png
 math: true
 ---

@@ -1,9 +1,10 @@
 ---
-title: 基础算法
+title: ZU_基础算法
 date: 2025年11月22日
 tags:
     - 算法
     - C++
+    - 模板
 highlight_shrink: false
 cover: /img/cover/picg_19.png
 

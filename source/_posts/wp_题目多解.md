@@ -3,6 +3,8 @@ title: wp_题目多解
 date: 2025-12-13
 tags:
     - 算法
+    - Problems
+
 cover: /img/cover/picg_16.png
 ---
 

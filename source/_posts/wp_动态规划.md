@@ -4,6 +4,8 @@ date: 2025-12-06
 tags:
     - 算法
     - DP
+    - Problems
+
 
 cover: /img/cover/picg_5.png
 math: true

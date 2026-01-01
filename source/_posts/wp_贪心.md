@@ -4,6 +4,8 @@ date: 2025-12-06
 tags:
     - 贪心算法
     - 算法
+    - Problems
+    - 贪心
 cover: /img/cover/picg_8.png
 math: true
 ---

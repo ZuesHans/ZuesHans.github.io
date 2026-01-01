@@ -4,6 +4,8 @@ date: 2025-12-06
 tags:
     - 杂谈
     - 算法
+    - Problems
+    - 图论
 cover: /img/cover/picg_11.png
 math: true
 ---

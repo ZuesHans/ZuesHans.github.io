@@ -4,6 +4,8 @@ date: 2025-12-06
 tags:
     - 数学
     - 算法
+    - Problems
+
 cover: /img/cover/picg_19.png
 math: true
 ---

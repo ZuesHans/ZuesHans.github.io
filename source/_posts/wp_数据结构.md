@@ -608,7 +608,7 @@ vector<int> nextGreaterElementForward(const vector<int>& nums) {
 
 - 找最大xor对，查前缀
 
-#### [最大异或对 The XOR Largest Pair](https://www.luogu.com.cn/problem/P10471)
+#### [最大异或对](https://www.luogu.com.cn/problem/P10471)
 
 - **核心模型**:贪心最高位往下（前缀差异长度）
 - **思维误区 (Bug)**:忘记字典树每一位都需要递归下去

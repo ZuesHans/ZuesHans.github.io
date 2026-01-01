@@ -3,7 +3,7 @@ title: wp_数据结构
 date: 2025-12-10
 tags:
     - 算法
-cover: /img/cover/default.png
+cover: /img/cover/picg_14.png
 ---
 ## 数据结构
 
@@ -605,6 +605,8 @@ vector<int> nextGreaterElementForward(const vector<int>& nums) {
 ---
 
 ### 字典树
+
+- 找最大xor对，查前缀
 
 #### [最大异或对 The XOR Largest Pair](https://www.luogu.com.cn/problem/P10471)
 

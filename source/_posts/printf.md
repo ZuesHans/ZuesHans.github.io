@@ -2111,6 +2111,12 @@ for (int i = 1; i <= n; ++i) {
 - O(n^2)做法:$$dp[i] = \max(dp[j]) + 1 \quad \text{其中 } 0 \le j < i, a[i] > a[j]$$
 - O(nlogn)做法：
 
+- **注意事项**
+  - 代码体现：
+    - 严格 (<): lower_bound(d.begin(), d.end(), x)
+    - 不降 (<=): upper_bound(d.begin(), d.end(), x)
+  - d 数组的真实含义 ：如果你需要输出具体的子序列内容，不能直接打印 d，需要记录 pre 数组回溯。
+
 ```cpp
 int LIS_nlogn(vector<int>& a) {
     if (a.empty()) return 0;

@@ -82,6 +82,97 @@ void solve() {
 
 ### 线性DP
 
+#### [E. LIS of Sequence](https://codeforces.com/problemset/problem/486/E)
+
+- **核心模型**:LIS的性质，寻找“可能会出现”的小trick（拼接法）
+- **思维误区 (Bug)**:**LIS注意是要求你单调递增还是不下降**，哈希表可能会用重复的数字，所以我们需要对于每一个数字单独判断
+- **修正逻辑 (Patch)**：注意LIS要求你求单调递增还是不下降，求以ai开头的LIS长度是多少可以用倒叙加greater<>；要求你单调增的LIS需要用lowerbound
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nm(n);
+    rep(i, 0, n - 1)
+    {
+        cin >> nm[i];
+    }
+
+    auto LIS = [&](vi &aa) -> void
+    {
+        vector<int> d;
+        for (int i = 0; i < n; i++)
+        {
+            if (d.empty() || nm[i] > d.back())
+            {
+                d.push_back(nm[i]);
+                aa[i] = d.size();
+            }
+            else
+            {
+                auto it = lower_bound(all(d), nm[i]);
+                *it = nm[i];
+                aa[i] = it - d.begin()+1;
+            }
+          //  cerr << aa[i] << ' ' << i << '\n';
+        }
+    };
+    auto LISx = [&](vi &aa) -> void
+    {
+        vector<int> d;
+        for (int i = n - 1; i >= 0; i--)
+        {
+            if (d.empty() || nm[i] < d.back())
+            {
+                d.push_back(nm[i]);
+                aa[i] = d.size();
+            }
+            else
+            {
+                auto it = lower_bound(all(d), nm[i], greater<>());
+                *it = nm[i];
+                aa[i] = it - d.begin() + 1;
+            }
+          //  cerr << aa[i] << ' ' << i << '\n';
+        }
+    };
+    vi pre(n);
+    LIS(pre);
+    vi sub(n);
+    LISx(sub);
+
+    map<int, int> proans3;
+    int mx = *max_element(all(pre));
+    //cerr << mx << '\n';
+    for (int i = 0; i < n; i++)
+    {
+        if (pre[i] + sub[i] - 1 == mx)
+        {
+            // cerr<<11<<'\n';
+            proans3[pre[i]]++;
+        }
+    }
+    for (int i = 0; i < n; i++)
+    {
+         if (pre[i] + sub[i] - 1 != mx)
+        {
+            cout << 1;
+        }
+        else
+        {
+            if (proans3[pre[i]] == 1)
+            {
+                cout << 3;
+            }
+            else
+                cout << 2;
+        }
+    }
+}
+```
+
 #### 最大子段和
 >
 > P1115 最大子段和

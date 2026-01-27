@@ -175,6 +175,97 @@ void solve()
 }
 ```
 
+#### [F. Pizza Delivery  F. 披萨配送](https://codeforces.com/contest/2193/problem/F)
+
+- **核心模型**:滚动数组优化dp
+- **思维误区 (Bug)**:状态转移
+- **修正逻辑 (Patch)**:处理边界条件于状态转移：起点到终点的距离+len
+- **关键代码**:
+
+```cpp
+
+void solve()
+{
+    int n, sx, sy, ex, ey;
+    cin >> n >> sx >> sy >> ex >> ey;
+    vector<pii> pt(n);
+    set<int> cnt;
+    for (int i = 0; i < n; i++)
+    {
+        cin >> pt[i].first;
+        cnt.emplace(pt[i].first);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        cin >> pt[i].second;
+    }
+    int lien = cnt.size();
+    sort(all(pt), [](pii a, pii b)
+         { return a.first < b.first; });
+
+    ll ans = 0;
+    vector<vi> lie(lien);
+
+    vi dx(lien + 1);
+    dx[0] = pt[0].first - sx;
+    dx[lien] = pt[n - 1].first - ex;
+
+    int tp = 0;
+    for (int i = 0; i < n; i++)
+    {
+        if ((i != 0 && pt[i].first != pt[i - 1].first))
+        {
+            tp++;
+            dx[tp] = pt[i].first - pt[i - 1].first;
+        }
+        lie[tp].push_back(pt[i].second);
+    }
+
+    vi up(lien);
+    vi down(lien, 1e9); // 错误初始化
+    for (int i = 0; i < lien; i++)
+    {
+        for (int j = 0; j < lie[i].size(); j++)
+        {
+            up[i] = max(up[i], lie[i][j]);
+            down[i] = min(down[i], lie[i][j]);
+        }
+    }
+
+    int dpl = 0;
+    int dpr = 0;
+
+    for (int i = 0; i < lien; i++)
+    {
+        ll len = up[i] - down[i];
+
+        int prel = dpl;
+        int prer = dpr;
+        if (!i)
+        {
+            dpl = dx[i] + abs(sy - up[0]) + len;
+            dpr = dx[i] + abs(sy - down[0]) + len;
+        }
+        else
+        {
+            dpr = dx[i] + min(abs(down[i - 1] - down[i]) + prel, abs(up[i - 1] - down[i]) + prer) + len;
+            dpl = dx[i] + min(abs(down[i - 1] - up[i]) + prel, abs(up[i - 1] - up[i]) + prer) + len;
+        }
+    }
+    ll last_d = abs(dx[lien]);
+
+    ans = min(
+              dpl + abs(down[lien - 1] - ey), // 最后停在下端点 -> 终点
+              dpr + abs(up[lien - 1] - ey) // 最后停在上端点 -> 终点
+              ) +
+          last_d;
+
+    cout << ans << "\n";
+}
+
+
+---
+
 #### 最大子段和
 >
 > P1115 最大子段和

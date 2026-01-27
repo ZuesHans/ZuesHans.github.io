@@ -1139,6 +1139,7 @@ nums.erase(unique(all(nums)), nums.end());
 auto get_id = [&](int x) {
     return lower_bound(all(nums), x) - nums.begin() + 1;
 };
+//注意这是1based单位
 
 // 4. 在离散化后的数组上做差分
 vector<long long> diff(nums.size() + 5, 0);
@@ -1381,10 +1382,8 @@ struct Fenwick {
     // 初始化：传入最大长度 n
     Fenwick(int size) : n(size), tr(size + 1, 0) {}
     //初始化2：节省时间开销的init
-    void init(int size) {s
-        // assign 会重置大小并全填为0
-        // 如果 vector 之前的 capacity 够大，它不会重新申请内存，只会重置数据
-        // 这样就兼顾了速度和方便
+    void init(int size) {
+        n=size;
         tr.assign(n + 1, 0); 
     }
 
@@ -1445,56 +1444,60 @@ int main() {
 - 相比线段树，ST 表最大的优势是 查询时间严格 $O(1)$，常数极小。
 - 缺点是 不支持修改（静态）且内存占用稍大 ($O(N \log N)$)。 F
 
+- 这套版本有一个优势：分配连续空间（毕竟是预处理）不需要vvi那种ij调换顺序加速写法
+
 ```cpp
 
-template <typename T>
-struct ST {
-    int n;
-    vector<vector<T>> st;
+#include <bits/stdc++.h>
+using namespace std;
 
-    // 构造函数：传入 vector<int> a 即可
-    // 默认实现的是区间【最大值】，如需最小值请把 max 改 min
-    ST(const vector<T> &a) {
-        n = a.size();
-        int K = __lg(n) + 1; // 计算需要的最大层数
-        st.assign(n, vector<T>(K));
+// 1. 定义常量
+const int MAXN = 2e5 + 5; // 根据题目数据范围修改，例如 200005
+const int K = 21;         // 2^20 > 1e6，一般 21 就够用了
 
-        // 1. 初始化第一层 (长度为 1)
-        for (int i = 0; i < n; i++) 
-            st[i][0] = a[i];
+// 2. 静态数组：st[i][j] 表示从位置 i 开始，长度为 2^j 的区间
+//    为了避免 cache miss，通常把维数小的 j 放在后面，即 st[MAXN][21]
+int st[MAXN][K]; 
 
-        // 2. 倍增预处理
-        for (int j = 1; j < K; j++) {
-            for (int i = 0; i + (1 << j) <= n; i++) {
-                // st[i][j] = max(左半段, 右半段)
-                st[i][j] = max(st[i][j - 1], st[i + (1 << (j - 1))][j - 1]);
-            }
+void ST_init(int n, const vector<int> &a) {
+    // a 是 1-based 的，如果是 0-based 传入要小心
+    // 初始化 j=0 (长度为1) 的情况
+    for (int i = 1; i <= n; i++) {
+        st[i][0] = a[i];
+    }
+
+    // 倍增处理
+    // j 代表层数 (2^j)，i 代表起点
+    for (int j = 1; j < K; j++) {
+        for (int i = 1; i + (1 << j) - 1 <= n; i++) {
+            // 状态转移：当前区间 = 左半边 op 右半边
+            st[i][j] = max(st[i][j - 1], st[i + (1 << (j - 1))][j - 1]);
         }
     }
+}
 
-    // 查询闭区间 [l, r] 的最大值 (0-based)
-    T query(int l, int r) {
-        int k = __lg(r - l + 1); // 快速计算 log2(len)
-        return max(st[l][k], st[r - (1 << k) + 1][k]);
-    }
-};
+int query(int l, int r) {
+    int k = __lg(r - l + 1); // C++ 内置函数，计算 log2
+    // 左右两块覆盖，取 max
+    return max(st[l][k], st[r - (1 << k) + 1][k]);
+}
 
 int main() {
-    // 假设输入数据
-    vector<int> a = {1, 9, 2, 8, 3, 7};
-    
-    // 1. 初始化 (自动预处理)
-    ST<int> st(a);
+    // 假设输入 n=6
+    int n = 6;
+    // 注意：为了方便 1-based，我们把 vector 开大一点，或者填个占位符
+    vector<int> a = {0, 1, 9, 2, 8, 3, 7}; 
 
-    // 2. 查询区间 [1, 4] (即 9, 2, 8, 3) 的最大值
-    // 注意：如果是题目给的 1-based 坐标 l, r，这里要写 query(l-1, r-1)
-    cout << st.query(1, 4) << endl; // 输出 9
-    
+    ST_init(n, a);
+
+    // 查询区间 [2, 4] -> 即 {9, 2, 8} 最大值是 9
+    cout << query(2, 4) << endl; 
+
     return 0;
 }
 ```
 
-### 单调栈/单调队列
+### 单调栈
 
 - **运用场景**
   - 下一个/上一个更大/更小值的位置
@@ -1540,33 +1543,26 @@ int main() {
 - **AC代码**
 
 ```cpp
-
-    int n, k;
-    cin >> n >> k;
-    vector<int> a(n + 1);
-    for (int i = 0; i < n; i++)
-    {
-        cin >> a[i];
-    }
-    deque<int> dq;
-    vi ans1(n + 1);
-    for (int i = k - 1; i < n; i++)
+   deque<int> dq;
+    vi da(n + 1);
+    vi xiao(n + 1);
+    for (int i = 1; i <= n; i++)
     {
         while (!dq.empty() && dq.front() + k <= i)
         {
             dq.pop_front();
         }
-        while (!dq.empty() && a[dq.back()] > a[i])
+        while (!dq.empty() && nums[dq.back()] > nums[i])
         {
-
             dq.pop_back();
         }
-        dq.push_back(i);
-        ans1[i] = a[dq.front()];
+
+        dq.emplace_back(i);
+        da[i] = nums[dq.front()];
     }
-    for (int i = k - 1; i < n; i++)
+    for (int i = k; i <= n; i++)
     {
-        cout << ans1[i] << " \n"[i == n - 1];
+        cout << da[i] << " \n"[i == n];
     }
 ```
 
@@ -2059,7 +2055,7 @@ for (int i = 1; i <= n; ++i) {
     int count = s[i];
     for (int k = 1; count >= k; k *= 2) {
         items.push_back({w[i] * k, v[i] * k});
-        count -= k;
+        count -= k;//注意这里填k
     }
     if (count > 0) {
         items.push_back({w[i] * count, v[i] * count});
@@ -2071,6 +2067,23 @@ for (auto& item : items) {
     for (int j = V; j >= item.w; --j) {
         dp[j] = max(dp[j], dp[j - item.w] + item.v);
     }
+}
+```
+
+- 二进制优化/拆分
+
+  - **解说**：k *= 2: 这是在生成 $1, 2, 4, 8 \dots$ 的序列。
+     count -= k: 保证我们拆分出的总数之和刚好等于原有的 $s[i]$。
+     最后的 if (count > 0): 这是一个“补丁”。
+     因为 $2^n$ 的累加不一定刚好等于 $s[i]$。比如 $s=10$，拆出 1, 2, 4 后剩下 3，这个 3 必须单独打包，才能凑出 0~10 所有的数。
+
+```cpp
+for (int k = 1; count >= k; k *= 2) {
+    items.push_back({w[i] * k, v[i] * k}); // 把 k 个物品打包成一个整体
+    count -= k; // 减去已经打包的数量
+}
+if (count > 0) {
+    items.push_back({w[i] * count, v[i] * count}); // 处理最后剩下的不够 2 的幂次的部分
 }
 ```
 

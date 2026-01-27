@@ -118,6 +118,53 @@ void solve()
 
 ### 二进制与位运算
 
+#### [D. Unfair Game](https://codeforces.com/contest/2184/problem/D)
+
+- **核心模型**:组合数学算出在1-n之内有多少个符合要求的数字
+- **思维误区 (Bug)**:拆位运算分类讨论少了情况
+- **修正逻辑 (Patch)**:注意到于n同位次不能直接全部allin，需要比n小。注意到allin逻辑最终不包含n本身，所以需要加一个对n的特判
+- **关键点**：这里要学习具体怎么实现的：对于从高到低，碰到0只有一个0，碰到1可以有两种可能，以及
+- **关键代码**:注意__lg()求的是0baseed长度，而我们有多少位求的是len也就是`wc+1`
+
+```cpp
+void solve()
+{
+    int n, k;
+    cin >> n >> k;
+    ll ans = 0;
+    int wc = __lg(n);
+    for (int i = 1; i <= wc; i++)
+    {
+        if (i <= k)
+        {
+            for (int j = 0; j <= min(i - 1,k-i); j++)
+                ans += nCr(i - 1, j);
+        }
+    }
+    int cnt = 1;
+    for (int i = wc-1; i >= 0; i--)//这里我们每一位都往后挪了意味，意思是这一位填0，剩下的位次的排列组合
+    {
+        if ((n >> i) & 1)
+        {
+            for (int j = 0; j < i; j++)
+                if (cnt + j < k - wc)//这里的式子应该是cnt+j<=k-(wc+1);
+                    ans += nCr(i, j);
+ 
+            cnt++;
+        }
+    }
+ 
+    if (k >=wc+1)
+    {
+        ans++;
+    }
+ 
+    cout << n - ans << '\n';
+}
+```
+
+---
+
 #### [D. Blackslex and Penguin Civilization](https://codeforces.com/contest/2179/problem/D  )
 
 - **核心模型**贪心求排列&前缀和的和最大，有相同的输出字典序最小的排列
@@ -522,3 +569,5 @@ void solve()
 ```
 
 - **公式**：`double side = 2 *R* sin(M_PI / n);`
+
+---

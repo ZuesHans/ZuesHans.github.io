@@ -607,6 +607,148 @@ vector<int> nextGreaterElementForward(const vector<int>& nums) {
 
 ---
 
+### 单调队列
+
+#### [切蛋糕](https://vjudge.net/contest/783689#problem/D)
+
+- **核心模型**:含负数的求最大子段和（长度可变）zon用单调队列
+- **思维误区 (Bug)**:含负数的求最大子段和/**注意！！这个循环要从i=0开始因为我们实在做前缀和计算区间长度，我们需要计算进去a[1]**
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+
+void solve()
+{
+    int n, k;
+    cin >> n >> k;
+    vi nums(n + 1);
+    vi qzh(n + 1);
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> nums[i];
+        qzh[i] = qzh[i - 1] + nums[i];
+    }
+    deque<int> dq;
+    vi da(n + 1);
+    ll ans=-LINF;
+    for (int i = 0; i <= n; i++)
+    {
+        while (!dq.empty() && dq.front() + k < i)
+        {
+            dq.pop_front();
+        }
+        if(!dq.empty())
+        {
+            ans=max(ans,qzh[i]-qzh[dq.front()]);
+        }
+        while (!dq.empty() && qzh[dq.back()]>=qzh[i])
+        {
+            dq.pop_back();
+        }
+
+        dq.emplace_back(i);
+     
+    }
+    cout<<ans<<'\n';
+}
+
+
+```
+
+---
+
+### 树状数组
+
+#### [R - 【典题】逆序对 ⭐](https://vjudge.net/contest/783689#problem/R)
+
+- **核心模型**:离散化，桶排；
+- **思维误区 (Bug)**:读题错误:逆序对要求是p[i]>p[j]严格！
+- **修正逻辑 (Patch)**:记得离散化。**想要快速查到见过的元素有多少，可以用树状数组维护，便捷的维护能加起来的桶**（经典离线运用见V - 【典题】静态区间种类数 / HH的项链 ⭐⭐）
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    Fenwick tr(n + 3);
+    ll sum = 0;
+    vi nums(n);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> nums[i];
+    }
+    vi num = nums;
+    sort(all(num));
+    num.erase(unique(all(num)), num.end());
+    auto get_id = [&](int x)
+    {
+        return lower_bound(all(num), x) - num.begin() + 1;
+    };
+    //reverse(all(nums));
+    for (int i = 0; i < n; i++)
+    {
+        sum += tr.range_ask(get_id(nums[i]-1)+1,n+1);
+        //cerr<<get_id(nums[i])<<' ';
+        tr.add(get_id(nums[i]), 1);
+    }
+    cout << sum << '\n';
+}
+```
+
+---
+
+### 堆
+
+#### [P1631 序列合并](https://www.luogu.com.cn/problem/P1631)
+
+- **核心模型**:堆排序，二叉树
+- **思维误区 (Bug)**:用一种类似二叉树或者说图论的方式想，但是发现有冲突！但是一开始的做法是死板地重复导入左节点和右节点，会导致冲突（重复入堆）。简单来说就是：由于 $x+1$ 和 $y+1$ 是并列的维度，一定存在菱形结构（重复）。我们优先导入`（x，0）` 所有数，这样子保证了不会乱扩展入队。失败原因在用了二叉树的搜索策略去搜索网格图
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+ int n;
+    cin >> n;
+    vi a(n);
+    vi b(n);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> a[i];
+    }
+    for (int i = 0; i < n; i++)
+    {
+        cin >> b[i];
+    }
+    sort(all(a));
+    sort(all(b));
+    priority_queue<pair<int, pii>, vector<pair<int, pii>>, greater<>> pq;
+    int x = 0, y = 0;
+   // pq.emplace(a[x] + b[y], make_pair(x, y));
+
+
+    for(int i=0;i<n;i++)
+    {
+         pq.emplace(a[i] + b[0], make_pair(i, 0));
+
+    }
+    for (int i = 0; i < n; i++)
+    {
+        // if(x+1<n)
+        // pq.emplace(a[x+1]+b[y],make_pair(x+1,y));
+        if(y+1<n)
+        pq.emplace(a[x]+b[y+1],make_pair(x,y+1));
+
+        cout<<pq.top().first<<' ';
+        pq.pop();
+        x=pq.top().second.first;
+        y=pq.top().second.second;
+    }
+```
+
+---
+
 ### 字典树
 
 - 找最大xor对，查前缀

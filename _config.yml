@@ -125,3 +125,22 @@ search:
   field: post
   content: true
   format: striptags
+
+# -------音模块-------
+aplayer:
+  meting: true
+  asset_inject: true # 这里的设置取决于你的主题，如果播放器不显示，改为 true 试试
+  # 下面是全局吸底播放器的配置
+  fixed: true       # 开启吸底模式
+  mini: false       # 默认不折叠
+  autoplay: false   # 再次提醒：浏览器通常会拦截自动播放，建议 false
+  theme: '#b7daff'  # 播放器颜色，可以改成你喜欢的赛博朋克粉/蓝
+  loop: all
+  order: list
+  preload: auto
+  volume: 0.7
+  list_folded: true
+  # 歌单信息
+  server: tencent   # netease=网易云, tencent=QQ音乐
+  type: song #playlist    # 歌单
+  id: '004XpUu80lUPOh'    # 去网易云网页版复制歌单 ID

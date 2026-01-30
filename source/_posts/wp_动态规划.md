@@ -556,6 +556,450 @@ cout<<zuida;
 
 ---
 
+### 区间dp
+
+- 目前我做到两种区间dp：
+  - 一种是整一块是由两个小块拼接版本的
+    - 这对应的是树形结构的合并，根节点由左右两个子树组成。
+    - $$dp[i][j] = \max_{k=i}^{j-1} \{ dp[i][k] \oplus dp[k+1][j] \}$$
+
+  - 一种是类似于洋葱拨皮的递推版本
+    - 这对应的是线性结构的延伸，只在两头做文章。
+    - $$dp[i][j] = dp[i+1][j] \lor dp[i][j-1] \lor (dp[i+1][j-1] + \text{cost})$$
+
+#### [P1435 [IOI 2000] 回文字串](https://www.luogu.com.cn/problem/P1435)
+
+- **核心模型**:一种是类似于洋葱拨皮的递推版本
+- **思维误区 (Bug)**:关键初始化
+- **修正逻辑 (Patch)**:回文的定义是什么？是对称。 对称这个性质，是由两端决定的，而不是由中间决定的。此处默认dp起点是必定回文
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    string s;
+    cin >> s;
+    int n = s.size();
+    vector<vi> dp(n + 1, vi(n + 1, INF));
+
+    for (int i = 0; i < n - 1; i++)
+    {
+        if (s[i] == s[i + 1])
+        {
+            dp[i][i + 1] = 0;
+        }
+    }
+
+    for (int len = 1; len <= n; len++)
+    {
+        for (int l = 0; l + len - 1 < n; l++)
+        {
+            int r = l + len - 1;
+            if (r == l)
+            {
+                dp[l][r] = 0;
+            }
+            else
+            {
+                if (s[l] == s[r])
+                {
+                    dp[l][r] = min(dp[l][r], dp[l + 1][r - 1]);
+                }
+
+                dp[l][r] = min(dp[l][r], min(dp[l + 1][r] + 1, dp[l][r - 1] + 1));
+               
+            }
+        }
+    }
+    cout << dp[0][n - 1];
+}
+```
+
+#### [P4290 [HAOI2008] 玩具取名](https://www.luogu.com.cn/problem/P4290)
+
+- **核心模型**:一种是整一块是由两个小块拼接版本的
+- **思维误区 (Bug)**:因为题目规则是 二合一 ($A \to BC$)。这本质上是一棵二叉树的构建过程。当你合并A(BCD)可能会遗漏掉(AB)(CD)
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+
+```
+
+---
+
+#### [典题P3146 [USACO16OPEN]248](https://www.luogu.com.cn/problem/P3146)
+
+- **核心模型**:区间dp，**看到合并一类的操作**；区间 DP 的核心逻辑就是“大区间由小区间合并而来”。只要涉及到“合并”或者“拆分”，你都得知道从哪儿合并，也就是要找那个 $k$。
+- **思维误区 (Bug)**:记得区间写左闭右闭
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<vi> dp(n, vi(n, -1));
+    ll ans = 0;
+    rep(i, 0, n - 1)
+    {
+        cin >> dp[i][i];
+        ans = max(ans,(ll) dp[i][i]);
+    }
+    // 枚举长度，枚举起点，枚举断点
+
+    for (int len = 2; len <= n; len++)
+    {
+        for (int i = 0; i + len - 1 < n; i++)
+        {
+            for (int k = i; k < i + len - 1; k++)
+            {
+                if (dp[i][k] == dp[k + 1][i + len - 1] && dp[i][k] > 0)
+                {
+                    dp[i][i + len - 1] = max(dp[i][k] + 1, dp[i][i + len - 1]);
+                    ans = max(ans, (ll)dp[i][i + len - 1]);
+                }
+            }
+        }
+    }
+   
+    cout << ans;
+}
+```
+
+#### [P3147 [USACO16OPEN] 262144 P(待补题）)](https://www.luogu.com.cn/problem/P3147)
+
+- **核心模型**:数据范围：2≤N≤262,144），每个数的范围在 1…40 之间
+- **思维误区 (Bug)**:
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    // vi nums(n);
+    ll ans = 0;
+    vector<vi> dp(61, vi(n + 3, -1));
+    for (int i = 0; i < n; i++)
+    {
+        int in = 0;
+        cin >> in;
+        dp[in][i] = i + 1;
+        ans = max(ans, (ll)in);
+    }
+
+    for (int i = 1; i <= 60; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (dp[i][j] == -1)
+            {
+                dp[i][j] = dp[i - 1][dp[i - 1][j] + 1];
+            }
+            if (dp[i][j] != -1)
+            {
+                // dp[i][j]=dp[i][dp[i-1][j]+1];
+                // dp[i][j]=dp[i][dp[i-1][j]+1];
+                ans = max((ll)i, ans);
+            }
+        }
+    }
+
+    cout << ans;
+}
+
+```
+
+#### [P1070 道路游戏（处理环形）](https://www.luogu.com.cn/problem/P1070)
+
+- **核心模型**:
+- **环形处理**:1-based
+  - 往后走（顺时针）：`next_pos = (x + k - 1) % n + 1`
+  - 往前走（逆时针退后）：`prev_pos = (x - k - 1 + n) % n + 1` `prev_pos = ((x - k - 1) % n + n) % n + 1`
+  - **0based**环形公式极其简单，往后走就是 (x + k) % n，往回退就是 (x - k + n) % n。
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+
+```
+
+---
+
+#### [魔法项链（o1简单查找连乘思路，断环成链教学）](https://www.luogu.com.cn/problem/P1063)
+
+- **核心模型**:区间dp
+- **思维误区 (Bug)**:注意这里项链的合并逻辑，我们dp数组里面存的是释放能量。根据题意
+- **修正逻辑 (Patch)**:注意到段换成链：可以on去最大值（就不用在循环里写可能错）以及成链的做法
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<vi> dp(2 * n + 4, vi(2 * n + 4, 0));
+    vi xl(2 * n + 3);
+    rep(i, 1, n)
+    {
+
+        cin >> xl[i];
+        xl[i + n] = xl[i];
+    }
+
+    for (int len = 2; len <= n; len++)
+    {
+        for (int l = 1; l + len <= 2 * n; l++)
+        {
+            int r = l + len;
+
+            for (int k = l + 1; k < r; k++)
+            {
+                dp[l][r] = max(dp[l][r], dp[l][k] + dp[k][r] + (xl[l] * xl[k] * xl[r]));
+            }
+        }
+    }
+    int ans = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        ans = max(ans, dp[i][i + n]);
+    }
+    cout << ans;
+}
+```
+
+#### [关路灯](https://www.luogu.com.cn/problem/P1220)
+
+- **核心模型**:区间dp
+- **思维误区 (Bug)**:前缀和维护“剩下没关的灯”
+- **修正逻辑 (Patch)**:递推关系
+- **关键代码**:
+
+```cpp
+struct deng
+{
+    int spot, wat;
+    int qzh = 0;
+};
+void solve()
+{
+    int n, c;
+    cin >> n >> c;
+    vector<deng> lt(n + 4);
+    vector<vector<vi>> dp1(n + 2, vector<vi>(n + 2, vi(2, INF)));
+    vector<vi> dp2(n + 2, vi(n + 2, 0));
+    rep(i, 1, n)
+    {
+        cin >> lt[i].spot >> lt[i].wat;
+        lt[i].qzh = lt[i].wat + lt[i - 1].qzh;
+    }
+
+    dp1[c][c][0] = 0;
+    dp1[c][c][1] = 0;
+    for (int len = 2; len <= n; len++)
+    {
+        for (int l = 1; l + len - 1<= n; l++)
+        {
+            int r = l + len - 1;
+            if (l <= c && r >= c)
+            {
+                dp1[l][r][0] = min(dp1[l][r][0], min(dp1[l + 1][r][1] + (abs(lt[r].spot - lt[l].spot) * (-lt[r].qzh + lt[l].qzh+lt[n].qzh)),
+                                                     dp1[l + 1][r][0] + (abs(lt[l + 1].spot - lt[l].spot) * (-lt[r].qzh + lt[l].qzh+lt[n].qzh))));
+                dp1[l][r][1] = min(dp1[l][r][1], min(dp1[l][r - 1][1] + (abs(lt[r].spot - lt[r - 1].spot) * (-lt[r - 1].qzh + lt[l - 1].qzh+lt[n].qzh)),
+                                                     dp1[l][r - 1][0] + (abs(lt[r].spot - lt[l].spot) * (-lt[r - 1].qzh + lt[l - 1].qzh+lt[n].qzh))));
+                //简单点说，它就是在算：除了你已经搞定的那一块区域，剩下的灯加起来一共多亮（多耗电）。
+            }
+        }
+    }
+    // cout << dp1[1][n][0]<<' '<< dp1[1][n][1];
+    cout << min(dp1[1][n][0], dp1[1][n][1]);
+}
+
+```
+
+#### [SUE的小球（跟关路灯完全相同）](https://www.luogu.com.cn/problem/P2466)
+
+- **核心模型**:
+- **思维误区 (Bug)**:数组开大导致mle，答案数字比较大需要初始化为LINF。注意到`必须尽量在魅力值高的时候收集这个彩蛋，而如果一个彩蛋掉入海中，它的魅力值将会变成一个负数，但这并不影响 Sue 兴趣`。注意到我们无法贪心的去找到在这段上面消耗的时间（因为有可能往左或者往右，因为是区间dp）。所以我们仅能逆向思路：求“损失最小值”。处理方法前缀和维护“彩球失去的价值”。
+- **修正逻辑 (Patch)**:
+- **关键代码**:注释掉的逻辑是假的。
+
+```cpp
+struct pt
+{
+    int x, y, v;
+};
+
+void solve()
+{
+    int n, x0;
+    cin >> n >> x0;
+    vector<pt> ptt(n + 3);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> ptt[i].x;
+    }
+    ll sum = 0;
+    for (int i = 0; i < n; i++)
+    {
+        cin >> ptt[i].y;
+        sum += ptt[i].y;
+    }
+
+    // 求段lr总和为qzh[r+1]-qzh[l]
+    // 求剩下段总和为(qzh[n]-qzh[0]-(qzh[r+1]-qzh[l]))
+    // 加上距离（时间） (ptt[])
+
+    rep(i, 0, n - 1) cin >> ptt[i].v;
+    ptt.push_back({x0, 0, 0});
+    n = ptt.size();
+    sort(all(ptt), [](pt a, pt b)
+         { return a.x < b.x; });
+    vi qzh(n + 1);
+    for (int i = 0; i < n; i++)
+    {
+        qzh[i + 1] = qzh[i] + ptt[i].v;
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        if (ptt[i].x == x0)
+        {
+            x0 = i;
+            break;
+        }
+    }
+
+//-------------------------------------------------------------------------//
+    // 希望是给个时间返回彩蛋分数
+    // auto cd = [&](int timm, int i_x)
+    // {
+    //     return ptt[i_x].y - (ptt[i_x].v * timm);
+    // };
+
+    // auto when = [&](int l, int r, int sp)
+    // {
+    //     if (sp == 0)
+    //     {
+    //         // return ptt[r].x - ptt[l].x + (ptt[r].x - ptt[x0].x - 1);
+    //         return (ptt[r].x - ptt[l].x) + (ptt[r].x - ptt[x0].x);
+    //     }
+    //     else
+    //     {
+    //         // return ptt[r].x - ptt[l].x + (ptt[x0].x - ptt[l].x - 1);
+    //         return (ptt[r].x - ptt[l].x) + (ptt[x0].x - ptt[l].x);
+    //     }
+    // };
+
+//-------------------------------------------------------------------------//
+   vector<vector<vi>> dp(n + 5, vector<vi>(n + 5, vi(2, LINF)));
+ 
+    dp[x0][x0][0]=0;
+    dp[x0][x0][1]=0;
+    for (int len = 2; len <= n; len++)
+    {
+        for (int l = 0; l + len - 1 < n; l++)
+        {
+            int r = l + len - 1;
+            if (l <= x0 && r >= x0)
+            {
+                //-------------------------------------------//
+                // dp[l][r][0] = max(dp[l + 1][r][0] + cd(when(l + 1, r, 0) + ptt[l + 1].x - ptt[l].x, l), dp[l + 1][r][1] + cd(when(l + 1, r, 1) + ptt[l + 1].x - ptt[l].x, l));
+                // dp[l][r][1] = max(dp[l][r - 1][0] + cd(when(l, r - 1, 0) + ptt[r].x - ptt[r - 1].x, r), dp[l][r - 1][1] + cd(when(l, r - 1, 1) + ptt[r].x - ptt[r - 1].x, r));
+                // dbg(l, r);
+                //-------------------------------------------//
+                dp[l][r][0] = min(dp[l + 1][r][0] + (ptt[l + 1].x - ptt[l].x) * (qzh[n] - (qzh[r + 1] - qzh[l + 1])),
+                                  dp[l + 1][r][1] + (ptt[r].x - ptt[l].x) * (qzh[n] - (qzh[r + 1] - qzh[l + 1])));
+                dp[l][r][1] = min(dp[l][r - 1][0] + (ptt[r].x - ptt[l].x) * (qzh[n] - (qzh[r] - qzh[l])),
+                                  dp[l][r - 1][1] + (ptt[r].x - ptt[r - 1].x) * (qzh[n] - (qzh[r] - qzh[l])));
+            }
+        }
+    }
+    double ans = sum - min(dp[0][n - 1][0], dp[0][n - 1][1]);
+    ans /= 1000;
+    cout << fixed << setprecision(3) << ans;
+}
+
+```
+
+---
+
+#### [石子合并（包括四边形优化）](https://www.luogu.com.cn/problem/P1880)
+
+- **核心模型**:这里是四边形优化教学
+- **四边形优化**:
+  - 1. 适用方程的形式（标准型）
+    - 首先，你的状态转移方程必须是区间 DP 的经典形式：$$dp[i][j] = \min_{i \le k < j} \{ dp[i][k] + dp[k+1][j] \} + w(i, j)$$
+    - 其中：$dp[i][j]$ 表示合并区间 $[i, j]$ 的最优代价。$w(i, j)$ 是合并这一步产生的直接代价（例如石子合并里的区间和）。
+    - 目的是求 最小值。
+  - 1. 代价函数 $w(i, j)$ 需满足两个数学性质要能优化，核心不在 $dp$ 数组本身，而在于那个代价函数 $w(i, j)$。
+  - 它必须满足：A. 区间包含单调性 (Monotonicity)含义：小区间的代价 $\le$ 包含它的大区间的代价。
+    - 数学表达：对于任意 $i \le i' < j' \le j$，有：$$w(i', j') \le w(i, j)$$B.
+      - 四边形不等式 (Quadrangle Inequality)含义：交叉小于包含。即“两个交错区间的代价和”小于等于“它们并集区间与交集区间的代价和”。数学表达：对于任意 $i < i' < j < j'$，有：$$w(i, j) + w(i', j') \le w(i, j') + w(i', j)$$
+- **严肃注意：四边形优化有单调性所以只能优化求最小值**:
+- **严肃注意：四边形优化dp数组要开大一点，solu数组要开大一点，以及初始化：初始化 `sulo[i][i]`**
+- 注意：断环成链的处理最好开多几个
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(2 * n);
+
+    vector<vi> dp(2 * n+2, vi(2 * n+2, 0));
+    vector<vi> dp2(2 * n+2, vi(2 * n+2, 0));
+    vi qzh(2 * n + 1, 0);
+    vector<vi> solu(2 * n + 5, vi(2 * n+5, 0));
+    for (int i = 0; i < n; i++)
+    {
+        cin >> nums[i];
+        nums[i + n] = nums[i];
+    }
+    for (int i = 0; i < 2 * n; i++)
+    {
+        qzh[i + 1] = qzh[i] + nums[i];
+        solu[i][i] = i;
+    }
+
+    for (int len = 2; len <= n; len++)
+    {
+        for (int l = 0; l + len - 1 < 2 * n; l++)
+        {
+            dp2[l][l + len - 1] = max(dp2[l + 1][l + len - 1], dp2[l][l + len - 2]) + qzh[l + len] - qzh[l];
+            dp[l][l + len - 1] = INF;
+            for (int k = solu[l][l + len - 2]; k <= solu[l + 1][l + len - 1]; k++)
+            {
+                int val = dp[l][k] + dp[k + 1][l + len - 1] + (qzh[l + len] - qzh[l]);
+                if (dp[l][l + len - 1] > val)
+                {
+                    dp[l][l + len - 1] = val;
+                    solu[l][l + len - 1] = k; // 记录决策点，供下一轮长度使用
+                }
+            }
+        }
+    }
+    int mn = INF, mx = 0;
+
+    for (int i = 0; i < n; i++)
+    {
+        mn = min(mn, dp[i][i + n - 1]);
+        mx = max(mx, dp2[i][i + n - 1]);
+    }
+
+    cout << mn << '\n'
+         << mx << '\n';
+}
+```
+
+---
+
+---
+
 ### 01 背包（一维/二维）
 
 **用途**：每个物品选或不选，求最大价值（不要求装满/要求恰好装满）。  

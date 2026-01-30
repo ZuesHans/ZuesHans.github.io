@@ -656,6 +656,63 @@ void solve()
 
 ```
 
+#### [O - 【典题】DP / 单调队列优化DP ⭐](https://vjudge.net/contest/784328#problem/O)
+
+- **核心模型**:单调队列，dp
+- **思维误区 (Bug)**:“如果一个新人（新元素），比你年轻（下标更大），还比你强（数值更大），那你就是毫无价值的，可以直接退役（出队）了。”
+- **修正逻辑 (Patch)**:单调队列能做的在数据范围小的时候能用multiset或优先队列逃课nlogn
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n, l, r;
+    cin >> n >> l >> r;
+
+    vi nums(n + 1);
+
+    for (int i = 0; i <= n; i++)
+    {
+        cin >> nums[i];
+    }
+    vi dp(n + 1, -INF);
+    deque<int> dq;
+    dp[0] = 0;
+    ll ans = -INF;
+
+    for (int i = l; i <= n; i++)
+    {
+        if (i - r)
+        {
+            while (!dq.empty() && i - r > dq.front())
+            {
+                dq.pop_front();
+            }
+            
+        }
+        if (dp[i - l] > -INF)
+        {
+            while (!dq.empty() && dp[dq.back()] < dp[i - l])
+            {
+                dq.pop_back();
+            }
+            dq.push_back(i - l);
+        }
+        if(!dq.empty())
+            dp[i] = max(dp[i], dp[dq.front()] + nums[i]);
+        if (i + r > n)
+        {
+            ans = max(ans, dp[i]);
+        }
+    }
+    cout << ans << '\n';
+ 
+}
+
+```
+
+---
+
 ---
 
 ### 树状数组

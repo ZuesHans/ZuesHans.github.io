@@ -797,6 +797,100 @@ void solve()
   - `priority_queue` : 自动维护堆的“插入+弹出最大/最小”工具，“贪心/最短路/Top-K/滑动窗口最大值” 都能靠它快速实现
   - 注意优先队列没办法删除除了堆顶以外的元素,所以**注意**`if (d > dist[u]) continue;`
 
+### 分层图
+
+#### [逃出生天](https://codeforces.com/gym/106210/problem/C)
+
+- **核心模型**:一句话概括题意/数学本质 (如: 中位数贪心 / 差分约束)
+- **思维误区 (Bug)**:记录第一直觉为什么错了 (如: 以为是DP其实是贪心 / 读错题)
+- **修正逻辑 (Patch)**:下次看到什么特征，要修正为正确思路
+- **关键代码**:
+
+```cpp
+vi dx = {1, 0, -1, 0, 0};
+vi dy = {0, 1, 0, -1, 0};
+int n, m;
+int laohupos(int stpos, int fx, int t)
+{
+    int idx;
+ 
+    if (fx == 1)
+    {
+        idx = stpos - 1;
+    }
+    else
+    {
+        idx = 2 * m - 2 - (stpos - 1);
+    }
+ 
+    return (idx + t) % (2 * m - 2);
+}
+struct hhh
+{
+    int x, y, t;
+};
+void solve()
+{
+ 
+    cin >> n >> m;
+    vector<vector<vi>> hsh(n + 1, vector<vi>(m + 1, vi(2 * m - 2, 0)));
+    vector<pii> tiger;
+    for (int i = 1; i <= n; i++)
+    {
+        int d, dd;
+        cin >> d;
+        char c;
+        cin >> c;
+        if (c == 'R')
+            dd = 1;
+        else
+            dd = -1;
+        tiger.push_back({d, dd});
+    }
+    vi laohu;
+    for (int i = 1; i <= m; i++)
+        laohu.push_back(i);
+    for (int i = m - 1; i > 1; i--)
+        laohu.push_back(i);
+ 
+    queue<hhh> pos;
+    pos.push({1, m, 0});
+    hsh[1][m][0] = 1;
+    while (!pos.empty())
+    {
+        auto [nx, ny, nt] = pos.front();
+        pos.pop();
+ 
+        if (nx == n && ny == 1)
+        {
+            cout << "Yes" << '\n';
+            return;
+        }
+        int tm = nt + 1;
+        for (int i = 0; i < 5; i++)
+        {
+            int xx = nx + dx[i];
+            int yy = ny + dy[i];
+ 
+            if (xx < 1 || xx > n || yy < 1 || yy > m)
+                continue;
+            if (hsh[xx][yy][tm%(2*m-2)])
+                continue;
+ 
+            if(laohu[laohupos(tiger[xx-1].first,tiger[xx-1].second,nt)]==yy)continue;
+            if(laohu[laohupos(tiger[xx-1].first,tiger[xx-1].second,tm)]==yy)continue;
+ 
+            hsh[xx][yy][tm%(2*m-2)]=1;
+            pos.push({xx,yy,tm%(2*m-2)});
+        }
+    }
+    cout << "No" << endl;
+}
+ 
+```
+
+---
+
 ### tarjan
 
 #### 图的遍历（tarjan算法）

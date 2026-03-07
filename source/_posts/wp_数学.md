@@ -116,6 +116,64 @@ void solve()
 }
 ```
 
+#### [E - Simple Division](https://atcoder.jp/contests/abc448/tasks/abc448_e)
+
+- **核心模型**: 除法/取整 + 取模  **当你需要对结果取模，但中间某步运算会破坏模运算时，找到一个更大的模数，使得这步运算在数学上能干净地消去。**
+  - 遇到"除法/取整 + 取模"时：
+    - 先想逆元——如果能保证 gcd(除数, 模数) = 1（比如模数是质数），直接用逆元
+    - 逆元不可用时——考虑把模数扩大为 除数 × 原模数，用这道题的trick
+- [数学推导及详细](/go/Simple%20Division.md)
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int k, m;
+    cin >> k >> m;
+    int mod = m* 10007;
+    vector<pll> cl(k);
+    rep(i, 0, k - 1)
+    {
+        cin >> cl[i].first >> cl[i].second;
+    }
+
+    vi ten(40);
+    ten[1] = 10;
+    for (int i = 2; i < 32; i++)
+    {
+        ten[i] = (ten[i - 1] * ten[i - 1])%mod;
+    }
+
+    vi rli(40);
+    rli[1] = 1;
+    for (int i = 2; i < 31; i++)
+    {
+        rli[i] = rli[i - 1]%mod + rli[i - 1] * ten[i - 1]%mod;
+        rli[i] %=mod;
+    }
+    ll ans = 0;
+    int dgt = 0;
+    for (int i = k - 1; i >= 0; i--)
+    {
+
+        ll R = 0;
+        for (int d = 29; d >= 0; d--)
+        {
+            if (cl[i].second & (1ll << d))
+            { // 如果第d位是1
+                R = R * ten[d+1] %mod+ rli[d+1]%mod;
+            }
+        }
+        ans = (ans + (cl[i].first * (R * qpow(10, dgt, mod) % mod)) % mod) % mod;
+        dgt += cl[i].second;
+    }
+    cout << ans / m << '\n';
+}
+
+```
+
+---
+
 ### 二进制与位运算
 
 #### [D. Unfair Game](https://codeforces.com/contest/2184/problem/D)

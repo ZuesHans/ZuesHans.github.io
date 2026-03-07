@@ -13,7 +13,7 @@ default_top_img: /img/cover_3.png
 # -----------------
 # 主页副标题 (打字机)
 subtitle:
-  enable: false
+  enable: true
   effect: true
   sub:
      - 'a coding cat_with love in its heart'

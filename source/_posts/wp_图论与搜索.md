@@ -18,6 +18,104 @@ math: true
 **用途**：枚举、路径搜索、连通性。  
 **常见坑**：注意回溯还原（如标记数组清零），加剪枝防超时。
 
+#### [F. Parabola Independence 寻找最常路](https://codeforces.com/contest/2195/problem/F)
+
+- **核心模型**:寻找最长路，数学几何性质
+- **修正逻辑 (Patch)**:把图分为上下两部分，按照规则建立DAG，通过dfs（好久没写好生疏）找到上下对于这个点而言最长路径，夹一下出结果
+- **难点**：数学几何性质
+- **关键代码**:
+
+```cpp
+struct line
+{
+    int a, b, c;
+};
+
+bool canwalk(line a, line b)
+{
+    int chaa = a.a - b.a;
+    int chab = a.b - b.b;
+    int chac = a.c - b.c;
+    if (a.a > b.a)
+    {
+        return chab * chab < 4 * chaa * chac;
+    }
+    else if (chaa == 0)
+    {
+
+        return chab == 0 && chac > 0;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<line> ls(n);
+    vector<vi> mp(n);
+    vector<vi> fmp(n);
+    rep(i, 0, n - 1)
+    {
+        int aa, bb, cc;
+        cin >> aa >> bb >> cc;
+        ls[i].a = aa;
+        ls[i].b = bb;
+        ls[i].c = cc;
+    }
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (canwalk(ls[i], ls[j]))
+            {
+                mp[i].push_back(j);
+                fmp[j].push_back(i);
+            }
+        }
+    }
+
+    vi dpu(n, 0);
+    vi dpd(n, 0);
+
+    auto dpp = [&](auto self, int a) -> int
+    {
+        if (dpu[a] != 0)
+            return dpu[a];
+        int cnt = 0;
+        for (int i = 0; i < mp[a].size(); i++)
+        {
+            cnt = max(cnt, self(self, mp[a][i]));
+        }
+        return dpu[a] = cnt + 1;
+    };
+
+    auto dpq = [&](auto self, int a) -> int
+    {
+        if (dpd[a] != 0)
+            return dpd[a];
+        int cnt = 0;
+        for (int i = 0; i < fmp[a].size(); i++)
+        {
+            cnt = max(cnt, self(self, fmp[a][i]));
+        }
+        return dpd[a] = cnt + 1;
+    };
+
+    for (int i = 0; i < n; i++)
+    {
+
+        int ans = dpp(dpp, i) + dpq(dpq, i) - 1;
+        cout << ans << ' ';
+    }
+    cout << '\n';
+}
+
+```
+
 #### 小猫爬山
 
 ```cpp
@@ -345,7 +443,7 @@ void solve()
 
 ---
 
-### P1162 填涂颜色 提供深搜广搜两种做法
+#### P1162 填涂颜色 提供深搜广搜两种做法
 
 - **题号**: P1162
 - **链接**: [题目链接](https://www.luogu.com.cn/problem/P1168)
@@ -431,7 +529,7 @@ for (int i = 1; i <= n; i++)
 
 ---
 
-### 3.2 无向图分组
+### 无向图分组
 
 **用途**：求连通分量数。  
 **常见坑**：双向边需存两次，初始化标记数组。

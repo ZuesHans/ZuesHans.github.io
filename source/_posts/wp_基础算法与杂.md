@@ -1555,5 +1555,9 @@ void solve()
 - `gcd()`计算最大公约数
 - `binary_search`在有序数列中寻找指定元素
 - `next_permutation(a.begin(),a.end())`返回下一个全排列（字典序）
+- `substr(pos, len)` 接受两个参数：起始位置 和 长度。等价于左闭右开,复杂度On
+  - 如果你想取 [l, r) 这段，写法就是：`substr(l, r - l)`
+    所以 s.substr(0, i + st.size()) 的意思是：
+    从位置 0 开始,取 i + st.size() 个字符
 
 ---

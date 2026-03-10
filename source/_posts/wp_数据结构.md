@@ -544,6 +544,261 @@ void solve()
 }
 ```
 
+#### [D. Simons and Beating Peaks](https://codeforces.com/problemset/problem/2205/D)
+
+- **核心模型**:非常常见的拼接型找最大值
+- **思维误区 (Bug)**:
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n);
+    int mx = -1;
+    int tpmx = 0;
+ 
+    rep(i, 0, n - 1)
+    {
+        cin >> nums[i];
+    }
+   
+    auto ddz = [&]() -> vi
+    {
+        vi dl(n + 1);
+        stack<int> stk;
+        for (int i = 0; i < n; i++)
+        {
+            while (!stk.empty() && nums[stk.top()] < nums[i])
+            {
+                stk.pop();
+            }
+            if (stk.empty())
+            {
+                dl[i] = 0;
+            }
+            else
+            {
+                dl[i] = stk.size();
+            }
+            stk.push(i);
+        }
+        return dl;
+    };
+    auto ddz2 = [&]() -> vi
+    {
+        vi dl(n + 1);
+        stack<int> stk;
+        for (int i = n - 1; i >= 0; i--)
+        {
+            while (!stk.empty() && nums[stk.top()] < nums[i])
+            {
+                stk.pop();
+            }
+            if (stk.empty())
+            {
+                dl[i] = 0;
+            }
+            else
+            {
+                dl[i] = stk.size();
+            }
+            stk.push(i);
+        }
+        return dl;
+    };
+    vi left = ddz(), right = ddz2();
+    int ans = INF;
+    for (int i = 0; i < n; i++)
+    {
+        auto lf = i - left[i];
+        auto rt = n - 1 - i - right[i];
+        dbg(left[i],right[i]);
+        ans = min(ans, lf + rt);
+    }
+    cout << ans << '\n';
+}
+ 
+```
+
+#### [C. Where's My Water?](https://codeforces.com/contest/2207/problem/C)
+
+- **注意：**以下是复杂度on的解法，该题数据可以用n方
+- **核心模型**:单调栈On计算每个出水口能吸收的水（有点类似于玉蟾宫）然后用天才贪心固定住一个点找第二个
+- **修正逻辑 (Patch)**:这里只介绍关于单调栈维护的部分：
+    单调栈可以做到On去从前往后维护。
+    举个例子：往左找的：我们维护一个单调递减的栈（栈里面留下严格大于的土柱）
+    这里的维护逻辑类似于玉蟾宫悬线法：
+    这里的wl（wr）是用类似dp的一个方法维护
+    维护方法是维护到目前的四方格里面有多少土块被覆盖
+    最后更新用一个容斥做，（不需要考虑左闭右开...）
+
+```cpp
+    vi sl(n + 2);
+    vi wl(n + 2);
+    vi sum(n + 2);
+    stack<int> stl;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!stl.empty() && nums[stl.top()] <= nums[i])
+        {
+            stl.pop();
+        }
+        int now = 0;
+        if (stl.empty())
+        {
+            now = 0;
+        }
+        else
+        {
+            now = stl.top();
+        }
+        sl[i] = sl[now] + (i - now) * nums[i];
+        wl[i] = i * h - sl[i];
+        stl.emplace(i);
+    }
+    vi sr(n + 2);
+    vi wr(n + 2);
+    stack<int> str;
+    for (int i = n; i >= 1; i--)
+    {
+        while (!str.empty() && nums[str.top()] <= nums[i])
+        {
+            str.pop();
+        }
+        int now = 0;
+        if (str.empty())
+        {
+            now = n + 1;
+        }
+        else
+        {
+            now = str.top();
+        }
+        sr[i] = sr[now] + (now - i) * nums[i];
+        wr[i] = (n - i + 1) * h - sr[i];
+        str.emplace(i);
+    }
+
+    pii mx_ans = {0, 0};
+    for (int i = 1; i <= n; i++)
+    {
+        sum[i] = wl[i] + wr[i] - (h - nums[i]);
+        if (mx_ans.first < sum[i])
+        {
+            mx_ans = {sum[i], i};
+        }
+    }
+```
+
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n, h;
+    cin >> n >> h;
+    vi nums(n + 2);
+  
+    rep(i, 1, n)
+    {
+        int d;
+        cin >> d;
+        nums[i] = d;
+      
+    }
+    
+    vi sl(n + 2);
+    vi wl(n + 2);
+    vi sum(n + 2);
+    stack<int> stl;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!stl.empty() && nums[stl.top()] <= nums[i])
+        {
+            stl.pop();
+        }
+        int now = 0;
+        if (stl.empty())
+        {
+            now = 0;
+        }
+        else
+        {
+            now = stl.top();
+        }
+        sl[i] = sl[now] + (i - now) * nums[i];
+        wl[i] = i * h - sl[i];
+        stl.emplace(i);
+    }
+    vi sr(n + 2);
+    vi wr(n + 2);
+    stack<int> str;
+    for (int i = n; i >= 1; i--)
+    {
+        while (!str.empty() && nums[str.top()] <= nums[i])
+        {
+            str.pop();
+        }
+        int now = 0;
+        if (str.empty())
+        {
+            now = n + 1;
+        }
+        else
+        {
+            now = str.top();
+        }
+        sr[i] = sr[now] + (now - i) * nums[i];
+        wr[i] = (n - i + 1) * h - sr[i];
+        str.emplace(i);
+    }
+
+    pii mx_ans = {0, 0};
+    for (int i = 1; i <= n; i++)
+    {
+        sum[i] = wl[i] + wr[i] - (h - nums[i]);
+        if (mx_ans.first < sum[i])
+        {
+            mx_ans = {sum[i], i};
+        }
+    }
+   
+    int ans2 = mx_ans.first;
+    int idx = mx_ans.second;
+    int curMax = nums[idx];
+    int curtp = idx;
+    // cerr<<idx;
+    for (int j = idx; j >= 1; j--)
+    {
+        if (curMax < nums[j])
+        {
+            curtp = j;
+            curMax = nums[j];
+        }
+
+        ans2 = max(ans2, sum[idx]+ sum[j] - sum[curtp]);
+    }
+
+    curMax = nums[idx];
+     curtp = idx;
+    for (int j = idx + 1; j <= n; j++)
+    {
+        if (curMax < nums[j])
+        {
+            curtp = j;
+            curMax = nums[j];
+        }
+
+        ans2 = max(ans2, sum[idx] + sum[j] - sum[curtp]);
+    }
+
+    cout << ans2 << '\n';
+}
+```
+
 #### **关于单调栈得两种写法**
 
 由于学习了悬线法之后脑子变成石头了总是搞反两种写法：以下时讲解

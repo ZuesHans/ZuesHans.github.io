@@ -149,6 +149,19 @@ void solve() {
 
 **复杂度**：O(2^n) 最坏，剪枝后更优。
 
+#### [E2. Interactive Graph (Hard Version)](https://codeforces.com/contest/2197/problem/E2)
+
+- **核心模型**: 字典序 + 计数：核心的跳跃量 c[u] 本质是在字典序排列里做区间跳跃，跟数位DP的思想非常像
+- **思维误区 (Bug)**:
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+
+```
+
+---
+
 ### BFS
 
 #### P1434 [SHOI2002] 滑雪

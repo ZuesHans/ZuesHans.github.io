@@ -11,7 +11,7 @@ cover: /img/cover/picg_12.png
 
 ### 筛法枚举
 
-#### [F. Easy Demon Problem]()
+#### [F. Easy Demon Problem](https://codeforces.com/problemset/problem/2044/F)
 
 - **核心模型**:调和级数枚举预处理
 - **思维误区 (Bug)**:首先是对于题目负因数case没写上。其次是复杂度。这道题错解是n√nlogn，注意到数据范围会变成1e8，加上map常数大会tle。第一步优化换了unorded_set （O(1)查询最坏on）题目卡哈希冲突。

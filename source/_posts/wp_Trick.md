@@ -1379,3 +1379,94 @@ void solve() {
 **复杂度**：O(n)，空间 O(n)。
 
 ---
+
+### 二分答案
+
+- 当看到：最小化最大值/最大化最小值（有单调性）就可以考虑二分
+
+#### [F. Editorial for Two](https://codeforces.com/contest/1837/problem/F)
+
+- **核心模型**:分析这道题，震撼发现我们要做得是：找到子序列k+判断割点。太难了，不妨尝试二分？
+- **思维误区 (Bug)**:一开始我们可能会想到贪心，但是有可能他是一个递增数列。hack掉了普通的贪心。我们想一下二分：二分答案得话：如何判断是否能满足：简单来说，我们不具体考虑具体数字是多少，数字越多数值肯定越大，这就满足了我们二分的单调性。我们可以尝试去维护在某个地方的数字数量（选择权）。那么这个时候就有一个次序得问题：我想选择某个数字作为前缀，那在她前面的数字要不然被删掉要不然成为前缀。这个时候怎么办呢？有一定次序+希望再某个截止量之前做最多的事->>>**反悔贪心**！然后就对了
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n, k;
+    cin >> n >> k;
+    vi nums(n);
+    ll ri = 0;
+    ll lef = 0;
+    rep(i, 0, n - 1)
+    {
+        cin >> nums[i];
+        ri += nums[i];
+    }
+    auto check = [&](int x) -> bool
+    {
+        priority_queue<int> pq;
+        int sum = 0;
+
+        vi qz(n);
+        for (int i = 0; i < n; i++)
+        {
+            sum += nums[i];
+            pq.emplace(nums[i]);
+            while (sum > x)
+            {
+                sum -= pq.top();
+                pq.pop();
+            }
+            qz[i] = pq.size();
+        }
+
+        priority_queue<int> pq2;
+        sum = 0;
+
+        vi hz(n);
+        for (int i = n - 1; i >= 0; i--)
+        {
+            sum += nums[i];
+            pq2.emplace(nums[i]);
+            while (sum > x)
+            {
+                sum -= pq2.top();
+                pq2.pop();
+            }
+
+            hz[i] = pq2.size();
+        }
+
+        int ans = 0;
+        for (int i = 0; i < n-1; i++)
+        {
+            ans = qz[i] + hz[i+1];
+            if (ans >= k)
+            {
+                return 1;
+            }
+        }
+        return 0;
+    };
+
+    while (lef < ri)
+    {
+        int mid = (lef + ri) / 2;
+        if (check(mid))
+        {
+            ri = mid;
+        }
+        else
+        {
+            lef = mid + 1;
+        }
+    }
+
+    cout << lef << '\n';
+}
+
+```
+
+---

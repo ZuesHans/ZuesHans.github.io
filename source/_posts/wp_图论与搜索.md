@@ -1000,6 +1000,70 @@ void solve()
  
 ```
 
+#### [G_Exploration](https://codeforces.com/gym/105806/problem/G)
+
+- **核心模型**:分层图dp
+- **思维误区 (Bug)**:一开始看见权值/2地往下递减错误的想用bfs。bfs本质上就是一点一点枚举路径，复杂度是指数级别的
+- **修正逻辑 (Patch)**:ce[v][k] 是指：从v出发走k步最大地值。题目是要求/边权，我们可以反向思考成从某点出发*边权。可以证明出单调性
+- 发现重复子问题 → 想到DP
+- 发现步数上界只有30 → 把步数作为DP的维度
+- 发现正向状态太多 → 翻转问题方向
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n, m, q;
+    cin >> n >> m >> q;
+    vector<vector<pii>> mp(n + 1);
+    for (int i = 0; i < m; i++)
+    {
+        int u, v, d;
+        cin >> u >> v >> d;
+        mp[v].push_back(make_pair(u, d));
+    }
+    vector<vector<int>> dp(40, vi(n + 1, 0));
+    for (int i = 1; i <= n; i++)
+    {
+        sort(mp[i].begin(), mp[i].end(), [](pii a, pii b)
+             { return a.second < b.second; });
+    }
+    for (int i = 0; i < n + 1; i++)
+    {
+        dp[0][i] = 1;
+    }
+    for (int k = 1; k <= 30; k++)
+        for (int i = 1; i <= n; i++)
+        {
+            for (auto it : mp[i])
+            {
+                int nxt = it.first;
+                int gap = it.second;
+                
+                dp[k][nxt] = max(dp[k][nxt], min(dp[k - 1][i] * gap, (int)2e9));
+            }
+        }
+
+    while (q--)
+    {
+        int po, val;
+        cin >> po >> val;
+        int ans = 0;
+        for (int i = 0; i <= 30; i++)
+        {
+            if (dp[i][po] > val)
+            {
+                ans = i;
+                break;
+            }
+        }
+        cout << ans << '\n';
+    }
+}
+
+```
+
+---
 ---
 
 ### tarjan

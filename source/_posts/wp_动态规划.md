@@ -84,6 +84,72 @@ void solve() {
 
 ### 线性DP
 
+#### [P1874 快速求和](https://www.luogu.com.cn/problem/P1874)
+
+- **核心模型**:划分段落地线性dp->把一个序列切成若干段，每段满足某种条件，求最优解
+- **思维误区 (Bug)**:
+- **修正逻辑 (Patch)**:通用思维：dp[i] = 考虑前 i 个元素，满足条件的最优解；它是一条线，从左到右一步步往前延伸。
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    string s;
+    cin >> s;
+    vi nums(s.size());
+    for (int i = 0; i < s.size(); i++)
+    {
+        nums[i] = s[i] - '0';
+    }
+
+    int a;
+    cin >> a;
+
+    vector<vi> dp(1e5, vi(40, INF));
+    dp[0][0] = 0;
+
+    for (int i = 1; i <= s.size(); i++)
+    {
+        for (int k = 0; k < i; k++)
+        {
+
+            bool can = 1;
+            int now = 0;
+            for (int j = k; j < i; j++)
+            {
+                now *= 10;
+                now += nums[j];
+
+                if (now > a)
+                {
+                    can = 0;
+                    break;
+                }
+            }
+            if (!can)
+            {
+                continue;
+            }
+          
+            for (int val = now; val <= a; val++)
+            {
+                if (dp[val-now][k] < INF)
+                {  
+                    dp[val][i] = min(dp[val][i], dp[val-now][k] + 1);
+                    // cerr<<now+val<<' ';
+                }
+               
+            }
+        }
+    }
+    if (dp[a][s.size()] == INF)
+        cout << -1 << '\n';
+    else
+        cout << dp[a][s.size()]-1 << '\n';
+}
+
+```
+
 #### [E. LIS of Sequence](https://codeforces.com/problemset/problem/486/E)
 
 - **核心模型**:LIS的性质，寻找“可能会出现”的小trick（拼接法）

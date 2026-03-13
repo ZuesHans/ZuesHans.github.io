@@ -1559,5 +1559,3 @@ void solve()
   - 如果你想取 [l, r) 这段，写法就是：`substr(l, r - l)`
     所以 s.substr(0, i + st.size()) 的意思是：
     从位置 0 开始,取 i + st.size() 个字符
-
----

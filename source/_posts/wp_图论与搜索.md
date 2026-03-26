@@ -116,6 +116,148 @@ void solve()
 
 ```
 
+#### [流沙（dfs找子树）](https://acm.hdu.edu.cn/contest/problem?cid=1197&pid=1007)
+
+- **核心模型**:，贪心，继承，dp
+- **思维误区 (Bug)**:
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n + 1);
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> nums[i];
+    }
+
+    vector<vi> mp(n + 1);
+    for (int i = 0; i < n - 1; i++)
+    {
+        int u, v;
+
+        cin >> u >> v;
+        mp[u].push_back(v);
+        mp[v].push_back(u);
+    }
+
+    vi dp(n + 1, 0);
+    vi sum(n + 1, 0);
+    vi tr(n + 1, 1);
+    vi ans(n + 1);
+    auto dfs = [&](int a, int fa, auto self) -> void
+    {
+        sum[a] = nums[a];
+        
+        int pans = INF;
+        bool lv = 1;
+        for (auto it : mp[a])
+        {
+            if (it == fa)
+            {
+                continue;
+            }
+            lv = 0;
+            self(it, a, self);
+
+            sum[a] += sum[it];
+            tr[a] += tr[it];
+            pans = min(pans, ans[it]);
+        }
+        if (lv)
+            ans[a] = nums[a];
+        else
+            ans[a] = min(pans, sum[a] / tr[a]);
+    };
+
+    dfs(1, -1, dfs);
+    for (int i = 1; i <= n; i++)
+    {
+        cout << ans[i] << ' ';
+    }
+    cout << '\n';
+}
+
+```
+
+---
+
+#### [分治->Generate01String](https://codeforces.com/group/A5KcfGn880/contest/679438/attachments/download/31637/9thHBCPC.pdf)
+
+- **核心模型**:括号匹配，单调性分治递归搜索树
+- **思维误区 (Bug)**:第一时间没有观察到其树状递归单调性
+- **修正逻辑 (Patch)**:注意递归顺序最大的出发点把-1和n看作一个虚空大括号，每加上一个小括号子树进去就要加一次
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    string s;
+    cin >> s;
+
+    if (2 * count(all(s), '0') != s.size())
+    {
+        cout << -1 << '\n';
+        return;
+    }
+
+    vector<pii> stk;
+    vector<pii> bt;
+    cout << count(all(s), '0') << '\n';
+    for (int i = 0; i < s.size(); i++)
+    {
+        if (stk.empty() || s[i] == stk.back().first)
+        {
+            stk.push_back({s[i], i});
+        }
+        else
+        {
+            bt.push_back({stk.back().second, i});
+            stk.pop_back();
+        }
+    }
+    sort(all(bt), [](pii a, pii b)
+         {
+      if(a.first!=b.first)  return a.first<b.first;
+      else a.second>b.second; });
+    int tp = 0;
+    int pos = 1;
+    vector<pii> ans;
+    auto dfs = [&](auto &&self, int L, int R) -> void
+    {
+        if (L >= R)
+            return;
+
+        if (L != -1)
+        {
+            if (s[L] == '0')
+                ans.push_back({pos, 1});
+            else
+                ans.push_back({pos, 2});
+        }
+        while (tp < bt.size() && bt[tp].second < R)
+        {
+            int a = bt[tp].first;
+            int b = bt[tp].second;
+            tp++;
+            self(self, a, b);
+            pos++;
+        }
+    };
+    dfs(dfs, -1, s.size());
+
+    for (auto [a, b] : ans)
+    {
+        cout << a << ' ' << b << "\n";
+    }
+}
+```
+
+---
+
 #### 小猫爬山
 
 ```cpp
@@ -249,7 +391,7 @@ void solve()
            inDegree[v]--
            if (inDegree[v] == 0) 入队
    }
-```~~~```
+```
 
 #### BFS例题：P1443 马的遍历
 
@@ -259,6 +401,7 @@ void solve()
 - **AC 代码**:
 
 ```cpp
+
 nn[x][y]=0;
     queue<pair<int, int>> bfs; // 建立一个以点坐标为项目的队列
     bfs.emplace(x, y);
@@ -277,6 +420,7 @@ nn[x][y]=0;
             bfs.emplace(hsh, ljl);
         }
     }
+
 ```
 
 - **注意事项**:
@@ -1061,6 +1205,113 @@ void solve()
     }
 }
 
+```
+
+### trick：容斥与路径数
+
+- 情景：已知条件：
+  - 从起点到 A 的路径数
+  - 从起点到 B 的路径数
+  - A 在 B 的左上方（A 可以在 B 之前被经过）
+
+- 想求：
+  - 从起点到 B、且途中没有经过 A 的路径数
+
+- 解法:到B且不经过A = 到B的所有路径 - 到B且经过A的路径 = 到A的路径 × 从A到B的路径
+  - 子问题1：求0，0到点A的路径数：相当于向下走Ax步向右走Ay步-> nCr(Ax+Ay，Ax)；
+  - 子问题1推广到从 (prex, prey) 走到 (x, y)：->nCr(abs(x - prex) + abs(y - prey), abs(x - prex))
+  - 因为是要算很多个点递推关系所以dp方程变为：`dp[j] = (((dp[j] - (dp[k] * nCr(abs(x - prex) + abs(y - prey), abs(x - prex)) % MOD)) + MOD) % MOD) % MOD;`
+
+#### [G. Path Summing Problem](https://codeforces.com/group/A5KcfGn880/contest/680980/problem/G)
+
+- **核心模型**:见解法一容斥dp
+
+- **题解**：如题意容易想到贡献法：用贡献法转化为“每种数字对结果的贡献”
+
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<vi> mp(n + 1, vi(m + 1, 0));
+    map<int, vector<pii>> lab;
+    vi arr;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            cin >> mp[i][j];
+            arr.push_back(mp[i][j]);
+            lab[mp[i][j]].push_back(make_pair(i, j));
+        }
+    }
+    sort(all(arr));
+    arr.erase(unique(arr.begin(), arr.end()), arr.end());
+
+    int nn = arr.size();
+    // cerr << "yuanshen" << '\n';
+    int B = max(1ll, (int)sqrt(n * m));
+    ll ans = 0;
+
+    for (int i = 0; i < nn; i++)
+    {
+        int sz = lab[arr[i]].size();
+        assert(sz != 0);
+        //   cerr << "yuanshen" << '\n';
+        if (sz < B)
+        {
+            // 第一个容斥DP
+            //  cerr << "yuanshen" << '\n';
+            vector<pii> vec = lab[arr[i]];
+            ll pans = 0;
+            vi dp(sz);
+            for (int j = 0; j < sz; j++)
+            {
+                auto [x, y] = vec[j];
+                dp[j] = nCr(x + y, x);
+                for (int k = 0; k < j; k++)
+                {
+                    auto [prex, prey] = vec[k];
+
+                    if (prex <= x && prey <= y)
+                    {
+                        dp[j] = (((dp[j] - (dp[k] * nCr(abs(x - prex) + abs(y - prey), abs(x - prex)) % MOD)) + MOD) % MOD) % MOD;
+                    }
+                }
+                pans = (pans + dp[j] * nCr(n + m - x - y - 2, n - x - 1) % MOD);
+            }
+            ans = (ans + pans % MOD) % MOD;
+        }
+        else
+        {
+            // 第二个普通DP
+            //  cerr << "yuanshen" << '\n';
+            vector<vi> dp(n + 1, vi(m + 1, 0));
+            dp[0][0] = (mp[0][0] == arr[i]) ^ 1;
+            for (int j = 0; j < n; j++)
+            {
+                for (int k = 0; k < m; k++)
+                {
+                    if (mp[j][k] == arr[i])
+                        dp[j][k] = 0;
+
+                    else{
+                        if (j > 0)
+                            dp[j][k] += dp[j - 1][k];
+                        if (k > 0)
+                            dp[j][k] += dp[j][k - 1];
+                    }
+                    dp[j][k] %= MOD;
+                }
+            }
+            dbg(dp[n - 1][m - 1], nCr(n + m - 2, n - 1));
+            ans = ((ans + nCr(n + m - 2, n - 1)) % MOD - dp[n - 1][m - 1] + MOD) % MOD;
+        }
+    }
+    cout << ans << '\n';
+}
 ```
 
 ---

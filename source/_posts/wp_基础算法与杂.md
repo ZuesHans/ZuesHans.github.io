@@ -414,6 +414,81 @@ void solve()
   - 维护r的界限和nums[r]的更新逻辑是难点
 [相似的滑动窗口]<https://codeforces.com/problemset/problem/2117/C>
 
+#### [金麦园](https://codeforces.com/group/A5KcfGn880/contest/679438/attachments/download/31637/9thHBCPC.pdf)
+
+- **核心模型**:双指针固定点R快速求区间差值和
+- **思维误区 (Bug)**:
+- **修正逻辑 (Patch)**:注意到排序后的差值有单调性，有单调性的就能二分
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n, k;
+    cin >> n >> k;
+    vi nums(n + 1);
+    vi qzh(n + 1);
+    rep(i, 1, n)
+    {
+        cin >> nums[i];
+    }
+ 
+    sort(nums.begin() + 1, nums.end());
+    rep(i, 1, n)
+    {
+        qzh[i] = qzh[i - 1] + nums[i];
+    }
+    auto check = [&](int x) -> bool
+    {
+        ll cnt = 0;
+        for (int lef = 1, ri = 1; ri <= n; ri++)
+        {
+            while (nums[ri] - nums[lef] > x)
+                lef++;
+            cnt += (ri - lef);
+        }
+        return cnt <= k;
+    };
+    int dui = 0;
+    auto sum = [&](int x) -> ll
+    {
+        ll res = 0;
+ 
+        for (int lef = 1, ri = 1; ri <= n; ri++)
+        {
+            while (nums[ri] - nums[lef] > x)
+                lef++;
+            dui += (ri - lef);
+            res += (ri - lef) * nums[ri] - (qzh[ri - 1] - qzh[lef - 1]);
+        }
+        return res;
+    };
+ 
+    int L = 0;
+    int R = (ll)1e8 + 5;
+    while (L < R)
+    {
+        int mid = (L + R) / 2;
+        if (check(mid))
+        {
+            L = mid + 1;
+        }
+        else
+        {
+            R = mid;
+        }
+    }
+ 
+    ll gap = 0;
+    ll ans = sum(L - 1);
+    ans += (k - dui) * L;
+    cout << ans << '\n';
+}
+ 
+```
+
+---
+
 #### P1638 逛画展
 
 - 写双指针的时候一定要知道你在写什么

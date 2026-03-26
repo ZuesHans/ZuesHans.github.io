@@ -150,6 +150,116 @@ void solve()
 
 ```
 
+#### [Blackboard](https://ac.nowcoder.com/acm/contest/120561/H)
+
+- **核心模型**:划分型dp，注意到它的性质是有单调性的；判断区间是否能成为一个集合当且仅当`if ((nums[tp] & mask) == 0)`
+- **思维误区 (Bug)**:注意如果中间塞很多很多0就会tle->可以选择链表来往上找，记得要加上区间dp和（我用树状数组处理，注意下标）
+- **修正逻辑 (Patch)**:
+- **关键代码**:
+
+```cpp
+struct Fenwick
+{
+    int n;
+    vector<long long> tr;
+
+    // 初始化：传入最大长度 n
+    Fenwick(int size) : n(size), tr(size + 1, 0) {}
+    // 初始化2：节省时间开销的init
+    void init(int size)
+    {
+        n = size;
+        tr.assign(n + 1, 0);
+    }
+
+    // 核心位运算：获取二进制最低位的 1
+    int lowbit(int x)
+    {
+        return x & -x;
+    }
+
+    // 单点修改：在位置 x 加上 val
+    void add(int x, long long val)
+    {
+        for (; x <= n; x += lowbit(x))
+        {
+            tr[x] = (tr[x] + val) % MOD;
+        }
+    }
+
+    // 查询前缀和：查询 [1, x] 的和
+    long long ask(int x)
+    {
+        long long res = 0;
+        for (; x > 0; x -= lowbit(x))
+        {
+            res = (res + tr[x]) % MOD;
+        }
+        return res;
+    }
+
+    // 区间查询：查询 [l, r] 的和
+    long long range_ask(int l, int r)
+    {
+        if (l > r)
+            return 0;
+        return (ask(r) % MOD - ask(l - 1) % MOD + MOD) % MOD;
+    }
+};
+
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n + 1);
+    int lst_idx = 0;
+    vi preidx(n + 1);
+    rep(i, 1, n)
+    {
+        cin >> nums[i];
+        preidx[i] = lst_idx;
+        if (nums[i])
+            lst_idx = i;
+    }
+    //  dbg_arr(preidx, 0, preidx.size() - 1);
+    Fenwick dp(n + 2);
+    dp.add(1, 1);
+
+    for (int i = 1; i <= n; i++)
+    {
+        int mask = 0;
+        int tp = i;
+        int cnt = 0;
+        int now = 0;
+        
+        while (tp > 0 && cnt < 32)
+        {
+            // cerr<<preidx[tp]<<' '<<cnt<<'\n';
+           
+            if ((nums[tp] & mask) == 0)
+            {
+                mask |= nums[tp];
+                
+                tp = preidx[tp];
+                now = tp ;
+            }
+            else
+            {
+                // now=tp+1;
+                break;
+            }
+
+            cnt++;
+        }
+        // if (tp == 0)
+        //     now = 1;
+        dp.add(i + 1, dp.range_ask(now+1, i));
+    }
+    cout << dp.range_ask(n + 1, n + 1) << '\n';
+}
+
+```
+
 #### [E. LIS of Sequence](https://codeforces.com/problemset/problem/486/E)
 
 - **核心模型**:LIS的性质，寻找“可能会出现”的小trick（拼接法）

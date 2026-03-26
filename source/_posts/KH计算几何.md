@@ -84,6 +84,78 @@ struct Point {
 using Vec = Point;//不要和vector撞了
 ```
 
+## 3D点struct
+
+```cpp
+struct Point3 {
+    double x, y, z; // 3D点
+
+    Point3(double x=0, double y=0, double z=0):x(x),y(y),z(z){}
+    /*
+    支持高效创建点
+    例如 Point3 p2(3, 4, 5);     // (3,4,5)
+    */
+
+    Point3 operator+(const Point3 &b) const { return Point3(x+b.x, y+b.y, z+b.z); }
+    Point3 operator-(const Point3 &b) const { return Point3(x-b.x, y-b.y, z-b.z); }
+    Point3 operator*(double p) const { return Point3(x*p, y*p, z*p); }
+    Point3 operator/(double p) const { return Point3(x/p, y/p, z/p); }
+    
+    /*
+    重载运算符，进行点的向量运算
+    例如: Point3 a(1,2,3), b(4,5,6);
+          Point3 c = a + b;  // c = (5,7,9)
+    重载乘除：对坐标进行放缩
+          Point3 v = p * 2.0;   // 坐标都 ×2
+          Point3 unit = v / v.len();  // 单位向量
+    */
+
+    // 定义 ^ 为叉积。注意：3D叉积返回的是一个【向量】，而不是2D里的标量！
+    Point3 operator^(const Point3 &b) const { 
+        return Point3(y*b.z - z*b.y, z*b.x - x*b.z, x*b.y - y*b.x); 
+    } 
+
+    bool operator==(const Point3 &b) const { 
+        return dcmp(x-b.x)==0 && dcmp(y-b.y)==0 && dcmp(z-b.z)==0; 
+    }
+    /*
+    判断两个点在误差内是否相等（重合）
+    */
+
+    // 长度。注：C++17 开始支持 std::hypot(x,y,z)，如果编译器较老建议用 sqrt
+    double len() const { return sqrt(x*x + y*y + z*z); }               
+    double len2() const { return x*x + y*y + z*z; }                 // 平方
+    //调用方式：double dist = (p1 - p2).len();
+
+    Point3 unit() const { return *this / len(); }                   // 单位向量
+    
+    // 注意：3D中没有单一的 perp() (逆时针90°)，因为垂直于一条线的向量有无数个
+    // 注意：3D中也没有单一的 angle() (与x轴夹角)，通常需要用点积求两个向量之间的夹角
+
+    double dot(const Point3 &b) const { return x*b.x + y*b.y + z*b.z; } // 点积
+    Point3 cross(const Point3 &b) const { return *this ^ b; }           // 叉积
+    /*
+    3D叉积数学公式 a×b = (y₁z₂ - z₁y₂, z₁x₂ - x₁z₂, x₁y₂ - y₁x₂)
+    几何意义：生成一个垂直于a和b所在平面的法向量。
+    该向量的长度 |a×b| = |a||b|sinθ，即两向量构成的平行四边形面积。
+    */
+
+    /*
+    3D 旋转：罗德里格斯旋转公式 (Rodrigues' rotation formula)
+    参数：axis 为旋转轴（必须是单位向量），theta 为旋转角度（弧度）
+    调用方式：Point3 v_new = v.rotate(Point3(0,0,1), PI/2); // 绕Z轴转90度
+    */
+    Point3 rotate(const Point3 &axis, double theta) const {
+        double c = cos(theta), s = sin(theta);
+        Point3 v = *this;
+        // 公式：v' = v*cosθ + (axis×v)*sinθ + axis*(axis·v)*(1-cosθ)
+        return v * c + axis.cross(v) * s + axis * (axis.dot(v)) * (1 - c);
+    }
+};
+using Vec3 = Point3; // 不要和vector撞了
+
+```
+
 ## 常用函数
 
 ```cpp
@@ -140,6 +212,88 @@ bool OnSeg(Point p, Point a, Point b) {
 
 - 共线：`Cross(p-a, b-a) = (p-a) × (b-a)`
 - 在点区间内：`Dot(p-a, p-b) <= 0`
+
+## 3D常用函数
+
+```cpp
+// 假设之前已经定义了 Point3, Vec3 和 dcmp，且 ^ 重载为了叉积
+
+/* 1. 点到直线的距离
+原理：叉积的模长等于平行四边形面积，面积除以底边长等于高。
+参数：点 p，直线上的两点 a 和 b
+*/
+double distToLine(Point3 p, Point3 a, Point3 b) {
+    Vec3 v1 = b - a;
+    Vec3 v2 = p - a;
+    return (v1 ^ v2).len() / v1.len(); 
+}
+
+/*
+2. 点到线段的距离
+原理：先利用点积判断垂足是否在线段上，如果在外面则退化为点到端点的距离。
+参数：点 p，线段的两个端点 a 和 b
+*/
+double distToSegment(Point3 p, Point3 a, Point3 b) {
+    if (a == b) return (p - a).len();
+    Vec3 v1 = b - a, v2 = p - a, v3 = p - b;
+    
+    if (dcmp(v1.dot(v2)) < 0) return v2.len();      // 垂足在 a 的外侧，离 a 更近
+    if (dcmp(v1.dot(v3)) > 0) return v3.len();      // 垂足在 b 的外侧，离 b 更近
+    return (v1 ^ v2).len() / v1.len();              // 垂足在线段上，同点到直线的距离
+}
+
+/*
+3. 点在直线上的投影点 (求垂足)
+原理：利用点积求出投影长度的比例，再用向量加法从起点推过去。
+参数：点 p，直线上的两点 a 和 b
+*/
+Point3 projectionOnLine(Point3 p, Point3 a, Point3 b) {
+    Vec3 v = b - a;
+    // (p-a).dot(v) 是投影长度乘以 v 的长度。再除以 v.len2() 就得到了 t 的比例
+    double t = (p - a).dot(v) / v.len2(); 
+    return a + v * t;
+}
+
+/*
+4. 求平面的单位法向量
+原理：在平面上任取三个不共线的点，两两连成向量做叉积，然后归一化。
+参数：平面上三个不共线的点 p1, p2, p3
+*/
+Vec3 getNormal(Point3 p1, Point3 p2, Point3 p3) {
+    return ((p2 - p1) ^ (p3 - p1)).unit();
+}
+
+/*
+5. 点到平面的距离
+原理：把点和平面上的已知点连成向量，求它在法向量上的投影长度（点积的绝对值）。
+参数：点 p，平面上任意一点 p0，平面的单位法向量 n
+注意：传进来的 n 必须是单位向量 (unit)
+*/
+double distToPlane(Point3 p, Point3 p0, Vec3 n) {
+    return fabs((p - p0).dot(n));
+}
+
+/*
+6. 点在平面上的投影点
+原理：点 p 沿着法向量的反方向移动“点到平面的带符号距离”，就能落在平面上。
+参数：点 p，平面上任意一点 p0，平面的单位法向量 n
+注意：传进来的 n 必须是单位向量 (unit)
+*/
+Point3 projectionOnPlane(Point3 p, Point3 p0, Vec3 n) {
+    double d = (p - p0).dot(n); // 注意这里不加绝对值，保留正负号来指示方向
+    return p - n * d;           
+}
+
+/*
+7. 判断四点共面
+原理：三个点构成平面（求出法向量），看第四个点到这个平面的距离是否为 0。
+参数：四个点 a, b, c, d
+*/
+bool isCoplanar(Point3 a, Point3 b, Point3 c, Point3 d) {
+    Vec3 n = (b - a) ^ (c - a); // 不需要 unit，只要判断点积是否为 0 即可
+    return dcmp((d - a).dot(n)) == 0;
+}
+```
 
 ## 排序(大部分时间我手搓lambda，这是属于提醒自己)
 

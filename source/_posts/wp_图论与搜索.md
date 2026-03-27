@@ -299,9 +299,156 @@ void solve() {
 - **关键代码**:
 
 ```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<vi> ans(n + 1);
+   
+
+    auto qry = [&](int q) -> vi
+    {
+       
+        cout << "? " << q << endl;
+        int k;
+        cin >> k;
+        if (k == -1)
+            exit(0); 
+        if (k == 0) { return {}; }
+        vi res(k);     
+        rep(i, 0, k - 1) cin >> res[i];
+        
+        return res;
+    };
+    int kq = 1;
+    vi dp(n + 1, 0);
+    vector<int> stk;
+
+    auto dfs = [&](int pt, auto self) -> void
+    {
+        while (1)
+        {
+            vi rsp = qry(kq);
+            bool out = rsp.size() <= stk.size();
+            if (out)
+                break;
+            for (int i = 0; i < stk.size(); i++)
+            {
+                if (rsp[i] != stk[i]) · 11
+                {
+                    out = 1;
+                    break;
+                }
+            }
+            
+            // int v = rsp.back();
+            int v = rsp[stk.size()];
+
+            ans[pt].push_back(v);
+            if (dp[v] != 0)
+            { // c[v] 已知
+                dp[pt] += dp[v];
+                kq += dp[v];
+            }
+            else
+            { // c[v] 未知，进去探索
+                dp[v] = 1;
+                kq++;
+                stk.push_back(v);
+                self(v, self);
+                stk.pop_back();
+                dp[pt] += dp[v];
+            }
+        }
+    };
+
+    for (int i = 1; i <= n; i++)
+    {
+        if (dp[i] != 0)
+        {
+            kq += dp[i];
+            continue;
+        }
+        dp[i] = 1;
+        kq++;
+        stk.push_back(i);
+        dfs(i, dfs);
+        stk.pop_back();
+    }
+    int m = 0;
+    for (int i = 1; i <= n; i++)
+        m += ans[i].size();
+    cout << "! " << m << endl;
+    for (int i = 1; i <= n; i++)
+    {
+        for (auto v : ans[i])
+        {
+            cout << i << ' ' << v << endl;
+        }
+    }
+}
+```
+
+#### [静海拾光](https://acm.hdu.edu.cn/contest/problem?cid=1198&pid=1010)
+
+- **核心模型**:跟E2几乎一样的东西，注意到字典序构成的树dfs即可
+
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n, k;
+    cin >> n >> k;
+
+    vi ans;
+
+    auto dfs = [&](int now, auto self) -> void
+    {
+        if (now <= 0 || k <= 0)
+            return;
+        if (!ans.empty())
+        {
+            k--;
+            if (k <= 0)
+                return;
+        }
+        for (int i = 1; i <= now; i++)
+        {
+            if (now - i > 61)
+            {
+                ans.push_back(i);
+                self(now - i, self);
+                return;
+            }
+            else
+            {
+                int sz = 1ll << (now - i);
+                if (k <= sz)
+                {
+                    ans.push_back(i);
+                    self(now - i, self);
+                    return;
+                }
+                else
+                {
+                    k -= sz;
+                }
+            }
+        }
+    };
+
+    dfs(n, dfs);
+    for (auto it : ans)
+    {
+        cout << it << ' ';
+    }
+    cout << '\n';
+}
 
 ```
 
+---
 ---
 
 ### BFS

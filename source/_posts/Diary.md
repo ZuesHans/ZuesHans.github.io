@@ -6,6 +6,61 @@ tags:
 cover: /img/cover/picg_diary.png
 
 ---
+
+## 2026年3月31日
+
+好久没写diary了，我决定严肃研究我推文功能🤔
+unk宝宝在用龙虾写代码，那我的hexo算什么εε=( o｀ω′)ノ
+btw我这也是ai写的））
+无所谓了））
+btw我要认真打ctf吗））
+
+---
+
+## 26年情人节
+
+```cpp
+
+void solve()
+{
+    int n;
+    cin >> n;
+    map<int, int> love;
+    for (int i = 0; i < n; i++)
+    {
+        int d;
+        cin >> d;
+        love[d]++;
+    }
+    for (auto hsh : love)
+    {
+        auto [ilove, ljl] = hsh;
+        if (ljl % 2)
+        {
+            cout << "NO" << '\n';
+            return;
+        }
+    }
+    cout << "YES" << '\n';
+    for (auto hsh : love)
+    {
+        auto [ilove, ljl] = hsh;
+
+        for (int i = 0; i < ljl; i++)
+        {
+            cout << ilove << ' ';
+        }
+    }
+}
+
+
+```
+
+> 好想念unk呜呜┭┮﹏┭┮
+> 情人节快乐喵喵~~
+
+---
+
 2026年1月12日
 
 烂完了
@@ -84,7 +139,6 @@ cover: /img/cover/picg_diary.png
     我只能热更新我得状态，直到...
     
     或者...
-    
 
 ---
 >以下是顺序日期，之后更新每天心情将会更新在最顶端

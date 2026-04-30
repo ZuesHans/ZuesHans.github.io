@@ -451,6 +451,194 @@ void solve()
 ---
 ---
 
+### 树上问题
+
+#### [D2.Tree coloring](https://codeforces.com/contest/2183/problem/D2)
+
+- **核心模型**:树上染色
+- **做法**:事实上这就是一道大模拟。题目要求不是父子关系（好求），不是同一层。我们就直接把每一次的染色都分层不同的颜色。
+- **错误点**:容易想贪心:我想要在同一层里，每个同学都有自己**“绝对不能碰的禁忌色（亲爹色）”**。
+纯贪心的逻辑是：“轮到我了，桌子上只要有我能用的，我挑个最小的拿走，不管别人死活。”
+这就必然会导致一个惨案：前面的人为了图省事，顺手拿走了一个极其普通的颜色，结果把后面的人逼上了绝路，导致原本够用的蜡笔，硬生生不够用了！
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<vi> mp(n + 1);
+    for (int i = 0; i < n - 1; i++)
+    {
+        int u, v;
+        cin >> u >> v;
+        mp[u].push_back(v);
+        mp[v].push_back(u);
+    }
+
+    vector<vi> ceng(n + 1);
+    vi baba(n + 1);
+    auto dfs = [&](int now, int fa, int step, auto self) -> void
+    {
+        baba[now] = fa;
+        ceng[step].push_back(now);
+        for (auto it : mp[now])
+        {
+            if (it == fa)
+                continue;
+            self(it, now, step + 1, self);
+        }
+    };
+    dfs(1, 0, 0, dfs);
+    vi color(n + 1);
+    color[1] = 1;
+    int sum = 1;
+    for (int i = 0; i <= n; i++)
+    {
+        set<int> now;
+        for (int k = 1; k <= min(sum, (int)ceng[i].size() + 1); k++)
+        {
+            now.emplace(k);
+        }
+        int bt1 = -1, bt2 = -1;
+        for (auto it : ceng[i])
+        {
+            int fac = color[baba[it]];
+            auto tp = now.begin();
+            if (tp != now.end() && *tp == fac)
+            {
+                tp++;
+            }
+            if (tp != now.end())
+            {
+                color[it] = *tp;
+                now.erase(tp);
+            }
+            else
+            {
+                bool add = 0;
+                if (!now.empty())
+                {
+                    if (bt1 != -1 && baba[bt1] != baba[it])
+                    {
+                        add = 1;
+                        color[it] = color[bt1];
+                        color[bt1] = fac;
+                    }
+                    if (bt2 != -1 && baba[bt2] != baba[it] && !add)
+                    {
+                        add = 1;
+                        color[it] = color[bt2];
+                        color[bt2] = fac;
+                    }
+                }
+                if (!add)
+                {
+                    sum++;
+                    color[it] = sum;
+                }
+                else
+                {
+                    now.clear();
+                }
+            }
+            if (bt1 == -1)
+            {
+                bt1 = it;
+            }
+            if (bt2 == -1 && baba[it] != baba[bt1])
+            {
+                bt2 = it;
+            }
+        }
+    }
+    cout << sum << '\n';
+    vector<vi> op(sum + 1);
+    for (int i = 1; i <= n; i++)
+    {
+        op[color[i]].push_back(i);
+    }
+    for (int i = 1; i <= sum; i++)
+    {
+        cout << op[i].size() << ' ';
+        for (auto it : op[i])
+        {
+            cout << it << ' ';
+        }
+        cout << '\n';
+    }
+}
+
+```
+
+#### [流沙](https://acm.hdu.edu.cn/contest/problem?cid=1197&pid=1007)
+
+- **核心模型**:树上dp（涉及图论概念：子树:包含自己还有自己的所有儿子）。树上贪心 （赛时一发过只是放在这参考一下树上的遍历
+- **关键代码**:
+
+```cpp
+void solve()
+{
+ int n;
+ cin >> n;
+ vi a(n + 1);
+ for (int i = 1; i <= n; i++)
+ {
+  cin >> a[i];
+ }
+ vector<vi> mp(n + 1);
+ for (int i = 0; i < n - 1; i++)
+ {
+  int u, v;
+  cin >> u >> v;
+  mp[u].push_back(v);
+  mp[v].push_back(u);
+ }
+
+ vi ans(n + 1);
+ vi sz(n + 1, -(1e9));
+ auto dfs = [&](int now, int fa, auto self) -> int
+ {
+  bool is_leaf = 1;
+  int sum = a[now];
+  int siz = 1;
+  int pans = (1e18);
+  for (auto it : mp[now])
+  {
+   if (it == fa)
+   {
+    continue;
+   }
+   is_leaf = 0;
+   sum += self(it, now, self);
+   siz += sz[it];
+   pans = min(pans, ans[it]);
+  }
+
+  if (is_leaf)
+  {
+   sz[now] = 1;
+   ans[now] = a[now];
+   return a[now];
+  }
+  else
+  {
+   sz[now] = siz;
+   ans[now] = min(pans, sum / siz);
+   return sum;
+  }
+ };
+ dfs(1, -1, dfs);
+ for (int i = 1; i <= n; i++)
+ {
+  cout << ans[i] << ' ';
+ }
+ cout << '\n';
+}
+```
+
+---
+
 ### BFS
 
 #### P1434 [SHOI2002] 滑雪
@@ -1198,6 +1386,332 @@ void solve()
 - **新结构**
   - `priority_queue` : 自动维护堆的“插入+弹出最大/最小”工具，“贪心/最短路/Top-K/滑动窗口最大值” 都能靠它快速实现
   - 注意优先队列没办法删除除了堆顶以外的元素,所以**注意**`if (d > dist[u]) continue;`
+
+#### [冲向黄金城](https://jiang.ly/download.php?type=attachments&id=1802&r=1)
+
+- **解法**: 题目要求求出每个点是否可达->到达每个点的代价越小最后能够遍历到的点的数量越多->dijkstra-> 普通dij是靠距离作为key（代价）来排序，我们这里的代价一个是“到达的时间”一个是“距离”->哪种状态能给我未来留下最大的操作空间？->在这道题里，“未来的操作空间”是由剩下的车票数量决定的，所以“到达的车票序号”自然就成了至高无上的第一关键字
+- **优化**： 这里为了快速找到下一次用到的车票和时间需要做一个RMQ问题来确定。我们用dij'均摊了m的复杂度就需要想办法优化k的复杂度了->静态的就用st表
+- **关键代码**:
+
+```cpp
+struct STTable
+{
+    vector<vector<long long>> st;
+
+    // 默认构造函数（必须有，不然外层没法开 vector）
+    STTable() {}
+
+    // 给入一个一维数组，直接建表
+    void build(const vector<long long> &arr)
+    {
+        int n = arr.size();
+        if (n == 0)
+            return;
+
+        // __lg(x) 是 C++ 自带的底层宏，直接求以 2 为底的对数，极快！
+        int max_log = __lg(n) + 1;
+
+        // 分配空间并初始化第一层
+        st.assign(max_log, vector<long long>(n));
+        for (int i = 0; i < n; i++)
+        {
+            st[0][i] = arr[i];
+        }
+
+        // 核心建表逻辑
+        for (int j = 1; j < max_log; j++)
+        {
+            for (int i = 0; i + (1 << j) <= n; i++)
+            {
+                st[j][i] = max(st[j - 1][i], st[j - 1][i + (1 << (j - 1))]);
+            }
+        }
+    }
+
+    // 查询区间 [L, R] 的最大值
+    long long query(int L, int R)
+    {
+        if (L > R)
+            return -1; // 防御性编程
+        int j = __lg(R - L + 1);
+        return max(st[j][L], st[j][R - (1 << j) + 1]);
+    }
+};
+
+struct info
+{
+    int tp;
+    int c, l;
+};
+
+void solve()
+{
+    int n, m;
+    cin >> n >> m;
+    int k;
+    cin >> k;
+    vector<vector<info>> mp(n + 1);
+    for (int i = 0; i < m; i++)
+    {
+        int u, v, c, l;
+        cin >> u >> v >> c >> l;
+        mp[u].push_back({v, c, l});
+        mp[v].push_back({u, c, l});
+    }
+    map<int, int> fd;
+    vector<info> piao(k + 1);
+    vector<vi> oc(m + 1);
+    vector<vi> oc2(m + 1);
+    for (int i = 1; i <= k; i++)
+    {
+        int c, l;
+        cin >> c >> l;
+        piao[i] = {0,c, l};
+        oc[c].push_back(i);
+        fd[i] = c;
+        oc2[c].push_back(l);
+    }
+
+    vector<STTable> st(m + 1);
+    for (int i = 1; i <= m; i++)
+    {
+        if (!oc[i].empty())
+        {
+            st[i].build(oc2[i]);
+        }
+    }
+
+    using strt = pair<pair<int, long long>, int>;
+    priority_queue<strt, vector<strt>, greater<>> pq;
+    vector<pii> dist(n + 1, {INF, INF});
+    dist[1] = {0, 0};
+    vector<bool> ans(n + 1);
+    ans[1]=1;
+    pii y = make_pair(0ll, 0ll);
+    strt w = make_pair(y, 1);
+    pq.emplace(w);
+    while (!pq.empty())
+    {
+        auto [key, pt] = pq.top();
+        pq.pop();
+        int idx = key.first;
+        int color = fd[key.first];
+        int dis = key.second;
+        if (idx > dist[pt].first || (idx == dist[pt].first && dis > dist[pt].second))
+            continue;
+        for (auto it : mp[pt])
+        {
+            if (dis + it.l <= piao[idx].l && color == it.c)
+            {
+                ans[it.tp] = 1;
+                int nxt_idx = idx;
+                ll nxt_dis = dis + it.l;
+                if (make_pair(nxt_idx, nxt_dis) <= dist[it.tp])
+                {
+                    pii kkey = make_pair(nxt_idx, nxt_dis);
+                    pq.emplace(make_pair(kkey, it.tp));
+                    dist[it.tp] = kkey;
+                }
+            }
+
+            auto ub = upper_bound(oc[it.c].begin(), oc[it.c].end(), idx);
+            if (ub == oc[it.c].end())
+                continue;
+
+            int lo = distance(oc[it.c].begin(), ub);
+            int hi = (int)oc[it.c].size() - 1;
+
+            int search_start = lo;
+            int ans_pos = -1;
+
+            while (lo <= hi)
+            {
+                int mid = (lo + hi) / 2;
+
+                if (st[it.c].query(search_start, mid) >= it.l)
+                {
+                    ans_pos = mid;
+                    hi = mid - 1;
+                }
+                else
+                {
+                    lo = mid + 1;
+                }
+            }
+
+            if (ans_pos != -1)
+            {
+                ans[it.tp] = 1;
+                int nxt_idx = oc[it.c][ans_pos];
+                ll nxt_dis = it.l;
+                if (make_pair(nxt_idx, nxt_dis) < dist[it.tp])
+                {
+                    pii kkey = make_pair(nxt_idx, nxt_dis);
+                    pq.emplace(make_pair(kkey, it.tp));
+                    dist[it.tp] = kkey;
+                }
+            }
+            // ==================================================
+            // int lo = idx;
+            // int hi = (int)oc[it.c].size();
+            // while (lo < hi)
+            // {
+            //     int mid = (lo + hi) / 2;
+            //     if (st[it.c].query(idx, mid) >= it.l)
+            //     {
+            //         hi = mid;
+            //     }
+            //     else
+            //     {
+            //         lo = mid + 1;
+            //     }
+            // }
+            // if (lo < (int)oc[it.c].size())
+            // {
+            //     ans[it.tp] = 1;
+            //     int nxt_idx = lo;
+            //     ll nxt_dis = it.l;
+            //     if (make_pair(nxt_idx, nxt_dis) <= dist[it.tp])
+            //     {
+            //         pii kkey = make_pair(nxt_idx, nxt_dis);
+            //         pq.emplace(make_pair(kkey, it.tp));
+            //         dist[it.tp] = kkey;
+            //     }
+            // }
+        }
+    }
+
+    for (int i = 1; i <= n; i++)
+    {
+        if (ans[i])
+        {
+            cout << 1;
+        }
+        else
+        {
+            cout << 0;
+        }
+    }
+    cout << '\n';
+}
+
+```
+
+### floyd变体
+
+#### [括号路径](https://acm.hdu.edu.cn/contest/problem?cid=1202&pid=1006)
+
+- **核心模型**:看到数据范围和问法想到离线floyd，从floyd的初始化想，我门可以做一个类似区间dp的东西。考虑合法的括号子序列，松弛操作有两种，一种是往两边扩张，一种是和别的合法括号并排。dij是nmlogn的，数据范围支持我们一项一项转移。核心思路类似于floyd的第一维dp变形
+- **关键代码**:
+
+```cpp
+struct kuo
+{
+    int d;
+    int a, b;
+    kuo(int d = 0, int a = 0, int b = 0) : d(d), a(a), b(b) {}
+    bool operator>(const kuo &other) const
+    {
+        return d > other.d;
+    }
+};
+
+void solve()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<vector<pii>> mp(n + 1);
+    vector<vector<pii>> mp2(n + 1);
+    int q;
+    cin >> q;
+    for (int i = 0; i < m; i++)
+    {
+        int u, v;
+        char c;
+        cin >> u >> v >> c;
+        if (c == '(')
+        {
+            mp[u].push_back({v, -1});
+            mp[v].push_back({u, -1});
+        }
+        else
+        {
+            mp2[u].push_back({v, 1});
+            mp2[v].push_back({u, 1});
+        }
+    }
+
+    vector<vi> floyd(n + 1, vi(n + 1, INF));
+    priority_queue<kuo, vector<kuo>, greater<>> pq;
+    for (int i = 1; i <= n; ++i)
+    {
+        floyd[i][i] = 0;
+        pq.push({0, i, i});
+    }
+    while (!pq.empty())
+    {
+        auto it = pq.top();
+        pq.pop();
+        int d = it.d;
+        int a = it.a;
+        int b = it.b;
+        for (auto zuo : mp[a])
+        {
+            for (auto you : mp2[b])
+            {
+                if (floyd[zuo.first][you.first] > d + 2)
+                {
+                    floyd[zuo.first][you.first] = d + 2;
+                    pq.emplace(kuo(d + 2, zuo.first, you.first));
+                }
+            }
+        }
+
+        for (int i = 1; i <= n; i++)
+        {
+            if (floyd[i][a] != INF)
+            {
+                if (floyd[i][b] > floyd[i][a] + d)
+                {
+                    floyd[i][b] = floyd[i][a] + d;
+                    pq.emplace(kuo(floyd[i][b], i, b));
+                }
+            }
+        }
+
+        for (int i = 1; i <= n; i++)
+        {
+            if (floyd[b][i] != INF)
+            {
+                if (floyd[a][i] > floyd[b][i] + d)
+                {
+                    floyd[a][i] = floyd[b][i] + d;
+                    pq.emplace(kuo(floyd[a][i], a, i));
+                }
+            }
+        }
+    }
+
+    while (q--)
+    {
+        int l, r;
+        cin >> l >> r;
+        if (floyd[l][r] != INF)
+        {
+            cout << floyd[l][r] << '\n';
+        }
+        else
+        {
+            cout << -1 << '\n';
+        }
+    }
+}
+
+```
+
+---
+
+---
 
 ### 分层图
 

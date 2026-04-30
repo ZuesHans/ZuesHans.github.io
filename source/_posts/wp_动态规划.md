@@ -439,6 +439,91 @@ void solve()
     cout << ans << "\n";
 }
 
+```
+
+#### [漫步野经](https://jiang.ly/download.php?type=attachments&id=1802&r=1)
+
+- **核心模型**: 将问题转化为满足x>xi y>yi 的最长上升子序列->如何计算让她不存在重边？->二维偏序问题转化：第一维排序，第二维用数据结构（or这道题的lis）
+- **关键代码**:
+
+```cpp
+inline void print(i128 n)
+{
+    if (n < 0)
+    {
+        putchar('-');
+        n *= -1;
+    }
+    if (n > 9)
+        print(n / 10);
+    putchar(n % 10 + '0');
+}
+struct xy
+{
+    int x, y;
+};
+
+void solve()
+{
+    int n;
+    cin >> n;
+    int p, q;
+    cin >> p >> q;
+    vector<xy> nums;
+    rep(i, 0, n - 1)
+    {
+        int qq, ww;
+        cin >> qq >> ww;
+        if (qq < p && ww < q)
+        {
+            qq++;
+            ww++;
+            nums.push_back({qq,ww});
+            
+        }
+    }
+n=nums.size();
+
+    sort(all(nums), [](xy a, xy b)
+         {
+             if (a.x != b.x)
+                 return a.x < b.x;
+             else
+                 return a.y > b.y; });
+    i128 sumh = ((p + 1) * p) / 2;
+    i128 sums = ((q + 1) * q) / 2;
+    i128 ans = (sumh * (q + 1)) +( (p + 1) * sums);
+    i128 sumdel = 0;
+    i128 now = 0;
+    vi dp;
+    int lst = 0;
+    for (int i = 0; i < n; i++)
+    {
+        if (nums[i].x != lst)
+        {
+            sumdel += now * (nums[i].x - lst);
+            lst = nums[i].x;
+        }
+
+        if (dp.empty() || nums[i].y > dp.back())
+        {
+            dp.push_back(nums[i].y);
+            now += (q - nums[i].y + 1);
+        }
+        else
+        {
+            auto it = lower_bound(dp.begin(), dp.end(), nums[i].y);
+            now += (*it - nums[i].y);
+            *it = nums[i].y;
+        }
+    }
+    sumdel += now * (p - lst + 1);
+    i128 out = ans - sumdel;
+    print(out);
+    printf("\n");
+}
+
+```
 
 ---
 
@@ -1297,3 +1382,158 @@ void solve() {
 - **题解思路**:
   >建立二维数组，直接模拟遍历切蛋糕，通过队每个（i，j）进行异或运算来记录每个1，1 ->i,j的可行状态。由几何关系可知每个（i，j）的状态仅仅取决于（i-1，j）和（i，j-1）。虽然这道题很简单我的解法比dp更简单更省空间
   >>我想说的是：由一个状态继承过来的做法就可以叫做dp
+
+### LIS最长上升子序列
+
+#### [25时与codeforces]
+
+```markdown
+1. 核心题意给定 $n$ 道题目的难度 $r_i$，你需要选择做题。规则限制：时间不可逆：做题顺序的下标必须单调递增（即做完第 $i$ 题只能做 $j > i$ 的题）。不准刷水题：后做题目的难度不能低于先做题目（即 $r_j \ge r_i$）。本质上，满足条件的做题序列就是一个最长不下降子序列（LNDS）。2. 求解目标第一问：一个人最多能做多少题？并输出做题的下标路径。（求 LNDS 及其路径）第二问：最少需要多少人合作，才能把所有题都做完？并输出每个人的做题分配方案。（求最小不下降子序列覆盖，通过贪心 + multiset 解决）3. 数据范围与复杂度要求$T \le 10^3$（测试用例数）。$n \le 2 \times 10^5$，且 $\sum n \le 2 \times 10^5$。$r_i \le 10^9$。
+```
+
+- **逻辑 (Patch)**:然后他要求输出队员做完这套，因为每个人能做的是最长不下降子序列.那本质上就是求lcs.然后他还要输出每个人做的题，这就很难求了。然后我在魔改lis板子的时候鬼脑一动，之前cf上好像做过类似的贪心（上上场d1+2）然后我们建立一个set，把每个set看作一条lis队伍去贪心.但是贪心正确性是什么？你怎么知道每个元素一定能被划归到某条lis上？
+  - 我们就得想想我们怎么维护的:维护的方案是类似于lis的，当我发现一个数字比较小，我尝试把他塞进一个队列里，当我没得塞的时候就必须自立门户。只看这个阶段就能保证不会有更多的队伍。极端数据是54321.
+  - 对于单条序列而言，我们要他不下降，队尾的元素越小越好。当一个数字要进队伍的时候想一下进哪个:进能进的最大队伍（消耗掉较劣的队伍）
+
+- **关键代码**:
+
+```cpp
+vi LIS_nlogn(vector<int> &a)
+{
+
+    vi th;
+    vector<int> low;
+    vector<int> low_idx;
+    vector<int> pre(a.size(), -1);
+    for (int i = 0; i < a.size(); i++)
+    {
+        if (low.empty() || a[i] >= low.back())
+        {
+            if (!low_idx.empty())
+                pre[i] = low_idx.back();
+            low.push_back(a[i]);
+            low_idx.push_back(i);
+        }
+
+        else
+        {
+            auto it = upper_bound(low.begin(), low.end(), a[i]);
+            *it = a[i];
+            int p = it - low.begin();
+            low_idx[it - low.begin()] = i;
+            if (p > 0)
+                pre[i] = low_idx[p - 1];
+        }
+    }
+
+    vi res;
+    for (int i = low_idx.back(); i != -1; i = pre[i])
+    {
+        res.push_back(i + 1); // 1 开始
+    }
+    reverse(all(res));
+    return res;
+}
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n);
+    rep(i, 0, n - 1)
+    {
+        cin >> nums[i];
+    }
+    vi ans1 = LIS_nlogn(nums);
+    cout << ans1.size() << '\n';
+    for (auto it : ans1)
+    {
+        cout << it << ' ';
+    }
+    cout << '\n';
+
+    auto teamfd = [&]() -> int
+    {
+        vi hei;
+        vi low;
+
+        vi d;
+        for (auto x : nums)
+        {
+
+            if (d.empty() || x < d.back())
+            {
+                d.push_back(x);
+            }
+            else
+            {
+                auto it = lower_bound(d.begin(), d.end(), x, greater<int>());
+                *it = x;
+            }
+            // cerr<<hei.back()<<'\n';
+        }
+
+        return d.size();
+    };
+    cout << teamfd() << '\n';
+
+    // 存放 {-末尾数值, 序列ID}
+    multiset<pair<int, int>> tals;
+    vector<vector<int>> tms;
+
+    rep(i, 0, n - 1)
+    {
+       
+        auto it = tals.lower_bound({-nums[i], -LINF});
+    //这里实现取>=的最小值
+        if (it == tals.end())
+        {
+            int nw = tms.size();
+            tms.push_back({i + 1});
+            tals.insert({-nums[i], nw}); // 记得存负数
+        }
+        else
+        {
+            
+            int tid = it->second;
+            tms[tid].push_back(i + 1);
+
+            tals.erase(it);
+            tals.insert({-nums[i], tid}); 
+        }
+    }
+以下代码和上面代码完全一样，他是找<=x的最大值
+ /*rep(i, 0, n - 1)
+    {
+        auto it = tals.upper_bound({nums[i], LINF});
+
+        if (it == tals.begin())
+        {
+            int nw = tms.size();
+            tms.push_back({i + 1});
+            tals.insert({nums[i], nw});
+        }
+        else
+        {
+            --it;
+            int tid = it->second;
+            tms[tid].push_back(i + 1);
+
+            tals.erase(it);
+            tals.insert({nums[i], tid});
+        }
+    }*/
+    for (auto it : tms)
+    {
+        cout << it.size() << ' ';
+        for (auto it2 : it)
+        {
+            cout << it2 << ' ';
+        }
+        cout << '\n';
+    }
+}
+
+
+```
+
+---

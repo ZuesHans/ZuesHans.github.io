@@ -47,7 +47,7 @@ void solve()
         }
     };
     dfs(root, 0, dfs);
-    int st = root; // 被改过的最远端点
+    int st = root; 
     dep.clear();
     dfs(root, 0, dfs);
     int ed = root;

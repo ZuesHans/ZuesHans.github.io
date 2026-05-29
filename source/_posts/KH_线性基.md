@@ -69,7 +69,7 @@ struct LinearBasis {
         }
     }
 
-    // 求异或空间中第 k 小的值  第k大的等于->(Total - k + 1)
+    // 求异或空间中第 k 小的值 第k大的等于->(Total - k + 1)
     ll query_kth(ll k) {
         if (has_zero) k--; // 如果能表示0，第1小就是0，所以k要减1
         if (k >= (1LL << cnt)) return -1; // k 超出了表示范围

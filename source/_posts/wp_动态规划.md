@@ -1374,6 +1374,49 @@ void solve() {
 
 ---
 
+### SOSdp
+
+#### [（例题）E. Compatible Numbers](https://codeforces.com/contest/165/problem/E)
+
+- **题目**:给出n个数字（ai范围1e6），求每个数字在集合里面总能找到另一个数字使得ai&aj==0，如果有随意输出一个，没有输出-1
+
+- **关键代码**:
+
+```cpp
+void solve()
+{
+    int n;
+    cin >> n;
+    vi nums(n);
+    vi dp((1 << 23), -1);
+    rep(i, 0, n - 1)
+    {
+        cin >> nums[i];
+        dp[nums[i]] = nums[i];
+    }
+
+    for (int i = 0; i < 22; ++i)
+    {
+        for (int mask = 0; mask < (1 << 22); ++mask)
+        {
+            if (mask & (1 << i))
+            {
+                if (dp[mask] == -1)
+                    dp[mask] = dp[mask ^ (1 << i)];
+            }
+        }
+    }
+    for (auto it : nums)
+    {
+        cout << dp[((1 << 22) - 1) ^ it] << ' ';
+    }
+    cout << '\n';
+}
+
+```
+
+---
+
 ### 其他dp
 
 #### 切蛋糕

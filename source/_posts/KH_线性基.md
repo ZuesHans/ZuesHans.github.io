@@ -1,9 +1,11 @@
 ---
 title: KH_线性基
 tags:
-    - 数学
-    - 算法
-cover: /img/cover/picg_4.png
+  - 数学
+  - 算法
+  - C++
+category: 专题训练
+date: '2026-06-04'
 ---
 ## 线性基
 

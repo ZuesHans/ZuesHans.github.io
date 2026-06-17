@@ -1,47 +1,101 @@
-name: Deploy Hexo Blog
+# name: Deploy Hexo Blog
 
-# 触发器：当推送到 source 分支时运行
+# # 触发器：当推送到 source 分支时运行
+# on:
+#   push:
+#     branches:
+#       - source
+
+# jobs:
+#   build-and-deploy:
+#     runs-on: ubuntu-latest # 运行环境
+#     permissions:
+#       contents: write
+#     steps:
+#       # 步骤1：拉取你的 source 分支的代码
+#       - name: Checkout Source
+#         uses: actions/checkout@v3
+#         with:
+#           ref: source
+
+#       # 步骤2：设置 Node.js 环境
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '18' # 推荐使用 LTS 版本
+#           cache: 'npm'
+
+#       # 步骤3：安装 Hexo 依赖
+#       - name: Install Dependencies
+#         run: npm install
+
+#       # 步骤4：生成静态文件 (hexo g)
+#       - name: Build Site
+#         run: npx hexo generate
+
+#       # 步骤5：部署到 main 分支
+#       - name: Deploy to main branch
+#         uses: peaceiris/actions-gh-pages@v3
+#         with:
+#           # 这个 GITHUB_TOKEN 是 GitHub 自动提供的，你不需要设置
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+#           # 目标分支：你希望把 HTML 部署到哪里
+#           publish_branch: main
+
+#           # 部署的文件夹：Hexo 生成的文件夹（默认是 public）
+#           publish_dir: ./public
+# GitHub Actions workflow for Cloudflare Workers deployment
+# Requires secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
+# Set repository variable CLOUDFLARE_DEPLOY_ENABLED=true to enable deployment.
+name: Deploy to Cloudflare Workers
+
 on:
   push:
-    branches:
-      - source
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest # 运行环境
-    permissions:
-      contents: write
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: vars.CLOUDFLARE_DEPLOY_ENABLED == 'true'
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
     steps:
-      # 步骤1：拉取你的 source 分支的代码
-      - name: Checkout Source
-        uses: actions/checkout@v3
-        with:
-          ref: source
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # 步骤2：设置 Node.js 环境
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18' # 推荐使用 LTS 版本
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
-      # 步骤3：安装 Hexo 依赖
-      - name: Install Dependencies
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      # 步骤4：生成静态文件 (hexo g)
-      - name: Build Site
-        run: npx hexo generate
+      - name: Build for Cloudflare
+        run: npx opennextjs-cloudflare build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
-      # 步骤5：部署到 main 分支
-      - name: Deploy to main branch
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Copy pre-rendered HTML to assets
+        run: |
+          mkdir -p .open-next/assets
+          find .next/server/app -name "*.html" -exec cp --parents {} .open-next/assets/ \;
+          if [ -f .next/server/app/_not-found.html ]; then
+            cp .next/server/app/_not-found.html .open-next/assets/404.html
+          fi
+
+      - name: Deploy to Cloudflare Workers
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        uses: cloudflare/wrangler-action@v3
         with:
-          # 这个 GITHUB_TOKEN 是 GitHub 自动提供的，你不需要设置
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-          # 目标分支：你希望把 HTML 部署到哪里
-          publish_branch: main
-
-          # 部署的文件夹：Hexo 生成的文件夹（默认是 public）
-          publish_dir: ./public
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: "."
+          command: deploy --dry-run=false

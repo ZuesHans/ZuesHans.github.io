@@ -1,11 +1,11 @@
 ---
 title: wp_差分与前缀和
-date: 2025-12-06
+date: ''
 tags:
-    - 前缀和与差分
-    - 算法
-    - Problems
-cover: /img/cover/picg_3.png
+  - 前缀和与差分
+  - 算法
+  - C++
+category: 题解复盘
 ---
 [toc]
 

@@ -1,8 +1,10 @@
 ---
 title: KH_博弈论
 tags:
-    - 算法
-cover: /img/cover/picg_11.png
+  - 算法
+  - C++
+category: 算法板子
+date: '2026-06-04'
 ---
 
 ## 博弈操作

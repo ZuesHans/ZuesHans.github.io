@@ -1,15 +1,11 @@
 ---
 title: KH图论
-date: 2025-11-06 12:02:53
+date: ''
 tags:
-    - 算法
-    - C++
-    - 图论
-    - 最短路
-    - SCC
-
-cover: /img/cover/picg_5.png
-
+  - 算法
+  - C++
+  - 图论
+category: 学习笔记
 ---
 
 ## 拓扑排序

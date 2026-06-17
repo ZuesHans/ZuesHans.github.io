@@ -1,12 +1,13 @@
 ---
-title: KH计算几何
-date: 2025-11-13 13:21:11
+title: KH_计算几何模板
+date: '2026-06-04'
 tags:
-    - C++
-    - 计算几何
-    - 算法
-cover: /img/cover/picg_7.png
- 
+  - C++
+  - 计算几何
+  - 算法
+  - 数学
+  - 模板
+category: 算法板子
 ---
 这里是计算几何
 

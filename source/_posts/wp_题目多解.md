@@ -1,11 +1,11 @@
 ---
 title: wp_题目多解
-date: 2025-12-13
+date: ''
 tags:
-    - 算法
-    - Problems
-
-cover: /img/cover/picg_16.png
+  - 算法
+  - C++
+  - 错题整理
+category: 题解复盘
 ---
 
 

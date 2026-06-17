@@ -1,12 +1,11 @@
 ---
 title: wp_数据结构
-date: 2025-12-10
+date: ''
 tags:
-    - 算法
-    - 数据结构
-    - Problems
-
-cover: /img/cover/picg_14.png
+  - 算法
+  - 数据结构
+  - C++
+category: 题解复盘
 ---
 ## 数据结构
 

@@ -1,10 +1,11 @@
 ---
-title: wp_优化
-date: 2026-01-12
+title: wp_时空复杂度优化
+date: ''
 tags:
-
-    - 算法
-cover: /img/cover/picg_12.png
+  - 算法
+  - C++
+  - 时空复杂度
+category: 题解复盘
 ---
 
 ## 基于数据范围打表预处理

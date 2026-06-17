@@ -1,13 +1,13 @@
 ---
 title: wp_数学
-date: 2025-12-06
+date: '2026-06-04'
 tags:
-    - 数学
-    - 算法
-    - Problems
-
-cover: /img/cover/picg_19.png
+  - 数学
+  - 算法
+  - Trick
+  - C++
 math: true
+category: 题解复盘
 ---
 
 ## 数学
@@ -207,7 +207,7 @@ void solve()
   - 遇到"除法/取整 + 取模"时：
     - 先想逆元——如果能保证 gcd(除数, 模数) = 1（比如模数是质数），直接用逆元
     - 逆元不可用时——考虑把模数扩大为 除数 × 原模数，用这道题的trick
-- [数学推导及详细](/go/SimpleDivision/)
+- [数学推导及详细](https://zueshans.github.io/go/SimpleDivision/)
 - **关键代码**:
 
 ```cpp
